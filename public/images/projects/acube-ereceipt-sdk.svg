@@ -1,0 +1,30 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="grad-acube-ereceipt-sdk" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.6" />
+    </linearGradient>
+    <pattern id="grid-acube-ereceipt-sdk" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#grad-acube-ereceipt-sdk)"/>
+  <rect width="1200" height="630" fill="url(#grid-acube-ereceipt-sdk)"/>
+  
+  <!-- Icon circle -->
+  <circle cx="600" cy="250" r="100" fill="rgba(255,255,255,0.2)"/>
+  <text x="600" y="280" font-size="80" text-anchor="middle" fill="white">📦</text>
+  
+  <!-- Title -->
+  <text x="600" y="420" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="white">A-Cube e-Receipts SDK</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="470" font-family="system-ui, -apple-system, sans-serif" font-size="24" text-anchor="middle" fill="rgba(255,255,255,0.9)">A-Cube S.r.l.</text>
+  
+  <!-- Decorative elements -->
+  <circle cx="200" cy="100" r="60" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="1000" cy="530" r="80" fill="rgba(255,255,255,0.1)"/>
+</svg>
