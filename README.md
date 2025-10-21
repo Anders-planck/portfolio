@@ -352,9 +352,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👤 Author
 
 **Anders Planck**
-- Portfolio: [your-portfolio-url.com](https://your-portfolio-url.com)
+- Portfolio: [anders-games.com](https://anders-games.com)
 - GitHub: [@Anders-planck](https://github.com/Anders-planck)
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/your-profile)
+- LinkedIn: [@Anders-planck](https://linkedin.com/in/anders-planck-53184b1b4)
 
 ## 🙏 Acknowledgments
 
