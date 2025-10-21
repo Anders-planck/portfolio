@@ -67,7 +67,7 @@ export default function Header() {
       }`}
       style={{ top: `${bannerHeight}px` }}
     >
-        <nav className='container mx-auto flex max-w-3xl items-center justify-between px-2 md:px-0'>
+        <nav className='container mx-auto flex max-w-4xl items-center justify-between px-2 md:px-0'>
             <div>
                 <Link href="/" className='font-serif title text-2xl font-bold'>AP</Link>
             </div>

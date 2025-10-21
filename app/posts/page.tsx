@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 export default async function PostsPages() {
   const posts = await getPosts()
   return (
-    <section className='pb-24 pt-40'>
-      <div className='container max-w-3xl'>
+    <section className='pb-24 pt-44 md:pt-40'>
+      <div className='container max-w-4xl'>
         <h1 className='title mb-12'>Posts</h1>
         <PostsWithFilters initialPosts={posts} />
       </div>

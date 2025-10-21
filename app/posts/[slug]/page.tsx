@@ -72,8 +72,8 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     const { title, image, author, publishedAt, tags } = metadata;
 
   return (
-    <section className="pb-24 pt-32">
-        <div className='container max-w-3xl'>
+    <section className="pb-24 pt-44 md:pt-40">
+        <div className='container max-w-4xl'>
             <Link href="/posts" className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
                <ArrowLeftIcon className='h-5 w-5' />
                <span>Back to posts</span>

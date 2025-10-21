@@ -23,8 +23,8 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <section className="py-32">
-      <div className="container mx-auto max-w-3xl">
+    <section className="py-44 md:py-32">
+      <div className="container mx-auto max-w-4xl">
         <Intro />
 
         {/* Floating Download CV Button */}
