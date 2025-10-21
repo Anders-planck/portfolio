@@ -158,7 +158,7 @@ export default function AboutPage() {
         <Separator className="my-12" />
 
         {/* Work Experience Timeline */}
-        <div className="mb-24">
+        <div id="work-experience" className="mb-24 scroll-mt-24">
           <h2 className="mb-8 text-2xl font-bold">Work Experience</h2>
           <Timeline items={workTimeline} showProjects={true} />
         </div>
@@ -182,7 +182,7 @@ export default function AboutPage() {
         <Separator className="my-12" />
 
         {/* Technical Skills */}
-        <div className="mb-24">
+        <div id="skills" className="mb-24 scroll-mt-24">
           <h2 className="mb-8 text-2xl font-bold">Technical Expertise</h2>
           <div className="space-y-6">
             {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
@@ -205,7 +205,7 @@ export default function AboutPage() {
         <Separator className="my-12" />
 
         {/* Languages */}
-        <div className="mb-16">
+        <div id="languages" className="mb-16 scroll-mt-24">
           <h2 className="mb-8 text-2xl font-bold">Languages</h2>
           <div className="grid gap-4 md:grid-cols-3">
             {languages.map((language) => (
