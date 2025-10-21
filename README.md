@@ -52,11 +52,17 @@ npm install
 cp .env.example .env.local
 ```
 
-Add your EmailJS credentials:
+Add your EmailJS credentials and configure the system banner:
 ```env
+# EmailJS Configuration
 NEXT_PUBLIC_EMAILJS_SERVICE_ID=your_service_id
 NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your_template_id
 NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key
+
+# System Banner Configuration
+NEXT_PUBLIC_SHOW_BANNER=false
+NEXT_PUBLIC_BANNER_MESSAGE=🚧 Website under construction - New features coming soon!
+NEXT_PUBLIC_BANNER_TYPE=info
 ```
 
 4. **Run the development server**
@@ -201,6 +207,59 @@ tags: ["react", "nextjs"]
 - **ESLint** - Code linting
 - **Prettier** - Code formatting
 - **PostCSS** - CSS processing
+
+## 🚨 System Banner
+
+The portfolio includes a configurable system banner for displaying announcements, maintenance notices, or build status at the top of the website.
+
+### Configuration
+
+Control the banner via environment variables in `.env.local`:
+
+```env
+# Show or hide the banner
+NEXT_PUBLIC_SHOW_BANNER=true
+
+# Customize the message
+NEXT_PUBLIC_BANNER_MESSAGE=🚧 New features coming soon!
+
+# Set the banner type (affects color scheme)
+NEXT_PUBLIC_BANNER_TYPE=info
+```
+
+### Banner Types
+
+- **`info`** (default) - Blue banner for informational messages
+- **`warning`** - Yellow banner for warnings or caution notices
+- **`error`** - Red banner for errors or critical alerts
+- **`success`** - Green banner for success messages or positive announcements
+
+### Features
+
+- **Environment-based control** - Toggle visibility with a single env variable
+- **Dismissible** - Users can close the banner (saved to localStorage)
+- **Responsive design** - Looks great on all screen sizes
+- **Accessible** - Proper ARIA attributes and semantic HTML
+- **Theme-aware** - Adapts to dark/light mode
+
+### Example Use Cases
+
+```env
+# During maintenance
+NEXT_PUBLIC_SHOW_BANNER=true
+NEXT_PUBLIC_BANNER_MESSAGE=⚙️ Scheduled maintenance in progress - Some features may be unavailable
+NEXT_PUBLIC_BANNER_TYPE=warning
+
+# Build in progress
+NEXT_PUBLIC_SHOW_BANNER=true
+NEXT_PUBLIC_BANNER_MESSAGE=🚧 Website under construction - New features being added!
+NEXT_PUBLIC_BANNER_TYPE=info
+
+# Feature announcement
+NEXT_PUBLIC_SHOW_BANNER=true
+NEXT_PUBLIC_BANNER_MESSAGE=🎉 New blog posts available! Check out the latest articles
+NEXT_PUBLIC_BANNER_TYPE=success
+```
 
 ## 📧 EmailJS Setup
 

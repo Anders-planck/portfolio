@@ -3,6 +3,7 @@ import { Merriweather, Oxanium } from "next/font/google";
 import Providers from "@/components/providers";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
+import SystemBanner from "@/components/system-banner";
 import { Toaster } from "@/components/ui/sonner";
 
 import "./globals.css";
@@ -127,6 +128,7 @@ export default function RootLayout({
         )}
       >
         <Providers>
+          <SystemBanner />
           <Header />
           <main className="grow">
             {children}
