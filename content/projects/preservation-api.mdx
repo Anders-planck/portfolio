@@ -1,0 +1,634 @@
+---
+title: 'Preservation API'
+summary: 'Digital archival service for long-term document preservation compliant with Italian regulatory standards, featuring comprehensive testing and AWS integration'
+image: '/images/projects/preservation-api.png'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-12-01'
+tags: ['Symfony', 'PHP', 'API Platform', 'PostgreSQL', 'AWS', 'Docker', 'Behat', 'PHPStan']
+---
+
+## Overview
+
+**Preservation API** (Gov-It-API v2) is a production-grade digital archival service that ensures long-term preservation of electronic documents in compliance with Italian regulatory standards. Built with Symfony 6.2+ and API Platform 3, it provides secure, scalable storage with comprehensive validation and testing.
+
+### Key Achievements
+
+- 🏛️ **Regulatory Compliance**: Full compliance with Italian digital preservation laws
+- 📊 **200+ Behat Scenarios**: Comprehensive behavior-driven testing coverage
+- 🔍 **PHPStan Level 8**: Maximum static analysis for code quality
+- ☁️ **AWS Integration**: S3 for storage, Lambda for processing
+- 🐳 **Docker Development**: Consistent development environment
+- 🔒 **JWT Authentication**: Secure API access control
+- 📡 **RESTful API**: API Platform with OpenAPI documentation
+- ⚡ **High Performance**: Optimized for large document volumes
+
+---
+
+## Technical Architecture
+
+### System Design
+
+```
+┌──────────────────────────────────────────────────┐
+│        Symfony 6.2+ Application Layer             │
+│    API Platform 3 • Doctrine ORM • Validators    │
+└────────────────┬─────────────────────────────────┘
+                 │
+┌────────────────▼─────────────────────────────────┐
+│           Business Logic Layer                    │
+│   Document Processing • Validation • Archival    │
+└──────┬──────────────────────────────┬────────────┘
+       │                              │
+┌──────▼──────────┐         ┌─────────▼────────────┐
+│ PostgreSQL      │         │   AWS Services       │
+│ - Documents     │         │   - S3 Storage       │
+│ - Metadata      │         │   - Lambda Processor │
+│ - Audit Logs    │         │   - CloudWatch Logs  │
+└─────────────────┘         └──────────────────────┘
+```
+
+### Core Components
+
+**API Platform Resources**:
+- Document entity with lifecycle management
+- Preservation metadata tracking
+- Audit log entries
+- User and permission management
+
+**Symfony Services**:
+- Document processor service
+- Validation service
+- Storage service (AWS S3)
+- Notification service (AWS Lambda)
+
+---
+
+## Core Features
+
+### 1. Document Preservation
+
+**Document Entity**:
+```php
+<?php
+
+namespace App\Entity;
+
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\GetCollection;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+#[ORM\Entity]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(security: "is_granted('ROLE_USER')")
+    ]
+)]
+class Document
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    private string $fileName;
+
+    #[ORM\Column(length: 64)]
+    #[Assert\NotBlank]
+    private string $sha256Hash;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $uploadedAt;
+
+    #[ORM\Column(length: 255)]
+    private string $s3Key;
+
+    #[ORM\Column(type: 'json')]
+    private array $metadata = [];
+
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(choices: [
+        'pending', 'validated', 'preserved', 'error'
+    ])]
+    private string $status = 'pending';
+
+    // Getters and setters...
+}
+```
+
+**Document Processor Service**:
+```php
+<?php
+
+namespace App\Service;
+
+use App\Entity\Document;
+use Aws\S3\S3Client;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+class DocumentProcessor
+{
+    public function __construct(
+        private S3Client $s3Client,
+        #[Autowire('%env(AWS_S3_BUCKET)%')]
+        private string $bucketName,
+        private ValidatorService $validator
+    ) {}
+
+    public function process(Document $document, string $fileContent): void
+    {
+        // 1. Validate document
+        $validationResult = $this->validator->validate($document, $fileContent);
+
+        if (!$validationResult->isValid()) {
+            $document->setStatus('error');
+            throw new \RuntimeException('Document validation failed');
+        }
+
+        // 2. Upload to S3
+        $s3Key = $this->uploadToS3($document, $fileContent);
+        $document->setS3Key($s3Key);
+
+        // 3. Generate preservation metadata
+        $metadata = $this->generatePreservationMetadata($document);
+        $document->setMetadata($metadata);
+
+        // 4. Update status
+        $document->setStatus('preserved');
+    }
+
+    private function uploadToS3(Document $document, string $content): string
+    {
+        $key = sprintf(
+            'preserved/%s/%s/%s',
+            date('Y'),
+            date('m'),
+            $document->getSha256Hash()
+        );
+
+        $this->s3Client->putObject([
+            'Bucket' => $this->bucketName,
+            'Key' => $key,
+            'Body' => $content,
+            'Metadata' => [
+                'original-filename' => $document->getFileName(),
+                'uploaded-at' => $document->getUploadedAt()->format(\DateTimeInterface::ISO8601)
+            ],
+            'ServerSideEncryption' => 'AES256'
+        ]);
+
+        return $key;
+    }
+
+    private function generatePreservationMetadata(Document $document): array
+    {
+        return [
+            'preservation_timestamp' => (new \DateTimeImmutable())->format(\DateTimeInterface::ISO8601),
+            'preservation_agent' => 'A-Cube Preservation API v2',
+            'checksum_algorithm' => 'SHA-256',
+            'checksum_value' => $document->getSha256Hash(),
+            'file_format' => mime_content_type($document->getFileName()),
+            'file_size' => strlen($document->getS3Key())
+        ];
+    }
+}
+```
+
+### 2. Comprehensive Testing with Behat
+
+**Behat Configuration** (behat.yml):
+```yaml
+default:
+    suites:
+        default:
+            contexts:
+                - App\Tests\Behat\DocumentContext
+                - App\Tests\Behat\ApiContext
+                - App\Tests\Behat\AuthenticationContext
+            filters:
+                tags: "~@wip"
+
+    extensions:
+        Behat\Symfony2Extension:
+            kernel:
+                bootstrap: features/bootstrap/bootstrap.php
+                class: App\Kernel
+
+        FriendsOfBehat\SymfonyExtension: ~
+```
+
+**Example Behat Scenario**:
+```gherkin
+# features/document-preservation.feature
+Feature: Document Preservation
+  In order to comply with regulatory requirements
+  As an API client
+  I need to be able to preserve documents securely
+
+  Background:
+    Given I am authenticated as "user@example.com"
+
+  @critical
+  Scenario: Successfully preserve a valid PDF document
+    Given I have a PDF document "invoice-2024.pdf"
+    When I send a "POST" request to "/api/documents" with:
+      """
+      {
+        "fileName": "invoice-2024.pdf",
+        "content": "@file:invoice-2024.pdf"
+      }
+      """
+    Then the response status code should be 201
+    And the response should be in JSON
+    And the JSON node "status" should be equal to "pending"
+    And the JSON node "fileName" should be equal to "invoice-2024.pdf"
+    And the JSON node "sha256Hash" should match "/^[a-f0-9]{64}$/"
+
+    When the document is processed
+    Then the document status should be "preserved"
+    And the document should be stored in S3
+    And the document should have preservation metadata
+
+  Scenario: Reject document with invalid checksum
+    Given I have a corrupted document "corrupted.pdf"
+    When I send a "POST" request to "/api/documents" with:
+      """
+      {
+        "fileName": "corrupted.pdf",
+        "content": "@file:corrupted.pdf",
+        "expectedHash": "invalid-hash"
+      }
+      """
+    Then the response status code should be 422
+    And the JSON node "violations[0].propertyPath" should be equal to "sha256Hash"
+
+  Scenario: Retrieve preserved document
+    Given there is a preserved document with ID "123"
+    When I send a "GET" request to "/api/documents/123"
+    Then the response status code should be 200
+    And the JSON node "status" should be equal to "preserved"
+    And the JSON node "metadata.preservation_timestamp" should exist
+```
+
+**Behat Context Implementation**:
+```php
+<?php
+
+namespace App\Tests\Behat;
+
+use Behat\Behat\Context\Context;
+use Behat\Gherkin\Node\PyStringNode;
+
+class DocumentContext implements Context
+{
+    public function __construct(
+        private DocumentProcessor $processor,
+        private EntityManagerInterface $entityManager
+    ) {}
+
+    /**
+     * @When the document is processed
+     */
+    public function theDocumentIsProcessed(): void
+    {
+        $document = $this->entityManager
+            ->getRepository(Document::class)
+            ->findOneBy([], ['id' => 'DESC']);
+
+        $content = file_get_contents($document->getFileName());
+        $this->processor->process($document, $content);
+
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @Then the document should be stored in S3
+     */
+    public function theDocumentShouldBeStoredInS3(): void
+    {
+        $document = $this->entityManager
+            ->getRepository(Document::class)
+            ->findOneBy([], ['id' => 'DESC']);
+
+        $s3Client = $this->getContainer()->get(S3Client::class);
+
+        $exists = $s3Client->doesObjectExist(
+            getenv('AWS_S3_BUCKET'),
+            $document->getS3Key()
+        );
+
+        Assert::true($exists, 'Document not found in S3');
+    }
+
+    /**
+     * @Then the document should have preservation metadata
+     */
+    public function theDocumentShouldHavePreservationMetadata(): void
+    {
+        $document = $this->entityManager
+            ->getRepository(Document::class)
+            ->findOneBy([], ['id' => 'DESC']);
+
+        $metadata = $document->getMetadata();
+
+        Assert::keyExists($metadata, 'preservation_timestamp');
+        Assert::keyExists($metadata, 'checksum_value');
+        Assert::keyExists($metadata, 'preservation_agent');
+    }
+}
+```
+
+### 3. PHPStan Level 8 Static Analysis
+
+**PHPStan Configuration** (phpstan.neon):
+```neon
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    excludePaths:
+        - tests/bootstrap.php
+        - var
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: true
+```
+
+**Example PHPStan Clean Code**:
+```php
+<?php
+
+namespace App\Service;
+
+/**
+ * @template T of Document
+ */
+class DocumentRepository
+{
+    /**
+     * @param class-string<T> $className
+     * @return T|null
+     */
+    public function find(string $className, int $id): ?object
+    {
+        return $this->entityManager->find($className, $id);
+    }
+
+    /**
+     * @param array<string, mixed> $criteria
+     * @return list<T>
+     */
+    public function findBy(array $criteria): array
+    {
+        return $this->entityManager
+            ->getRepository(Document::class)
+            ->findBy($criteria);
+    }
+}
+```
+
+---
+
+## AWS Integration
+
+### S3 Storage Configuration
+
+**S3 Client Setup**:
+```php
+<?php
+
+namespace App\Service\Aws;
+
+use Aws\S3\S3Client;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
+
+class S3Service
+{
+    private S3Client $client;
+
+    public function __construct(
+        #[Autowire('%env(AWS_REGION)%')]
+        private string $region,
+        #[Autowire('%env(AWS_S3_BUCKET)%')]
+        private string $bucket
+    ) {
+        $this->client = new S3Client([
+            'region' => $this->region,
+            'version' => 'latest'
+        ]);
+    }
+
+    public function upload(string $key, string $content, array $metadata = []): void
+    {
+        $this->client->putObject([
+            'Bucket' => $this->bucket,
+            'Key' => $key,
+            'Body' => $content,
+            'Metadata' => $metadata,
+            'ServerSideEncryption' => 'AES256',
+            'StorageClass' => 'STANDARD_IA' // Infrequent Access for archival
+        ]);
+    }
+
+    public function download(string $key): string
+    {
+        $result = $this->client->getObject([
+            'Bucket' => $this->bucket,
+            'Key' => $key
+        ]);
+
+        return $result['Body']->getContents();
+    }
+}
+```
+
+### Lambda Integration
+
+**Lambda Invocation for Document Processing**:
+```php
+<?php
+
+namespace App\Service\Aws;
+
+use Aws\Lambda\LambdaClient;
+
+class LambdaService
+{
+    private LambdaClient $client;
+
+    public function __construct(string $region)
+    {
+        $this->client = new LambdaClient([
+            'region' => $region,
+            'version' => 'latest'
+        ]);
+    }
+
+    public function processDocument(int $documentId): void
+    {
+        $this->client->invoke([
+            'FunctionName' => 'preservation-document-processor',
+            'InvocationType' => 'Event', // Async
+            'Payload' => json_encode([
+                'documentId' => $documentId,
+                'action' => 'process'
+            ])
+        ]);
+    }
+}
+```
+
+---
+
+## Development Workflow
+
+### Docker Development Environment
+
+**docker-compose.yml**:
+```yaml
+version: '3.8'
+
+services:
+  php:
+    build: docker/php
+    volumes:
+      - .:/var/www/html
+    environment:
+      APP_ENV: dev
+      DATABASE_URL: postgresql://preservation:secret@postgres:5432/preservation_db
+      AWS_S3_BUCKET: preservation-dev
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: preservation_db
+      POSTGRES_USER: preservation
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - .:/var/www/html
+
+volumes:
+  postgres-data:
+```
+
+### Running Tests
+
+```bash
+# Enter PHP container
+docker-compose exec php bash
+
+# Install dependencies
+composer install
+
+# Run PHPStan
+composer run phpstan
+
+# Run Behat tests
+composer run behat
+
+# Run all CI checks
+composer ci
+```
+
+---
+
+## Deployment
+
+**Deploy Script** (deploy.sh):
+```bash
+#!/bin/bash
+
+set -e
+
+# Configuration
+ENV=${ENV:-dev}
+AWS_PROFILE=${AWS_PROFILE:-acube-dev}
+GITHUB_TOKEN=${GITHUB_TOKEN}
+
+echo "Deploying Preservation API to ${ENV} environment"
+echo "AWS Profile: ${AWS_PROFILE}"
+
+# 1. Run tests
+docker-compose exec -T php composer ci
+
+# 2. Build production image
+docker build -t preservation-api:${ENV} -f Dockerfile.prod .
+
+# 3. Push to ECR
+aws --profile=${AWS_PROFILE} ecr get-login-password --region eu-west-1 | \
+  docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+docker tag preservation-api:${ENV} ${ECR_REGISTRY}/preservation-api:${ENV}
+docker push ${ECR_REGISTRY}/preservation-api:${ENV}
+
+# 4. Update ECS service
+aws --profile=${AWS_PROFILE} ecs update-service \
+  --cluster preservation-${ENV} \
+  --service preservation-api \
+  --force-new-deployment
+
+echo "Deployment complete!"
+```
+
+---
+
+## Technical Stack Summary
+
+### Backend Framework
+- Symfony 6.2+ - PHP framework
+- API Platform 3 - REST API
+- Doctrine ORM - Database abstraction
+- PHP 8.1+ - Modern PHP
+
+### Database & Storage
+- PostgreSQL - Relational database
+- AWS S3 - Document storage
+- AWS Lambda - Document processing
+
+### Testing & Quality
+- Behat - BDD testing (200+ scenarios)
+- PHPStan Level 8 - Static analysis
+- PHPUnit - Unit testing
+- Psalm - Additional static analysis
+
+### Development Tools
+- Docker - Containerization
+- Composer - Dependency management
+- Symfony CLI - Development server
+
+---
+
+## Regulatory Compliance
+
+### Italian Digital Preservation Standards
+
+- **AgID Guidelines**: Full compliance
+- **CAD (Digital Administration Code)**: Certified
+- **Preservation Timestamps**: RFC 3161 compliant
+- **Long-term Format**: PDF/A support
+- **Audit Trail**: Complete operation logging
+
+---
+
+## Conclusion
+
+**Preservation API** demonstrates enterprise-grade backend development with exceptional code quality (PHPStan level 8) and comprehensive testing (200+ Behat scenarios), ensuring regulatory compliance and reliable long-term document archival.
+
+**License**: Proprietary (A-Cube S.r.l.)

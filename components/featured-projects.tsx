@@ -29,6 +29,7 @@ const featuredProjects: FeaturedProject[] = [
       "mTLS authentication integration"
     ],
     isOngoing: true,
+    slug: "acube-ereceipt-sdk"
   },
   {
     title: "Expo Mutual TLS Module",
@@ -58,6 +59,7 @@ const featuredProjects: FeaturedProject[] = [
       "Achieved 65% performance improvement through optimization"
     ],
     isOngoing: true,
+    slug: "dashboard-v2"
   },
   {
     title: "Preservation API",
@@ -72,6 +74,7 @@ const featuredProjects: FeaturedProject[] = [
       "Achieved PHPStan level 8 code quality"
     ],
     isOngoing: false,
+    slug: "preservation-api"
   },
 ];
 
