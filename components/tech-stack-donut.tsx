@@ -61,7 +61,7 @@ const categoryLabels = {
   methodologies: "Methodologies",
 };
 
-const renderActiveShape = (props: any) => {
+const renderActiveShape = (props: unknown) => {
   const {
     cx,
     cy,
@@ -70,7 +70,15 @@ const renderActiveShape = (props: any) => {
     startAngle,
     endAngle,
     fill,
-  } = props;
+  } = props as {
+    cx: number;
+    cy: number;
+    innerRadius: number;
+    outerRadius: number;
+    startAngle: number;
+    endAngle: number;
+    fill: string;
+  };
 
   return (
     <g>
@@ -130,11 +138,11 @@ export default function TechStackDonut() {
       <div className="h-[350px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            {/* @ts-ignore */}
             <Pie
-              // @ts-ignore
-              activeIndex={activeIndex}
-              activeShape={renderActiveShape}
+              {...({
+                activeIndex: activeIndex,
+                activeShape: renderActiveShape,
+              } as Record<string, unknown>)}
               data={chartData}
               cx="50%"
               cy="50%"
@@ -143,7 +151,7 @@ export default function TechStackDonut() {
               paddingAngle={3}
               dataKey="value"
               onMouseEnter={onPieEnter}
-              label={({ value }: any) => `${value}`}
+              label={(props: unknown) => `${(props as { value: number }).value}`}
             >
               {chartData.map((entry, index) => (
                 <Cell

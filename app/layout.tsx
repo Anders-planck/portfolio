@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Merriweather, Oxanium, Playfair_Display } from "next/font/google";
+import { Merriweather, Oxanium } from "next/font/google";
 import Providers from "@/components/providers";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
@@ -16,6 +16,7 @@ const geistSans = Oxanium({
 const geistMono = Merriweather({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  weight: ["300", "400", "700"],
 });
 
 export const metadata: Metadata = {
