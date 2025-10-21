@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeftIcon } from 'lucide-react';
@@ -12,6 +13,50 @@ export async function generateStaticParams() {
     return projects.map(project => ({
         slug: project.slug,
     }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const project = await getProjectBySlug(slug);
+
+    if (!project) {
+        return {
+            title: 'Project Not Found',
+        };
+    }
+
+    const { metadata } = project;
+    const { title, summary, image, author, publishedAt, tags } = metadata;
+
+    return {
+        title,
+        description: summary || `Explore ${title} - a project by ${author || 'Anders Planck'}`,
+        authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
+        keywords: tags || [],
+        openGraph: {
+            title: `${title} | Anders Planck`,
+            description: summary || `Explore ${title}`,
+            type: 'article',
+            url: `https://anders-games.com/projects/${slug}`,
+            publishedTime: publishedAt,
+            authors: author ? [author] : ['Anders Planck'],
+            tags: tags || [],
+            images: image ? [
+                {
+                    url: image,
+                    width: 1200,
+                    height: 630,
+                    alt: title || 'Project image',
+                }
+            ] : [],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${title} | Anders Planck`,
+            description: summary || `Explore ${title}`,
+            images: image ? [image] : [],
+        },
+    };
 }
 
 

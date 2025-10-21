@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Intro from "@/components/intro";
 import RecentContent from "@/components/recent-content";
 import ContactForm from "@/components/contact-form";
@@ -8,6 +9,17 @@ import TechStackDonut from "@/components/tech-stack-donut";
 import { Separator } from "@/components/ui/separator";
 import SkillsRadarChart from "@/components/skills-radar-chart";
 import { Download } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: 'Home',
+  description: 'Anders Planck - Full-stack developer with expertise in React, Next.js, TypeScript, Node.js, and modern web technologies. View my portfolio, skills, and download my CV.',
+  openGraph: {
+    title: 'Anders Planck | Full-Stack Developer Portfolio',
+    description: 'Full-stack developer with expertise in React, Next.js, TypeScript, Node.js, and modern web technologies.',
+    url: 'https://andersplanck.dev',
+    type: 'website',
+  },
+};
 
 export default function HomePage() {
   return (

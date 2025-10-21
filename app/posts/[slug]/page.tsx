@@ -1,4 +1,5 @@
 import React from 'react'
+import type { Metadata } from 'next'
 import { getPostBySlug, getPosts } from '@/lib/posts';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -12,6 +13,50 @@ export async function generateStaticParams() {
     return posts.map(post => ({
         slug: post.slug,
     }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params;
+    const post = await getPostBySlug(slug);
+
+    if (!post) {
+        return {
+            title: 'Post Not Found',
+        };
+    }
+
+    const { metadata } = post;
+    const { title, summary, image, author, publishedAt, tags } = metadata;
+
+    return {
+        title,
+        description: summary || `Read ${title} by ${author || 'Anders Planck'}`,
+        authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
+        keywords: tags || [],
+        openGraph: {
+            title: `${title} | Anders Planck`,
+            description: summary || `Read ${title}`,
+            type: 'article',
+            url: `https://anders-games.com/posts/${slug}`,
+            publishedTime: publishedAt,
+            authors: author ? [author] : ['Anders Planck'],
+            tags: tags || [],
+            images: image ? [
+                {
+                    url: image,
+                    width: 1200,
+                    height: 630,
+                    alt: title || 'Blog post image',
+                }
+            ] : [],
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${title} | Anders Planck`,
+            description: summary || `Read ${title}`,
+            images: image ? [image] : [],
+        },
+    };
 }
 
 
