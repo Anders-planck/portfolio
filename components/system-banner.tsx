@@ -13,10 +13,10 @@ interface SystemBannerProps {
 }
 
 const bannerStyles: Record<BannerType, string> = {
-  info: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
-  warning: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
-  error: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20',
-  success: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
+  info: 'bg-blue-500/20 text-blue-900 dark:text-blue-200 border-blue-500/40',
+  warning: 'bg-yellow-500/30 text-yellow-900 dark:text-yellow-200 border-yellow-500/50',
+  error: 'bg-red-500/20 text-red-900 dark:text-red-200 border-red-500/40',
+  success: 'bg-green-500/20 text-green-900 dark:text-green-200 border-green-500/40',
 }
 
 export default function SystemBanner({
@@ -28,18 +28,7 @@ export default function SystemBanner({
   const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    // Get environment variables
     const showBanner = process.env.NEXT_PUBLIC_SHOW_BANNER === 'true'
-    const envMessage = process.env.NEXT_PUBLIC_BANNER_MESSAGE || '🚧 Website under construction - New features coming soon!'
-    const envType = (process.env.NEXT_PUBLIC_BANNER_TYPE as BannerType) || 'info'
-
-    // Debug logging (remove in production)
-    console.log('Banner Debug:', {
-      showBanner,
-      envMessage,
-      envType,
-      NEXT_PUBLIC_SHOW_BANNER: process.env.NEXT_PUBLIC_SHOW_BANNER,
-    })
 
     if (!showBanner) {
       setIsVisible(false)
@@ -72,14 +61,15 @@ export default function SystemBanner({
   return (
     <div
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300',
+        'w-full border-b-2 transition-all duration-300 backdrop-blur-sm shadow-md',
+        dismissible ? '' : 'fixed top-0 left-0 right-0 z-[60]',
         bannerStyles[bannerType]
       )}
       role="alert"
       aria-live="polite"
     >
-      <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3">
-        <div className="flex-1 text-center text-sm font-medium">
+      <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-4">
+        <div className="flex-1 text-center text-base font-semibold tracking-wide">
           {bannerMessage}
         </div>
         {dismissible && (

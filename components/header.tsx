@@ -13,6 +13,36 @@ const HeaderLinks = [
 
 export default function Header() {
   const pathname = usePathname()
+  const [bannerHeight, setBannerHeight] = React.useState(0)
+  const [isScrolled, setIsScrolled] = React.useState(false)
+
+  React.useEffect(() => {
+    const updateBannerHeight = () => {
+      const banner = document.querySelector('[role="alert"]')
+      setBannerHeight(banner ? banner.getBoundingClientRect().height : 0)
+    }
+
+    updateBannerHeight()
+    window.addEventListener('resize', updateBannerHeight)
+
+    // Observer for banner visibility changes
+    const observer = new MutationObserver(updateBannerHeight)
+    observer.observe(document.body, { childList: true, subtree: true })
+
+    return () => {
+      window.removeEventListener('resize', updateBannerHeight)
+      observer.disconnect()
+    }
+  }, [])
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 0)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleContactClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
@@ -31,7 +61,12 @@ export default function Header() {
   }
 
   return (
-    <header className='fixed inset-x-0 top-0 z-50 bg-background/75 py-6 backdrop-blur-sm'>
+    <header
+      className={`fixed inset-x-0 z-50 bg-background/75 py-6 backdrop-blur-sm transition-all duration-300 ${
+        isScrolled ? 'shadow-md' : ''
+      }`}
+      style={{ top: `${bannerHeight}px` }}
+    >
         <nav className='container mx-auto flex max-w-3xl items-center justify-between px-2 md:px-0'>
             <div>
                 <Link href="/" className='font-serif title text-2xl font-bold'>AP</Link>
