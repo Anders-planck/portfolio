@@ -1,103 +1,92 @@
-import Image from "next/image";
+import Intro from "@/components/intro";
+import RecentContent from "@/components/recent-content";
+import ContactForm from "@/components/contact-form";
+import StatsOverview from "@/components/stats-overview";
+import SkillsDonutChart from "@/components/skills-donut-chart";
+import LanguagesDonut from "@/components/languages-donut";
+import TechStackDonut from "@/components/tech-stack-donut";
+import { Separator } from "@/components/ui/separator";
+import SkillsRadarChart from "@/components/skills-radar-chart";
+import { Download } from "lucide-react";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <section className="py-24">
+      <div className="container mx-auto max-w-3xl">
+        <Intro />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        {/* Floating Download CV Button */}
+        <a
+          href="/cv.pdf"
+          download="Anders_Planck_CV.pdf"
+          className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+          aria-label="Download CV"
+        >
+          <Download className="h-5 w-5" />
+          <span className="hidden sm:inline">Download CV</span>
+        </a>
+
+          {/* At a Glance - Numerical Validation */}
+        <div className="my-24">
+          <h2 className="title mb-8">At a Glance</h2>
+          <StatsOverview />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+
+        {/* Core Competencies - Visual Skills Showcase */}
+        <div className="my-16">
+          <h2 className="title mb-8">Core Competencies</h2>
+          <div className="grid gap-12 md:grid-cols-2">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Skills Distribution</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Expertise across technology domains
+              </p>
+              <SkillsDonutChart />
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Languages</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Multilingual communication abilities
+              </p>
+              <LanguagesDonut />
+            </div>
+          </div>
+        </div>
+
+        <Separator className="my-12" />
+
+        {/* Technology Stack - Interactive Deep Dive */}
+        <div className="mt-24 mb-24">
+          <h2 className="title mb-8">Technology Stack</h2>
+          <TechStackDonut />
+        </div>
+
+        <Separator className="my-12" />
+
+          {/* Skills Deep Dive - Technical Proficiency */}
+        <div className="my-16">
+          <h2 className="title mb-8">Skills Deep Dive</h2>
+          <p className="mb-6 text-muted-foreground">
+            Top 3 skills from each technology domain
+          </p>
+          <SkillsRadarChart />
+        </div>
+
+
+        <Separator className="my-12" />
+        {/* Recent Works - Blogs & Projects */}
+        <RecentContent />
+
+        {/* Contact Section */}
+        <section id="contact" className="mt-24 scroll-mt-24">
+          <h2 className="title mb-4">Let&apos;s Work Together</h2>
+          <p className="mb-8 text-muted-foreground">
+            Open to new opportunities and collaborations. Get in touch to discuss your project.
+          </p>
+          <ContactForm compact />
+        </section>
+      </div>
+    </section>
   );
 }

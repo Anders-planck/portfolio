@@ -1,0 +1,856 @@
+---
+title: "Cloud-Native Technologies: Building Modern Scalable Applications"
+summary: "Learn how cloud-native technologies like Kubernetes, microservices, and containers are transforming application development."
+image: "/images/posts/cloud-native.png"
+author: 'Anders Planck'
+publishedAt: '2024-10-01'
+tags: ['Cloud-Native', 'Kubernetes', 'Docker', 'Microservices', 'DevOps']
+---
+
+## What is Cloud-Native?
+
+Cloud-native is an approach to building and running applications that fully exploit the advantages of cloud computing. It's about how applications are created and deployed, not where. Cloud-native applications are designed to be resilient, manageable, and observable, combining with automation to enable high-impact changes frequently and predictably with minimal effort.
+
+## Core Principles
+
+### The 12-Factor App Methodology
+
+1. **Codebase**: One codebase tracked in version control
+2. **Dependencies**: Explicitly declare and isolate dependencies
+3. **Config**: Store config in the environment
+4. **Backing Services**: Treat backing services as attached resources
+5. **Build, Release, Run**: Strictly separate build and run stages
+6. **Processes**: Execute as one or more stateless processes
+7. **Port Binding**: Export services via port binding
+8. **Concurrency**: Scale out via the process model
+9. **Disposability**: Maximize robustness with fast startup and graceful shutdown
+10. **Dev/Prod Parity**: Keep development, staging, and production as similar as possible
+11. **Logs**: Treat logs as event streams
+12. **Admin Processes**: Run admin/management tasks as one-off processes
+
+## Containerization with Docker
+
+### Understanding Containers
+
+Containers package software with all dependencies, ensuring consistency across environments:
+
+```dockerfile
+# Multi-stage Docker build for Node.js app
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy application code
+COPY . .
+
+# Build application
+RUN npm run build
+
+# Production stage
+FROM node:18-alpine AS production
+
+WORKDIR /app
+
+# Copy built application from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+USER nodejs
+
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck.js
+
+CMD ["node", "dist/index.js"]
+```
+
+### Docker Compose for Local Development
+
+```yaml
+# docker-compose.yml - Multi-service orchestration
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:password@db:5432/myapp
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=myapp
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
+    networks:
+      - app-network
+
+volumes:
+  postgres-data:
+  redis-data:
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+## Kubernetes: Container Orchestration
+
+### Kubernetes Architecture
+
+```yaml
+# deployment.yaml - Application deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-app
+  labels:
+    app: web-app
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: web-app
+  template:
+    metadata:
+      labels:
+        app: web-app
+        version: v1
+    spec:
+      containers:
+      - name: web-app
+        image: myapp:v1.0.0
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+# service.yaml - Service exposure
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-app-service
+spec:
+  selector:
+    app: web-app
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+  type: LoadBalancer
+---
+# ingress.yaml - Ingress configuration
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: web-app-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - myapp.example.com
+    secretName: web-app-tls
+  rules:
+  - host: myapp.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web-app-service
+            port:
+              number: 80
+```
+
+### ConfigMaps and Secrets
+
+```yaml
+# configmap.yaml - Configuration data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  app.properties: |
+    LOG_LEVEL=info
+    CACHE_TTL=3600
+    MAX_CONNECTIONS=100
+  nginx.conf: |
+    server {
+      listen 80;
+      server_name _;
+      location / {
+        proxy_pass http://web-app-service;
+      }
+    }
+---
+# secret.yaml - Sensitive data
+apiVersion: v1
+kind: Secret
+metadata:
+  name: app-secrets
+type: Opaque
+stringData:
+  database-url: "postgresql://user:password@db:5432/myapp"
+  api-key: "super-secret-api-key"
+  jwt-secret: "jwt-signing-secret"
+```
+
+### StatefulSets for Stateful Applications
+
+```yaml
+# statefulset.yaml - Stateful application
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+spec:
+  serviceName: postgresql
+  replicas: 3
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      containers:
+      - name: postgresql
+        image: postgres:15
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: password
+        volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "fast-ssd"
+      resources:
+        requests:
+          storage: 10Gi
+```
+
+## Microservices Architecture
+
+### Service Communication Patterns
+
+```typescript
+// API Gateway pattern
+import express, { Request, Response } from 'express';
+import axios from 'axios';
+
+const app = express();
+
+// Service registry
+const services = {
+  users: process.env.USERS_SERVICE_URL || 'http://users-service:3001',
+  orders: process.env.ORDERS_SERVICE_URL || 'http://orders-service:3002',
+  products: process.env.PRODUCTS_SERVICE_URL || 'http://products-service:3003',
+};
+
+// API Gateway routes
+app.get('/api/users/:id', async (req: Request, res: Response) => {
+  try {
+    const response = await axios.get(`${services.users}/users/${req.params.id}`);
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: 'Service unavailable' });
+  }
+});
+
+// Aggregation pattern
+app.get('/api/user-profile/:id', async (req: Request, res: Response) => {
+  try {
+    const [user, orders] = await Promise.all([
+      axios.get(`${services.users}/users/${req.params.id}`),
+      axios.get(`${services.orders}/orders?userId=${req.params.id}`),
+    ]);
+
+    res.json({
+      user: user.data,
+      orders: orders.data,
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch profile' });
+  }
+});
+
+app.listen(3000, () => console.log('API Gateway running on port 3000'));
+```
+
+### Circuit Breaker Pattern
+
+```typescript
+// Circuit breaker implementation
+class CircuitBreaker {
+  private failures: number = 0;
+  private successCount: number = 0;
+  private nextAttempt: number = Date.now();
+  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
+
+  constructor(
+    private threshold: number = 5,
+    private timeout: number = 60000,
+    private monitoringPeriod: number = 10000
+  ) {}
+
+  async execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (this.state === 'OPEN') {
+      if (Date.now() < this.nextAttempt) {
+        throw new Error('Circuit breaker is OPEN');
+      }
+      this.state = 'HALF_OPEN';
+    }
+
+    try {
+      const result = await fn();
+      this.onSuccess();
+      return result;
+    } catch (error) {
+      this.onFailure();
+      throw error;
+    }
+  }
+
+  private onSuccess(): void {
+    this.failures = 0;
+    if (this.state === 'HALF_OPEN') {
+      this.state = 'CLOSED';
+    }
+  }
+
+  private onFailure(): void {
+    this.failures++;
+    if (this.failures >= this.threshold) {
+      this.state = 'OPEN';
+      this.nextAttempt = Date.now() + this.timeout;
+    }
+  }
+
+  getState(): string {
+    return this.state;
+  }
+}
+
+// Usage
+const breaker = new CircuitBreaker(5, 60000);
+
+async function callExternalService() {
+  return breaker.execute(async () => {
+    const response = await axios.get('http://external-service/api/data');
+    return response.data;
+  });
+}
+```
+
+### Service Mesh with Istio
+
+```yaml
+# istio-gateway.yaml - Istio gateway configuration
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: app-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "myapp.example.com"
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: SIMPLE
+      credentialName: app-tls-cert
+    hosts:
+    - "myapp.example.com"
+---
+# virtual-service.yaml - Traffic routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: app-routes
+spec:
+  hosts:
+  - "myapp.example.com"
+  gateways:
+  - app-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api/v1
+    route:
+    - destination:
+        host: api-service-v1
+      weight: 90
+    - destination:
+        host: api-service-v2
+      weight: 10
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: web-frontend
+---
+# destination-rule.yaml - Load balancing and circuit breaking
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-service
+spec:
+  host: api-service
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+    loadBalancer:
+      simple: LEAST_REQUEST
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+```
+
+## Observability
+
+### Prometheus Monitoring
+
+```yaml
+# prometheus-config.yaml - Prometheus configuration
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+    - job_name: 'kubernetes-pods'
+      kubernetes_sd_configs:
+      - role: pod
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+```
+
+### Application Metrics
+
+```typescript
+// Prometheus metrics in Node.js
+import express from 'express';
+import promClient from 'prom-client';
+
+const app = express();
+
+// Create a Registry
+const register = new promClient.Registry();
+
+// Add default metrics
+promClient.collectDefaultMetrics({ register });
+
+// Custom metrics
+const httpRequestDuration = new promClient.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.1, 0.5, 1, 2, 5],
+  registers: [register],
+});
+
+const httpRequestsTotal = new promClient.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code'],
+  registers: [register],
+});
+
+// Middleware to track metrics
+app.use((req, res, next) => {
+  const start = Date.now();
+
+  res.on('finish', () => {
+    const duration = (Date.now() - start) / 1000;
+
+    httpRequestDuration
+      .labels(req.method, req.route?.path || req.path, res.statusCode.toString())
+      .observe(duration);
+
+    httpRequestsTotal
+      .labels(req.method, req.route?.path || req.path, res.statusCode.toString())
+      .inc();
+  });
+
+  next();
+});
+
+// Metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+app.listen(3000);
+```
+
+### Distributed Tracing with OpenTelemetry
+
+```typescript
+// OpenTelemetry setup
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+
+const sdk = new NodeSDK({
+  resource: new Resource({
+    [SemanticResourceAttributes.SERVICE_NAME]: 'my-service',
+    [SemanticResourceAttributes.SERVICE_VERSION]: '1.0.0',
+  }),
+  traceExporter: new JaegerExporter({
+    endpoint: 'http://jaeger:14268/api/traces',
+  }),
+  instrumentations: [getNodeAutoInstrumentations()],
+});
+
+sdk.start();
+
+// Custom spans
+import { trace } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('my-service');
+
+async function processOrder(orderId: string) {
+  const span = tracer.startSpan('processOrder');
+  span.setAttribute('orderId', orderId);
+
+  try {
+    // Business logic
+    await validateOrder(orderId);
+    await chargePayment(orderId);
+    await updateInventory(orderId);
+
+    span.setStatus({ code: 0 }); // OK
+  } catch (error) {
+    span.setStatus({ code: 2, message: error.message }); // ERROR
+    throw error;
+  } finally {
+    span.end();
+  }
+}
+```
+
+## CI/CD for Cloud-Native
+
+### GitHub Actions Workflow
+
+```yaml
+# .github/workflows/deploy.yml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Run linter
+      run: npm run lint
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Configure kubectl
+      uses: azure/k8s-set-context@v3
+      with:
+        method: kubeconfig
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl set image deployment/web-app \
+          web-app=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${GITHUB_SHA::7}
+        kubectl rollout status deployment/web-app
+```
+
+## Best Practices
+
+### Resource Management
+
+```yaml
+# resource-quotas.yaml - Namespace resource limits
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: production
+spec:
+  hard:
+    requests.cpu: "100"
+    requests.memory: 200Gi
+    limits.cpu: "200"
+    limits.memory: 400Gi
+    persistentvolumeclaims: "10"
+---
+# limit-range.yaml - Default limits
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: resource-limits
+  namespace: production
+spec:
+  limits:
+  - max:
+      cpu: "2"
+      memory: 4Gi
+    min:
+      cpu: 100m
+      memory: 128Mi
+    default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 250m
+      memory: 256Mi
+    type: Container
+```
+
+### Security Policies
+
+```yaml
+# network-policy.yaml - Network isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 3000
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: database
+    ports:
+    - protocol: TCP
+      port: 5432
+```
+
+## Conclusion
+
+Cloud-native technologies represent the future of application development and deployment. By embracing containers, Kubernetes, microservices, and modern DevOps practices, organizations can build highly scalable, resilient, and maintainable applications that fully leverage the power of cloud computing.
+
+The journey to cloud-native requires investment in learning new technologies and changing development practices, but the benefits—faster deployment, better scalability, improved reliability, and reduced costs—make it worthwhile for modern software development.
+
+## Further Reading
+
+- [Kubernetes Documentation](https://kubernetes.io/docs/)
+- [Docker Documentation](https://docs.docker.com/)
+- [CNCF Cloud Native Trail Map](https://github.com/cncf/trailmap)
+- [The Twelve-Factor App](https://12factor.net/)
+- [Cloud Native Computing Foundation](https://www.cncf.io/)

@@ -1,0 +1,609 @@
+---
+title: "Edge Computing & Serverless: The Future of Distributed Applications"
+summary: "Explore how edge computing and serverless architectures are revolutionizing application deployment and performance."
+image: "/images/posts/edge-serverless.webp"
+author: 'Anders Planck'
+publishedAt: '2024-10-08'
+tags: ['Edge Computing', 'Serverless', 'Cloud', 'DevOps', 'Performance']
+---
+
+## The Shift to the Edge
+
+Edge computing brings computation and data storage closer to the sources of data, reducing latency and bandwidth use. Combined with serverless architectures, it's creating a new paradigm for building highly scalable, performant applications.
+
+## What is Edge Computing?
+
+Edge computing processes data at or near the source of data generation, rather than relying on centralized cloud data centers:
+
+- **Reduced Latency**: Process data closer to users
+- **Bandwidth Optimization**: Less data sent to central servers
+- **Improved Privacy**: Data can stay local
+- **Reliability**: Continue operating during network issues
+- **Real-Time Processing**: Instant decision-making
+
+### Edge Computing Architecture
+
+```typescript
+// Edge function example with Cloudflare Workers
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Geographic routing based on location
+    const country = request.cf?.country || 'US';
+    const continent = request.cf?.continent || 'NA';
+
+    // Process at the edge
+    const response = await processRequest(request, country);
+
+    // Add edge-specific headers
+    return new Response(response, {
+      headers: {
+        'X-Edge-Location': continent,
+        'X-Country': country,
+        'Cache-Control': 'public, max-age=3600',
+      },
+    });
+  },
+};
+
+async function processRequest(request: Request, country: string): Promise<string> {
+  // Edge logic here
+  return JSON.stringify({
+    message: 'Processed at edge',
+    location: country,
+    timestamp: new Date().toISOString(),
+  });
+}
+```
+
+## Serverless Architecture
+
+Serverless computing allows you to build and run applications without managing servers:
+
+### Benefits of Serverless
+
+- **No Server Management**: Focus on code, not infrastructure
+- **Auto-Scaling**: Handles traffic spikes automatically
+- **Pay-per-Use**: Only pay for actual execution time
+- **Faster Development**: Rapid iteration and deployment
+- **Built-in Availability**: High availability by default
+
+### Serverless Platforms
+
+1. **AWS Lambda**: Industry leader
+2. **Vercel**: Frontend-focused
+3. **Cloudflare Workers**: Edge computing
+4. **Netlify Functions**: JAMstack integration
+5. **Azure Functions**: Microsoft ecosystem
+6. **Google Cloud Functions**: GCP integration
+
+## Building Edge Applications
+
+### Edge Functions with Vercel
+
+```typescript
+// api/hello.ts - Vercel Edge Function
+import type { NextRequest } from 'next/server';
+
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const name = searchParams.get('name') || 'World';
+
+  // Access edge runtime APIs
+  const geo = req.geo;
+  const ip = req.ip;
+
+  return new Response(
+    JSON.stringify({
+      message: `Hello, ${name}!`,
+      location: {
+        city: geo?.city,
+        country: geo?.country,
+        region: geo?.region,
+      },
+      ip,
+      timestamp: Date.now(),
+    }),
+    {
+      status: 200,
+      headers: {
+        'content-type': 'application/json',
+        'cache-control': 'public, s-maxage=60',
+      },
+    }
+  );
+}
+```
+
+### Cloudflare Workers
+
+```typescript
+// Advanced Cloudflare Worker with KV storage
+interface Env {
+  MY_KV: KVNamespace;
+  API_KEY: string;
+}
+
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Handle different routes
+    if (url.pathname === '/api/data') {
+      return handleDataRequest(request, env);
+    }
+
+    if (url.pathname === '/api/cache') {
+      return handleCacheRequest(request, env);
+    }
+
+    return new Response('Not Found', { status: 404 });
+  },
+};
+
+async function handleDataRequest(request: Request, env: Env): Promise<Response> {
+  const cacheKey = 'data_cache';
+
+  // Try to get from KV cache
+  const cached = await env.MY_KV.get(cacheKey);
+  if (cached) {
+    return new Response(cached, {
+      headers: { 'X-Cache': 'HIT' },
+    });
+  }
+
+  // Fetch fresh data
+  const data = await fetchFreshData(env.API_KEY);
+
+  // Store in KV with TTL
+  await env.MY_KV.put(cacheKey, data, {
+    expirationTtl: 3600,
+  });
+
+  return new Response(data, {
+    headers: { 'X-Cache': 'MISS' },
+  });
+}
+
+async function handleCacheRequest(request: Request, env: Env): Promise<Response> {
+  // Access request-specific cache
+  const cache = caches.default;
+  let response = await cache.match(request);
+
+  if (!response) {
+    response = new Response('Fresh content', {
+      headers: {
+        'Cache-Control': 'public, max-age=300',
+      },
+    });
+    await cache.put(request, response.clone());
+  }
+
+  return response;
+}
+
+async function fetchFreshData(apiKey: string): Promise<string> {
+  // Simulate API call
+  return JSON.stringify({ data: 'fresh', timestamp: Date.now() });
+}
+```
+
+## AWS Lambda Patterns
+
+### Basic Lambda Function
+
+```typescript
+// AWS Lambda with TypeScript
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+
+export const handler = async (
+  event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> => {
+  try {
+    const body = JSON.parse(event.body || '{}');
+
+    // Business logic
+    const result = await processData(body);
+
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      },
+      body: JSON.stringify(result),
+    };
+  } catch (error) {
+    console.error('Error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal Server Error' }),
+    };
+  }
+};
+
+async function processData(data: any): Promise<any> {
+  // Process data
+  return {
+    processed: true,
+    timestamp: new Date().toISOString(),
+    data,
+  };
+}
+```
+
+### Lambda with DynamoDB
+
+```typescript
+// Lambda with DynamoDB integration
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+
+export const handler = async (event: any) => {
+  const { action, userId, data } = JSON.parse(event.body);
+
+  try {
+    if (action === 'get') {
+      const result = await docClient.send(
+        new GetCommand({
+          TableName: 'Users',
+          Key: { userId },
+        })
+      );
+      return {
+        statusCode: 200,
+        body: JSON.stringify(result.Item),
+      };
+    }
+
+    if (action === 'put') {
+      await docClient.send(
+        new PutCommand({
+          TableName: 'Users',
+          Item: {
+            userId,
+            ...data,
+            updatedAt: new Date().toISOString(),
+          },
+        })
+      );
+      return {
+        statusCode: 201,
+        body: JSON.stringify({ success: true }),
+      };
+    }
+
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'Invalid action' }),
+    };
+  } catch (error) {
+    console.error('Error:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Internal Server Error' }),
+    };
+  }
+};
+```
+
+## Edge Caching Strategies
+
+### Multi-Tier Caching
+
+```typescript
+// Advanced edge caching with multiple tiers
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const url = new URL(request.url);
+    const cacheKey = new Request(url.toString(), request);
+
+    // Tier 1: Browser cache (handled by headers)
+    // Tier 2: Edge cache (Cloudflare cache)
+    const cache = caches.default;
+    let response = await cache.match(cacheKey);
+
+    if (response) {
+      return addCacheHeaders(response, 'HIT-EDGE');
+    }
+
+    // Tier 3: KV storage (distributed edge storage)
+    const kvCached = await env.CACHE_KV.get(url.pathname);
+    if (kvCached) {
+      response = new Response(kvCached);
+      await cache.put(cacheKey, response.clone());
+      return addCacheHeaders(response, 'HIT-KV');
+    }
+
+    // Tier 4: Origin server
+    response = await fetch(request);
+
+    // Store in multiple cache tiers
+    if (response.ok) {
+      await env.CACHE_KV.put(url.pathname, await response.clone().text(), {
+        expirationTtl: 86400, // 24 hours
+      });
+      await cache.put(cacheKey, response.clone());
+    }
+
+    return addCacheHeaders(response, 'MISS');
+  },
+};
+
+function addCacheHeaders(response: Response, status: string): Response {
+  const newResponse = new Response(response.body, response);
+  newResponse.headers.set('X-Cache-Status', status);
+  newResponse.headers.set('Cache-Control', 'public, max-age=3600');
+  return newResponse;
+}
+```
+
+## Real-Time Edge Processing
+
+### WebSocket at the Edge
+
+```typescript
+// Durable Objects for WebSocket connections
+export class ChatRoom {
+  state: DurableObjectState;
+  sessions: Set<WebSocket>;
+
+  constructor(state: DurableObjectState) {
+    this.state = state;
+    this.sessions = new Set();
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    if (request.headers.get('Upgrade') !== 'websocket') {
+      return new Response('Expected WebSocket', { status: 400 });
+    }
+
+    const pair = new WebSocketPair();
+    const [client, server] = Object.values(pair);
+
+    await this.handleSession(server);
+
+    return new Response(null, {
+      status: 101,
+      webSocket: client,
+    });
+  }
+
+  async handleSession(webSocket: WebSocket): Promise<void> {
+    webSocket.accept();
+    this.sessions.add(webSocket);
+
+    webSocket.addEventListener('message', (event) => {
+      // Broadcast to all connected clients
+      this.broadcast(event.data);
+    });
+
+    webSocket.addEventListener('close', () => {
+      this.sessions.delete(webSocket);
+    });
+  }
+
+  broadcast(message: string): void {
+    for (const session of this.sessions) {
+      try {
+        session.send(message);
+      } catch (error) {
+        this.sessions.delete(session);
+      }
+    }
+  }
+}
+```
+
+## Performance Optimization
+
+### Edge-Side Rendering
+
+```typescript
+// Server-Side Rendering at the Edge
+import { renderToString } from 'react-dom/server';
+import App from './App';
+
+export default {
+  async fetch(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+
+    // Fetch data at the edge
+    const data = await fetchData(url.pathname);
+
+    // Render React at the edge
+    const html = renderToString(<App data={data} />);
+
+    const fullHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Edge SSR</title>
+          <meta charset="utf-8" />
+        </head>
+        <body>
+          <div id="root">${html}</div>
+          <script>
+            window.__INITIAL_DATA__ = ${JSON.stringify(data)};
+          </script>
+        </body>
+      </html>
+    `;
+
+    return new Response(fullHtml, {
+      headers: {
+        'Content-Type': 'text/html',
+        'Cache-Control': 'public, max-age=300',
+      },
+    });
+  },
+};
+```
+
+## Monitoring and Observability
+
+### Edge Analytics
+
+```typescript
+// Track metrics at the edge
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const start = Date.now();
+
+    try {
+      const response = await handleRequest(request);
+      const duration = Date.now() - start;
+
+      // Log metrics
+      await logMetrics(env, {
+        path: new URL(request.url).pathname,
+        status: response.status,
+        duration,
+        country: request.cf?.country,
+      });
+
+      return response;
+    } catch (error) {
+      const duration = Date.now() - start;
+
+      await logMetrics(env, {
+        path: new URL(request.url).pathname,
+        status: 500,
+        duration,
+        error: error.message,
+      });
+
+      throw error;
+    }
+  },
+};
+
+async function logMetrics(env: Env, metrics: any): Promise<void> {
+  // Send to analytics service
+  await fetch('https://analytics.example.com/log', {
+    method: 'POST',
+    body: JSON.stringify(metrics),
+  });
+}
+```
+
+## Best Practices
+
+### Cold Start Optimization
+
+```typescript
+// Minimize cold starts in Lambda
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+
+// Initialize outside handler for reuse
+const dbClient = new DynamoDBClient({});
+
+export const handler = async (event: any) => {
+  // Handler uses pre-initialized client
+  // Subsequent invocations reuse the same instance
+  return processEvent(event, dbClient);
+};
+```
+
+### Security at the Edge
+
+```typescript
+// Rate limiting and security at edge
+export default {
+  async fetch(request: Request, env: Env): Promise<Response> {
+    const ip = request.headers.get('CF-Connecting-IP') || '';
+
+    // Rate limiting
+    const rateLimitKey = `rate_limit:${ip}`;
+    const requests = await env.KV.get(rateLimitKey);
+
+    if (requests && parseInt(requests) > 100) {
+      return new Response('Rate limit exceeded', { status: 429 });
+    }
+
+    await env.KV.put(
+      rateLimitKey,
+      (parseInt(requests || '0') + 1).toString(),
+      { expirationTtl: 60 }
+    );
+
+    // Security headers
+    const response = await fetch(request);
+    const secureResponse = new Response(response.body, response);
+
+    secureResponse.headers.set('X-Frame-Options', 'DENY');
+    secureResponse.headers.set('X-Content-Type-Options', 'nosniff');
+    secureResponse.headers.set('Strict-Transport-Security', 'max-age=31536000');
+
+    return secureResponse;
+  },
+};
+```
+
+## Use Cases
+
+### Content Delivery
+
+- **Static Assets**: Serve from nearest edge location
+- **Dynamic Content**: Generate personalized content at edge
+- **Image Optimization**: Resize and optimize on-the-fly
+
+### API Gateway
+
+- **Request Routing**: Direct requests to appropriate services
+- **Authentication**: Verify tokens at edge
+- **Rate Limiting**: Protect backend services
+
+### Real-Time Applications
+
+- **Gaming**: Low-latency game state updates
+- **IoT**: Process sensor data locally
+- **Video Streaming**: Adaptive bitrate streaming
+
+## Challenges and Considerations
+
+### Limitations
+
+- **Execution Time**: Short timeout limits (10-30s)
+- **Memory**: Limited memory available
+- **Package Size**: Deployment bundle restrictions
+- **No File System**: Stateless execution
+
+### Cost Optimization
+
+- **Right-Sizing**: Choose appropriate memory/CPU
+- **Caching**: Reduce redundant executions
+- **Bundling**: Minimize deployment size
+- **Monitoring**: Track and optimize costs
+
+## The Future of Edge
+
+### Emerging Trends
+
+1. **Edge AI**: Run ML models at edge locations
+2. **5G Integration**: Enhanced mobile edge computing
+3. **Edge Databases**: Distributed data storage
+4. **WebAssembly**: Portable edge functions
+5. **Edge-Native Frameworks**: Purpose-built tools
+
+## Conclusion
+
+Edge computing and serverless architectures represent a fundamental shift in how we build and deploy applications. By moving computation closer to users and eliminating server management overhead, we can create faster, more scalable, and more cost-effective applications.
+
+The combination of edge computing's low latency with serverless's auto-scaling creates powerful possibilities for modern application development. As these technologies continue to mature, we'll see even more innovative use cases and improved developer experiences.
+
+## Further Reading
+
+- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
+- [Vercel Edge Functions](https://vercel.com/docs/functions/edge-functions)
+- [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/)
+- [Netlify Edge Functions](https://docs.netlify.com/edge-functions/overview/)
+- [Deno Deploy](https://deno.com/deploy)
