@@ -128,7 +128,7 @@ export default function RootLayout({
         )}
       >
         <Providers>
-          <SystemBanner />
+          <SystemBanner dismissible={false} />
           <Header />
           <main className="grow">
             {children}

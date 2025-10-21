@@ -20,24 +20,39 @@ const bannerStyles: Record<BannerType, string> = {
 }
 
 export default function SystemBanner({
-  message = process.env.NEXT_PUBLIC_BANNER_MESSAGE || '🚧 Website under construction - New features coming soon!',
-  type = (process.env.NEXT_PUBLIC_BANNER_TYPE as BannerType) || 'info',
+  message,
+  type,
   dismissible = true,
 }: SystemBannerProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
 
   useEffect(() => {
-    // Check if banner should be shown based on env variable
+    // Get environment variables
     const showBanner = process.env.NEXT_PUBLIC_SHOW_BANNER === 'true'
+    const envMessage = process.env.NEXT_PUBLIC_BANNER_MESSAGE || '🚧 Website under construction - New features coming soon!'
+    const envType = (process.env.NEXT_PUBLIC_BANNER_TYPE as BannerType) || 'info'
+
+    // Debug logging (remove in production)
+    console.log('Banner Debug:', {
+      showBanner,
+      envMessage,
+      envType,
+      NEXT_PUBLIC_SHOW_BANNER: process.env.NEXT_PUBLIC_SHOW_BANNER,
+    })
+
+    if (!showBanner) {
+      setIsVisible(false)
+      return
+    }
 
     // Check if user has previously dismissed the banner
-    const dismissed = localStorage.getItem('system-banner-dismissed')
+    const dismissed = dismissible ? localStorage.getItem('system-banner-dismissed') : null
 
-    if (showBanner && !dismissed) {
+    if (!dismissed) {
       setIsVisible(true)
     }
-  }, [])
+  }, [dismissible])
 
   const handleDismiss = () => {
     setIsDismissed(true)
@@ -51,18 +66,21 @@ export default function SystemBanner({
     return null
   }
 
+  const bannerMessage = message || process.env.NEXT_PUBLIC_BANNER_MESSAGE || '🚧 Website under construction - New features coming soon!'
+  const bannerType: BannerType = (type || process.env.NEXT_PUBLIC_BANNER_TYPE as BannerType) || 'info'
+
   return (
     <div
       className={cn(
         'fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300',
-        bannerStyles[type]
+        bannerStyles[bannerType]
       )}
       role="alert"
       aria-live="polite"
     >
       <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3">
         <div className="flex-1 text-center text-sm font-medium">
-          {message}
+          {bannerMessage}
         </div>
         {dismissible && (
           <button
