@@ -172,7 +172,6 @@
   }
   html {
     scroll-behavior: smooth;
-    zoom: 0.8;
   }
   body {
     @apply bg-background text-foreground;

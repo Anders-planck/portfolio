@@ -6,6 +6,9 @@ import React from 'react'
 export const metadata: Metadata = {
   title: 'Blog Posts',
   description: 'Read my latest articles on web development, software engineering, React, Next.js, TypeScript, and modern JavaScript best practices.',
+  alternates: {
+    canonical: 'https://anders-games.com/posts',
+  },
   openGraph: {
     title: 'Blog Posts | Anders Planck',
     description: 'Latest articles on web development, software engineering, and modern JavaScript.',

@@ -5,6 +5,9 @@ import Header from "@/components/header";
 import Footer from "@/components/footer";
 import SystemBanner from "@/components/system-banner";
 import { Toaster } from "@/components/ui/sonner";
+import { WebsiteStructuredData, PersonStructuredData } from "@/components/structured-data";
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -26,7 +29,7 @@ export const metadata: Metadata = {
     default: 'Anders Planck | Full-Stack Developer & Software Engineer',
     template: '%s | Anders Planck'
   },
-  description: 'Full-stack developer specializing in React, Next.js, TypeScript, and modern web technologies. Explore my portfolio, blog posts, and open-source projects.',
+  description: 'Anders Planck - Senior Full-Stack Developer con 3+ anni di esperienza in React, Next.js, TypeScript, PHP, Laravel, Symfony. Portfolio progetti, blog tecnico su web development, e CV scaricabile. Ferrara, Italy.',
   keywords: [
     'Anders Planck',
     'Full-Stack Developer',
@@ -120,6 +123,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <WebsiteStructuredData />
+        <PersonStructuredData />
+      </head>
       <body
         className={cn(
           "flex flex-col font-sans antialiased",
@@ -127,14 +134,22 @@ export default function RootLayout({
           geistMono.variable
         )}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          Skip to main content
+        </a>
         <Providers>
           <SystemBanner dismissible={false} />
           <Header />
-          <main className="grow">
+          <main id="main-content" className="grow">
             {children}
           </main>
           <Footer />
           <Toaster />
+          <Analytics />
+          <SpeedInsights />
         </Providers>
       </body>
     </html>

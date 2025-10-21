@@ -38,12 +38,14 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 
 export async function getProjects(limit?: number): Promise<ProjectMetadata[]> {
     const files = await fs.readdirSync(rootPostDirectory);
-    const projects = files.map((fileName) => getProjectMetadata(fileName))
-    .sort((a, b) => {
-        const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-        const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-        return dateB - dateA; // Newest first
-    });
+    const projects = files
+        .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
+        .map((fileName) => getProjectMetadata(fileName))
+        .sort((a, b) => {
+            const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+            const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+            return dateB - dateA; // Newest first
+        });
     
     if (limit) {
         return projects.slice(0, limit);

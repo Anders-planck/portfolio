@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import React from 'react'
 
 const HeaderLinks = [
+  { href: '/about', label: 'About' },
   { href: '/posts', label: 'Posts' },
   { href: '/projects', label: 'Projects' },
   { href: '#contact', label: 'Contact', isAnchor: true },

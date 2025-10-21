@@ -7,6 +7,9 @@ import { ArrowLeftIcon } from 'lucide-react';
 import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import MdxContent from '@/components/mdx-content';
+import { BlogPostingStructuredData, BreadcrumbStructuredData } from '@/components/structured-data';
+import ShareButtons from '@/components/share-buttons';
+import { Separator } from '@/components/ui/separator';
 
 export async function generateStaticParams() {
     const posts = await getPosts();
@@ -33,6 +36,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description: summary || `Read ${title} by ${author || 'Anders Planck'}`,
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
         keywords: tags || [],
+        alternates: {
+            canonical: `https://anders-games.com/posts/${slug}`,
+        },
         openGraph: {
             title: `${title} | Anders Planck`,
             description: summary || `Read ${title}`,
@@ -69,10 +75,27 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
     }
 
     const { metadata, content } = post;
-    const { title, image, author, publishedAt, tags } = metadata;
+    const { title, summary, image, author, publishedAt, tags, readingTime } = metadata;
 
   return (
-    <section className="pb-24 pt-44 md:pt-40">
+    <>
+      <BlogPostingStructuredData
+        title={title || 'Blog Post'}
+        description={summary || ''}
+        publishedAt={publishedAt || new Date().toISOString()}
+        slug={slug}
+        image={image}
+        author={author}
+        tags={tags}
+      />
+      <BreadcrumbStructuredData
+        items={[
+          { name: 'Home', url: 'https://anders-games.com' },
+          { name: 'Posts', url: 'https://anders-games.com/posts' },
+          { name: title || 'Post', url: `https://anders-games.com/posts/${slug}` },
+        ]}
+      />
+      <section className="pb-24 pt-44 md:pt-40">
         <div className='container max-w-4xl'>
             <Link href="/posts" className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
                <ArrowLeftIcon className='h-5 w-5' />
@@ -93,7 +116,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
             <header>
                 <h1 className='title'>{title}</h1>
                 <p className='mt-3 text-xs text-muted-foreground'>
-                    {author} / {formatDate(publishedAt ?? '')}
+                    {author} / {formatDate(publishedAt ?? '')} {readingTime && `• ${readingTime}`}
                 </p>
                 <div className='mt-6 flex flex-wrap gap-2'>
                     {tags?.map((tag) => (
@@ -107,7 +130,18 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
             <main className='prose mt-16 dark:prose-invert'>
                 <MdxContent source={content} />
             </main>
+
+            <Separator className='my-12' />
+
+            <div className='flex flex-col gap-6'>
+                <ShareButtons
+                    url={`https://anders-games.com/posts/${slug}`}
+                    title={title || 'Blog Post'}
+                    description={summary}
+                />
+            </div>
         </div>
-    </section>
+      </section>
+    </>
   )
 }

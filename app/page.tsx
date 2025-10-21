@@ -12,18 +12,21 @@ import { Download } from "lucide-react";
 
 export const metadata: Metadata = {
   title: 'Home',
-  description: 'Anders Planck - Full-stack developer with expertise in React, Next.js, TypeScript, Node.js, and modern web technologies. View my portfolio, skills, and download my CV.',
+  description: 'Portfolio di Anders Planck - Full-Stack Developer specializzato in React, Next.js, TypeScript, PHP, Laravel. Scopri progetti, competenze tecniche, visualizza grafici interattivi skills e scarica il CV. 3+ anni esperienza.',
+  alternates: {
+    canonical: 'https://anders-games.com',
+  },
   openGraph: {
     title: 'Anders Planck | Full-Stack Developer Portfolio',
-    description: 'Full-stack developer with expertise in React, Next.js, TypeScript, Node.js, and modern web technologies.',
-    url: 'https://andersplanck.dev',
+    description: 'Full-Stack Developer con 3+ anni di esperienza in React, Next.js, TypeScript, PHP, Laravel. Portfolio progetti e blog tecnico.',
+    url: 'https://anders-games.com',
     type: 'website',
   },
 };
 
 export default function HomePage() {
   return (
-    <section className="py-44 md:py-32">
+    <section className="py-44">
       <div className="container mx-auto max-w-4xl">
         <Intro />
 

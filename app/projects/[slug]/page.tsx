@@ -33,6 +33,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         description: summary || `Explore ${title} - a project by ${author || 'Anders Planck'}`,
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
         keywords: tags || [],
+        alternates: {
+            canonical: `https://anders-games.com/projects/${slug}`,
+        },
         openGraph: {
             title: `${title} | Anders Planck`,
             description: summary || `Explore ${title}`,
