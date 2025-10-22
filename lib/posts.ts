@@ -30,7 +30,7 @@ export async function getPostBySlug(slug: string, locale: Locale = defaultLocale
 
     // Try requested locale first
     try {
-        const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
+        const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
         const {data, content} = matter(fileContent);
         const readingTime = calculateReadingTime(content);
 
@@ -43,7 +43,7 @@ export async function getPostBySlug(slug: string, locale: Locale = defaultLocale
         if (locale !== defaultLocale) {
             try {
                 filePath = path.join(getRootPostDirectory(defaultLocale), `${slug}.mdx`);
-                const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
+                const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
                 const {data, content} = matter(fileContent);
                 const readingTime = calculateReadingTime(content);
 
@@ -62,6 +62,23 @@ export async function getPostBySlug(slug: string, locale: Locale = defaultLocale
     }
 }
 
+async function getPostMetadataAsync(fileName: string, locale: Locale = defaultLocale): Promise<PostMetadata> {
+    const slug = fileName.replace(/\.mdx?$/, '');
+    const rootPostDirectory = getRootPostDirectory(locale);
+    const filePath = path.join(rootPostDirectory, fileName);
+
+    // Use async file reading for better performance
+    const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
+    const { data, content } = matter(fileContent);
+    const readingTime = calculateReadingTime(content);
+
+    return {
+        ...data,
+        slug,
+        readingTime
+    }
+}
+
 export async function getPosts(limit?: number, locale: Locale = defaultLocale): Promise<PostMetadata[]> {
     const rootPostDirectory = getRootPostDirectory(locale);
 
@@ -73,22 +90,26 @@ export async function getPosts(limit?: number, locale: Locale = defaultLocale): 
         return [];
     }
 
-    const files = await fs.readdirSync(rootPostDirectory);
+    const files = fs.readdirSync(rootPostDirectory);
 
-    const posts = files
-        .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
-        .map((fileName) => getPostMetadata(fileName, locale))
-        .sort((a, b) => {
-            const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-            const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-            return dateB - dateA; // Newest first
-        });
+    // Parallel file reading with Promise.all for better performance
+    const posts = await Promise.all(
+        files
+            .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
+            .map((fileName) => getPostMetadataAsync(fileName, locale))
+    );
+
+    const sortedPosts = posts.sort((a, b) => {
+        const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        return dateB - dateA; // Newest first
+    });
 
     if (limit) {
-        return posts.slice(0, limit);
+        return sortedPosts.slice(0, limit);
     }
 
-    return posts;
+    return sortedPosts;
 }
 
 export function getPostMetadata(fileName: string, locale: Locale = defaultLocale): PostMetadata {

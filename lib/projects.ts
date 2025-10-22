@@ -30,7 +30,7 @@ export async function getProjectBySlug(slug: string, locale: Locale = defaultLoc
 
     // Try requested locale first
     try {
-        const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
+        const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
         const {data, content} = matter(fileContent);
         const readingTime = calculateReadingTime(content);
 
@@ -43,7 +43,7 @@ export async function getProjectBySlug(slug: string, locale: Locale = defaultLoc
         if (locale !== defaultLocale) {
             try {
                 filePath = path.join(getRootProjectDirectory(defaultLocale), `${slug}.mdx`);
-                const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
+                const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
                 const {data, content} = matter(fileContent);
                 const readingTime = calculateReadingTime(content);
 
@@ -62,6 +62,23 @@ export async function getProjectBySlug(slug: string, locale: Locale = defaultLoc
     }
 }
 
+async function getProjectMetadataAsync(fileName: string, locale: Locale = defaultLocale): Promise<ProjectMetadata> {
+    const slug = fileName.replace(/\.mdx?$/, '');
+    const rootProjectDirectory = getRootProjectDirectory(locale);
+    const filePath = path.join(rootProjectDirectory, fileName);
+
+    // Use async file reading for better performance
+    const fileContent = await fs.promises.readFile(filePath, { encoding: "utf-8" });
+    const { data, content } = matter(fileContent);
+    const readingTime = calculateReadingTime(content);
+
+    return {
+        ...data,
+        slug,
+        readingTime
+    }
+}
+
 export async function getProjects(limit?: number, locale: Locale = defaultLocale): Promise<ProjectMetadata[]> {
     const rootProjectDirectory = getRootProjectDirectory(locale);
 
@@ -73,21 +90,26 @@ export async function getProjects(limit?: number, locale: Locale = defaultLocale
         return [];
     }
 
-    const files = await fs.readdirSync(rootProjectDirectory);
-    const projects = files
-        .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
-        .map((fileName) => getProjectMetadata(fileName, locale))
-        .sort((a, b) => {
-            const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
-            const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
-            return dateB - dateA; // Newest first
-        });
+    const files = fs.readdirSync(rootProjectDirectory);
+
+    // Parallel file reading with Promise.all for better performance
+    const projects = await Promise.all(
+        files
+            .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
+            .map((fileName) => getProjectMetadataAsync(fileName, locale))
+    );
+
+    const sortedProjects = projects.sort((a, b) => {
+        const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        return dateB - dateA; // Newest first
+    });
 
     if (limit) {
-        return projects.slice(0, limit);
+        return sortedProjects.slice(0, limit);
     }
 
-    return projects;
+    return sortedProjects;
 }
 
 export function getProjectMetadata(fileName: string, locale: Locale = defaultLocale): ProjectMetadata {

@@ -1,6 +1,6 @@
 export default function Loading() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex min-h-screen items-center justify-center">
       <div className="relative flex flex-col items-center gap-8">
         {/* Animated circles */}
         <div className="relative h-32 w-32">
