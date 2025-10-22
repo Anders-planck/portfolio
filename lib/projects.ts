@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { calculateReadingTime } from "./reading-time";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale } from "@/i18n/config";
+import { cache } from "react";
 
 function getRootProjectDirectory(locale: Locale) {
   return path.join(process.cwd(), "content", "projects", locale);
@@ -25,7 +26,8 @@ export type ProjectMetadata = {
     readingTime?: string;
 }
 
-export async function getProjectBySlug(slug: string, locale: Locale = defaultLocale): Promise<Project | null> {
+// Cache getProjectBySlug to prevent duplicate calls in the same request (generateMetadata + page component)
+export const getProjectBySlug = cache(async (slug: string, locale: Locale = defaultLocale): Promise<Project | null> => {
     let filePath = path.join(getRootProjectDirectory(locale), `${slug}.mdx`);
 
     // Try requested locale first
@@ -60,7 +62,7 @@ export async function getProjectBySlug(slug: string, locale: Locale = defaultLoc
         console.error("Error reading project file:", error);
         return null;
     }
-}
+});
 
 async function getProjectMetadataAsync(fileName: string, locale: Locale = defaultLocale): Promise<ProjectMetadata> {
     const slug = fileName.replace(/\.mdx?$/, '');
@@ -79,7 +81,7 @@ async function getProjectMetadataAsync(fileName: string, locale: Locale = defaul
     }
 }
 
-export async function getProjects(limit?: number, locale: Locale = defaultLocale): Promise<ProjectMetadata[]> {
+export const getProjects = cache(async (limit?: number, locale: Locale = defaultLocale): Promise<ProjectMetadata[]> => {
     const rootProjectDirectory = getRootProjectDirectory(locale);
 
     // Check if directory exists, if not use default locale
@@ -110,7 +112,7 @@ export async function getProjects(limit?: number, locale: Locale = defaultLocale
     }
 
     return sortedProjects;
-}
+});
 
 export function getProjectMetadata(fileName: string, locale: Locale = defaultLocale): ProjectMetadata {
     const slug = fileName.replace(/\.mdx?$/, '');

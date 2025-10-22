@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { calculateReadingTime } from "./reading-time";
 import type { Locale } from "@/i18n/config";
 import { defaultLocale } from "@/i18n/config";
+import { cache } from "react";
 
 function getRootPostDirectory(locale: Locale) {
   return path.join(process.cwd(), "content", "posts", locale);
@@ -25,7 +26,8 @@ export type PostMetadata = {
     readingTime?: string;
 }
 
-export async function getPostBySlug(slug: string, locale: Locale = defaultLocale): Promise<Post | null> {
+// Cache getPostBySlug to prevent duplicate calls in the same request (generateMetadata + page component)
+export const getPostBySlug = cache(async (slug: string, locale: Locale = defaultLocale): Promise<Post | null> => {
     let filePath = path.join(getRootPostDirectory(locale), `${slug}.mdx`);
 
     // Try requested locale first
@@ -60,7 +62,7 @@ export async function getPostBySlug(slug: string, locale: Locale = defaultLocale
         console.error("Error reading post file:", error);
         return null;
     }
-}
+});
 
 async function getPostMetadataAsync(fileName: string, locale: Locale = defaultLocale): Promise<PostMetadata> {
     const slug = fileName.replace(/\.mdx?$/, '');
@@ -79,7 +81,8 @@ async function getPostMetadataAsync(fileName: string, locale: Locale = defaultLo
     }
 }
 
-export async function getPosts(limit?: number, locale: Locale = defaultLocale): Promise<PostMetadata[]> {
+// Cache getPosts to prevent duplicate calls within the same request
+export const getPosts = cache(async (limit?: number, locale: Locale = defaultLocale): Promise<PostMetadata[]> => {
     const rootPostDirectory = getRootPostDirectory(locale);
 
     // Check if directory exists, if not use default locale
@@ -110,7 +113,7 @@ export async function getPosts(limit?: number, locale: Locale = defaultLocale): 
     }
 
     return sortedPosts;
-}
+});
 
 export function getPostMetadata(fileName: string, locale: Locale = defaultLocale): PostMetadata {
     const slug = fileName.replace(/\.mdx?$/, '');
