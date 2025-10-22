@@ -11,6 +11,7 @@ import {
   GitBranch,
   Boxes,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const categoryIcons = {
   backend: Server,
@@ -21,22 +22,24 @@ const categoryIcons = {
   methodologies: GitBranch,
 };
 
-const categoryLabels = {
-  backend: "Backend & Server",
-  frontend: "Frontend & UI",
-  database: "Database",
-  devops: "DevOps & Cloud",
-  api: "API & Communication",
-  methodologies: "Methodologies & Quality",
-};
-
 export default function TechStack() {
+  const t = useTranslations("about.techStack");
+
+  const categoryLabels: Record<string, string> = {
+    backend: t("categories.backend"),
+    frontend: t("categories.frontend"),
+    database: t("categories.database"),
+    devops: t("categories.devops"),
+    api: t("categories.api"),
+    methodologies: t("categories.methodologiesQuality"),
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Technology Stack</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Comprehensive overview of technologies and methodologies
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

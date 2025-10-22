@@ -5,12 +5,14 @@ import { ProjectMetadata } from '@/lib/projects'
 import Projects from '@/components/projects'
 import Pagination from '@/components/pagination'
 import ProjectFilters from '@/components/projects-filters'
+import { useTranslations } from 'next-intl'
 
 interface ProjectsWithFiltersProps {
   initialProjects: ProjectMetadata[]
 }
 
 export default function ProjectsWithFilters({ initialProjects }: ProjectsWithFiltersProps) {
+  const t = useTranslations('projects')
   const [filteredProjects, setFilteredProjects] = useState<ProjectMetadata[]>(initialProjects)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(4)
@@ -61,9 +63,9 @@ export default function ProjectsWithFilters({ initialProjects }: ProjectsWithFil
         </>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">No Projects found.</p>
+          <p className="text-muted-foreground text-lg">{t('noProjects')}</p>
           <p className="text-muted-foreground text-sm mt-2">
-            Try adjusting your filters to see more results.
+            {t('adjustFilters')}
           </p>
         </div>
       )}

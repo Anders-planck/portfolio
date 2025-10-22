@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from 'next-intl/server';
 import Intro from "@/components/intro";
 import FeaturedProjects from "@/components/featured-projects";
 import ContactForm from "@/components/contact-form";
@@ -6,22 +7,37 @@ import StatsOverview from "@/components/stats-overview";
 import SkillsRadarChart from "@/components/skills-radar-chart";
 import { Separator } from "@/components/ui/separator";
 import { Download } from "lucide-react";
+import type { Locale } from "@/i18n/config";
 
-export const metadata: Metadata = {
-  title: 'Home',
-  description: 'Portfolio di Anders Planck - Full-Stack Developer specializzato in React, Next.js, TypeScript, PHP, Laravel. Scopri progetti, competenze tecniche, visualizza grafici interattivi skills e scarica il CV. 3+ anni esperienza.',
-  alternates: {
-    canonical: 'https://anders-games.com',
-  },
-  openGraph: {
-    title: 'Anders Planck | Full-Stack Developer Portfolio',
-    description: 'Full-Stack Developer con 3+ anni di esperienza in React, Next.js, TypeScript, PHP, Laravel. Portfolio progetti e blog tecnico.',
-    url: 'https://anders-games.com',
-    type: 'website',
-  },
+type Props = {
+  params: Promise<{ locale: Locale }>;
 };
 
-export default function HomePage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'home.meta' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: `https://anders-games.com/${locale}`,
+    },
+    openGraph: {
+      title: 'Anders Planck | Full-Stack Developer Portfolio',
+      description: t('description'),
+      url: `https://anders-games.com/${locale}`,
+      type: 'website',
+      locale: locale === 'en' ? 'en_US' : locale === 'it' ? 'it_IT' : 'fr_FR',
+    },
+  };
+}
+
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'home' });
+  const tCommon = await getTranslations({ locale, namespace: 'common' });
+
   return (
     <section className="py-44 md:py-32">
       <div className="container mx-auto max-w-4xl">
@@ -32,15 +48,15 @@ export default function HomePage() {
           href="/cv.pdf"
           download="Anders_Planck_CV.pdf"
           className="fixed bottom-8 right-8 z-50 flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-          aria-label="Download CV"
+          aria-label={tCommon('downloadCV')}
         >
           <Download className="h-5 w-5" />
-          <span className="hidden sm:inline">Download CV</span>
+          <span className="hidden sm:inline">{tCommon('downloadCV')}</span>
         </a>
 
         {/* At a Glance - Numerical Validation */}
         <div className="my-24">
-          <h2 className="title mb-8">At a Glance</h2>
+          <h2 className="title mb-8">{t('atAGlance')}</h2>
           <StatsOverview />
         </div>
 
@@ -48,9 +64,9 @@ export default function HomePage() {
 
         {/* Skills Proficiency - Primary Visualization */}
         <div className="my-24">
-          <h2 className="title mb-8">Technical Proficiency</h2>
+          <h2 className="title mb-8">{t('technicalProficiency')}</h2>
           <p className="mb-8 text-muted-foreground">
-            Top 3 skills from each technology domain showing depth of expertise
+            {t('technicalProficiencyDesc')}
           </p>
           <SkillsRadarChart />
         </div>
@@ -59,9 +75,9 @@ export default function HomePage() {
 
         {/* Featured Projects - Real Work */}
         <div className="my-24">
-          <h2 className="title mb-8">Featured Projects</h2>
+          <h2 className="title mb-8">{t('featuredProjects')}</h2>
           <p className="mb-8 text-muted-foreground">
-            Showcasing real-world enterprise projects with measurable impact and modern tech stacks
+            {t('featuredProjectsDesc')}
           </p>
           <FeaturedProjects />
         </div>
@@ -70,9 +86,9 @@ export default function HomePage() {
 
         {/* Contact Section */}
         <section id="contact" className="mt-24 scroll-mt-24">
-          <h2 className="title mb-4">Let&apos;s Work Together</h2>
+          <h2 className="title mb-4">{t('letsWorkTogether')}</h2>
           <p className="mb-8 text-muted-foreground">
-            Open to new opportunities and collaborations. Get in touch to discuss your project.
+            {t('letsWorkTogetherDesc')}
           </p>
           <ContactForm compact />
         </section>

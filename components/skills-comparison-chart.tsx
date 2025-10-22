@@ -12,8 +12,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 export default function SkillsComparisonChart() {
+  const t = useTranslations("about.skillsComparison");
   // Get top 3 skills from each major category
   const categories = ["Backend", "Frontend", "DevOps"];
 
@@ -48,9 +50,9 @@ export default function SkillsComparisonChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Core Skills Comparison</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Top 3 skills in Backend, Frontend, and DevOps
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -1,0 +1,273 @@
+---
+title: 'Open Banking UI'
+summary: 'Interfaccia moderna per pagamenti con integrazione open banking, deployment multi-ambiente e internazionalizzazione completa'
+image: '/images/projects/open-banking-ui.svg'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-06-01'
+tags: ['React', 'Vite', 'Material-UI', 'TypeScript', 'Open Banking', 'Payments']
+---
+
+## Panoramica
+
+**Open Banking UI** è un'interfaccia pagamenti production-ready che fornisce integrazione seamless con API open banking. Costruita con React 18, Vite e Material-UI, offre un'esperienza sicura e user-friendly per iniziare pagamenti, gestire account e visualizzare storico transazioni.
+
+### Risultati Chiave
+
+- 💳 **Flusso Pagamento Sicuro**: Avvio pagamento conforme PSD2
+- 🔒 **Autenticazione OAuth 2.0**: Autorizzazione bancaria sicura
+- 🌍 **Supporto Multilingua**: React Intl per internazionalizzazione
+- 📱 **Design Responsive**: Approccio mobile-first con Material-UI
+- ☁️ **Deployment AWS S3**: Pipeline deployment multi-ambiente
+- 📄 **Visualizzazione PDF**: Viewer integrato per estratti conto
+- ⚡ **Build Veloci**: Vite con SWC per sviluppo rapido
+- 🧪 **Mock Service Worker**: MSW per mocking API durante sviluppo
+
+---
+
+## Architettura Tecnica
+
+### Design del Sistema
+
+Frontend Vite + React 18 gestisce flusso pagamento, collegamento account e storico. Layer stato Redux Toolkit per Auth, Pagamenti, Account e Transazioni. Integrazione con API Open Banking (AISP, PISP) e layer sicurezza con OAuth 2.0, flusso PKCE e token refresh.
+
+### Funzionalità Core
+
+**Payment Initiation Service Provider (PISP)**:
+- Pagamenti immediati singoli
+- Setup pagamenti ricorrenti
+- Tracciamento stato pagamento
+- Gestione Strong Customer Authentication (SCA)
+
+**Account Information Service Provider (AISP)**:
+- Recupero lista account
+- Informazioni saldo
+- Storico transazioni
+- Dettagli account
+
+---
+
+## Funzionalità Core
+
+### 1. Flusso Pagamento
+
+**Avvio Pagamento**:
+Il sistema gestisce richieste pagamento con dati creditor account (IBAN, currency), instructed amount, debtor account e informazioni rimessa. Dopo validazione, reindirizza alla banca per autorizzazione con gestione SCA completa.
+
+**Autenticazione Strong Customer**:
+```typescript
+export function SCAHandler() {
+  const { completeAuthentication } = useAuth()
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const code = params.get('code')
+    const state = params.get('state')
+
+    if (code && state) {
+      completeAuthentication({ code, state })
+    }
+  }, [location])
+
+  return (
+    <Box>
+      <CircularProgress />
+      <Typography>Completamento autenticazione...</Typography>
+    </Box>
+  )
+}
+```
+
+### 2. Collegamento Account
+
+**Flusso OAuth 2.0 + PKCE**:
+```typescript
+export const useAccountLinking = () => {
+  const initiateLink = async (bankId: string) => {
+    // Genera challenge PKCE
+    const codeVerifier = generateCodeVerifier()
+    const codeChallenge = await generateCodeChallenge(codeVerifier)
+
+    // Memorizza verifier per callback
+    sessionStorage.setItem('code_verifier', codeVerifier)
+
+    // Costruisce URL autorizzazione
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: process.env.VITE_CLIENT_ID!,
+      redirect_uri: process.env.VITE_REDIRECT_URI!,
+      scope: 'aisp pisp',
+      state: generateRandomState(),
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256'
+    })
+
+    window.location.href = `${bankAuthUrl}?${params.toString()}`
+  }
+
+  return { initiateLink, handleCallback }
+}
+```
+
+### 3. Storico Transazioni
+
+**Scroll Infinito con Virtualizzazione**:
+Implementazione useInfiniteQuery di React Query per caricamento paginato transazioni. Virtualizzazione con react-virtual per rendering efficiente di grandi dataset. Auto-fetch pagina successiva quando utente scorre vicino al fondo.
+
+**Caratteristiche**:
+- Caricamento lazy delle transazioni
+- Virtualizzazione per performance ottimali
+- Gestione stati caricamento e errore
+- Refresh pull-to-refresh
+
+### 4. Supporto Multilingua
+
+**Integrazione React Intl**:
+```typescript
+import { IntlProvider, FormattedMessage, FormattedNumber } from 'react-intl'
+
+export function App() {
+  const [locale, setLocale] = useState('en')
+  const messages = useMemo(() => require(`./locales/${locale}.json`), [locale])
+
+  return (
+    <IntlProvider locale={locale} messages={messages}>
+      <Router>
+        <Routes />
+      </Router>
+    </IntlProvider>
+  )
+}
+
+// Utilizzo nei componenti
+function PaymentSummary({ amount, currency }) {
+  return (
+    <Box>
+      <Typography>
+        <FormattedMessage id="payment.total" />
+      </Typography>
+      <Typography variant="h4">
+        <FormattedNumber
+          value={amount}
+          style="currency"
+          currency={currency}
+        />
+      </Typography>
+    </Box>
+  )
+}
+```
+
+---
+
+## Build & Deployment
+
+### Configurazione Multi-Ambiente
+
+```bash
+# Build development
+npm run build:dev  # Usa .env.dev
+
+# Build sandbox
+npm run build:sandbox  # Usa .env.sandbox
+
+# Build production
+npm run build:production  # Usa .env.production
+```
+
+### Deployment AWS S3
+
+**Script Deployment**:
+```bash
+#!/bin/bash
+
+# Build per ambiente
+npm run build:${ENV}
+
+# Upload su S3
+aws --profile=${AWS_PROFILE} s3 sync --delete \
+  ./dist s3://pay-${ENV}.acubeapi.com
+
+# Invalida cache CloudFront
+aws --profile=${AWS_PROFILE} cloudfront create-invalidation \
+  --distribution-id ${DISTRIBUTION_ID} \
+  --paths "/*"
+```
+
+---
+
+## Workflow di Sviluppo
+
+### Setup Mock Service Worker
+
+**Handler MSW**:
+```typescript
+import { rest } from 'msw'
+
+export const handlers = [
+  // Mock avvio pagamento
+  rest.post('/api/payments', (req, res, ctx) => {
+    return res(
+      ctx.status(201),
+      ctx.json({
+        paymentId: '123-456-789',
+        status: 'pending',
+        authorizationUrl: 'https://bank.example.com/auth'
+      })
+    )
+  }),
+
+  // Mock lista account
+  rest.get('/api/accounts', (req, res, ctx) => {
+    return res(
+      ctx.status(200),
+      ctx.json({
+        accounts: [
+          { id: '1', iban: 'IT89370400440532013000', balance: 1234.56 },
+          { id: '2', iban: 'IT1420041010050500013M02606', balance: 5678.90 }
+        ]
+      })
+    )
+  })
+]
+```
+
+---
+
+## Stack Tecnico Riepilogativo
+
+### Frontend
+- React 18.2.0
+- TypeScript 5.1.3
+- Vite 4.3.9
+- Material-UI 5.13.5
+- React Router 6.13.0
+
+### Stato & Dati
+- Redux Toolkit 1.9.5
+- React Query (scroll infinito)
+- React Intl 6.4.4
+
+### Strumenti Sviluppo
+- MSW 1.2.2 - API mocking
+- ESLint 8.43.0
+- Prettier 2.8.8
+- Husky 8.0.3
+
+---
+
+## Considerazioni Sicurezza
+
+1. **OAuth 2.0 + PKCE**: Protezione contro intercettazione codice autorizzazione
+2. **Conformità SCA**: Strong Customer Authentication PSD2
+3. **Refresh Token**: Rinnovo automatico token
+4. **Storage Sicuro**: Token in cookie httpOnly
+5. **Header CSP**: Content Security Policy per protezione XSS
+
+---
+
+## Conclusione
+
+**Open Banking UI** offre un'interfaccia pagamenti sicura e user-friendly con piena conformità PSD2 e pratiche di sviluppo moderne.
+
+**Licenza**: Proprietaria (A-Cube S.r.l.)

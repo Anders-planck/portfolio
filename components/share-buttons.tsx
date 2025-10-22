@@ -3,6 +3,7 @@
 import { Twitter, Linkedin, Facebook, Link as LinkIcon, Check } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface ShareButtonsProps {
   url: string;
@@ -11,6 +12,7 @@ interface ShareButtonsProps {
 }
 
 export default function ShareButtons({ url, title }: ShareButtonsProps) {
+  const t = useTranslations('common.share');
   const [copied, setCopied] = useState(false);
 
   const shareLinks = {
@@ -23,23 +25,23 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
     try {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      toast.success('Link copied to clipboard!');
+      toast.success(t('linkCopied'));
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('Failed to copy link');
+      toast.error(t('copyFailed'));
     }
   };
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm font-semibold text-muted-foreground">Share:</span>
+      <span className="text-sm font-semibold text-muted-foreground">{t('label')}</span>
 
       <a
         href={shareLinks.twitter}
         target="_blank"
         rel="noopener noreferrer"
         className="rounded-md p-2 transition-colors hover:bg-accent"
-        aria-label="Share on Twitter"
+        aria-label={t('twitter')}
       >
         <Twitter className="h-5 w-5" />
       </a>
@@ -49,7 +51,7 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="rounded-md p-2 transition-colors hover:bg-accent"
-        aria-label="Share on LinkedIn"
+        aria-label={t('linkedin')}
       >
         <Linkedin className="h-5 w-5" />
       </a>
@@ -59,7 +61,7 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
         target="_blank"
         rel="noopener noreferrer"
         className="rounded-md p-2 transition-colors hover:bg-accent"
-        aria-label="Share on Facebook"
+        aria-label={t('facebook')}
       >
         <Facebook className="h-5 w-5" />
       </a>
@@ -67,7 +69,7 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
       <button
         onClick={copyToClipboard}
         className="rounded-md p-2 transition-colors hover:bg-accent"
-        aria-label="Copy link to clipboard"
+        aria-label={t('copyLink')}
       >
         {copied ? <Check className="h-5 w-5 text-green-500" /> : <LinkIcon className="h-5 w-5" />}
       </button>

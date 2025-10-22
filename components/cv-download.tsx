@@ -3,15 +3,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, ExternalLink } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function CVDownload() {
+  const t = useTranslations("about.cvDownload");
+
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 p-6 text-center md:flex-row md:justify-between md:text-left">
         <div>
-          <h3 className="mb-1 font-semibold">Download My CV</h3>
+          <h3 className="mb-1 font-semibold">{t("title")}</h3>
           <p className="text-sm text-muted-foreground">
-            Get a detailed overview of my experience and skills
+            {t("description")}
           </p>
         </div>
         <div className="flex gap-2">
@@ -22,7 +25,7 @@ export default function CVDownload() {
               rel="noopener noreferrer"
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              View Source
+              {t("viewSource")}
             </a>
           </Button>
           <Button asChild>
@@ -31,7 +34,7 @@ export default function CVDownload() {
               download="Anders_Planck_CV.pdf"
             >
               <Download className="mr-2 h-4 w-4" />
-              Download PDF
+              {t("downloadPdf")}
             </a>
           </Button>
         </div>

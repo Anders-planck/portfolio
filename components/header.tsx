@@ -1,19 +1,28 @@
 'use client'
 
 import ThemeToggle from '@/components/theme-toggle'
+import LanguageSwitcher from '@/components/language-switcher'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import React from 'react'
+import type { Locale } from '@/i18n/config'
 
-const HeaderLinks = [
-  { href: '/about', label: 'About' },
-  { href: '/posts', label: 'Posts' },
-  { href: '/projects', label: 'Projects' },
-  { href: '#contact', label: 'Contact', isAnchor: true },
-]
+function getHeaderLinks(locale: Locale) {
+  return [
+    { href: `/${locale}/about`, label: 'about' },
+    { href: `/${locale}/posts`, label: 'posts' },
+    { href: `/${locale}/projects`, label: 'projects' },
+    { href: '#contact', label: 'contact', isAnchor: true },
+  ]
+}
 
 export default function Header() {
+  const t = useTranslations('common.nav')
+  const params = useParams()
   const pathname = usePathname()
+  const currentLocale = (params.locale as Locale) || 'en'
+  const HeaderLinks = getHeaderLinks(currentLocale)
   const [bannerHeight, setBannerHeight] = React.useState(0)
   const [isScrolled, setIsScrolled] = React.useState(false)
 
@@ -70,7 +79,7 @@ export default function Header() {
     >
         <nav className='container mx-auto flex max-w-4xl items-center justify-between px-2 md:px-0'>
             <div>
-                <Link href="/" className='font-serif title text-2xl font-bold'>AP</Link>
+                <Link href={`/${currentLocale}`} className='font-serif title text-2xl font-bold'>AP</Link>
             </div>
 
             <ul className='flex items-center gap-6 text-sm font-light text-muted-foreground'>
@@ -78,16 +87,17 @@ export default function Header() {
                     <li key={href} className='transition-colors hover:text-foreground'>
                         {isAnchor ? (
                           <a href={href} onClick={handleContactClick} className='cursor-pointer'>
-                            {label}
+                            {t(label as 'about' | 'posts' | 'projects' | 'contact')}
                           </a>
                         ) : (
-                          <Link href={href}>{label}</Link>
+                          <Link href={href}>{t(label as 'about' | 'posts' | 'projects' | 'contact')}</Link>
                         )}
                     </li>
                 ))}
             </ul>
 
-            <div>
+            <div className="flex items-center gap-2">
+                <LanguageSwitcher />
                 <ThemeToggle />
             </div>
         </nav>

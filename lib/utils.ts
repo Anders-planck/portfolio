@@ -6,8 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
-export function formatDate(date: string) {
-  return new Date(date).toLocaleDateString("en-US", {
+export function formatDate(date: string, locale: string = 'en') {
+  // Map our locale codes to full locale identifiers
+  const localeMap: Record<string, string> = {
+    'en': 'en-US',
+    'it': 'it-IT',
+    'fr': 'fr-FR'
+  };
+
+  return new Date(date).toLocaleDateString(localeMap[locale] || 'en-US', {
     year: "numeric",
     month: "long",
     day: "numeric",

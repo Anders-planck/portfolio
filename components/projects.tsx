@@ -12,14 +12,11 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import { ProjectMetadata } from '@/lib/projects'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function Projects({ projects }: { projects: ProjectMetadata[] }) {
-  // Calculate estimated reading time (rough estimate: 200 words per minute)
-  const getReadingTime = (summary?: string) => {
-    if (!summary) return 1
-    const words = summary.split(' ').length
-    return Math.max(1, Math.ceil(words / 50)) // Rough estimate
-  }
+  const t = useTranslations('common')
+  const locale = useLocale()
 
   return (
     <div className={cn(
@@ -27,7 +24,6 @@ export default function Projects({ projects }: { projects: ProjectMetadata[] }) 
       projects.length >= 2 ? 'sm:grid-cols-2 md:grid-cols-3' : '',
     )}>
       {projects.map((project) => {
-        const readingTime = getReadingTime(project.summary)
         const authorInitials = project.author
           ? project.author
               .split(' ')
@@ -123,21 +119,23 @@ export default function Projects({ projects }: { projects: ProjectMetadata[] }) 
                       <div className="flex items-center gap-1.5 text-gray-300">
                         <Calendar className="h-3.5 w-3.5" />
                         <time dateTime={project.publishedAt} className="text-xs">
-                          {formatDate(project.publishedAt)}
+                          {formatDate(project.publishedAt, locale)}
                         </time>
                       </div>
                     )}
 
                     {/* Reading time */}
-                    <div className="flex items-center gap-1.5 text-gray-300">
-                      <Clock className="h-3.5 w-3.5" />
-                      <span className="text-xs">{readingTime} min read</span>
-                    </div>
+                    {project.readingTime && (
+                      <div className="flex items-center gap-1.5 text-gray-300">
+                        <Clock className="h-3.5 w-3.5" />
+                        <span className="text-xs">{project.readingTime}</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* CTA Button */}
                   <div className="flex items-center gap-2 text-sm font-semibold text-primary-foreground bg-primary/90 hover:bg-primary px-4 py-2.5 rounded-md group-hover:gap-3 transition-all w-fit">
-                    <span>Read article</span>
+                    <span>{t('readArticle')}</span>
                     <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                 </div>

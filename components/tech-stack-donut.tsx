@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { technicalCompetencies } from "@/lib/cv-data";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip, Sector } from "recharts";
+import { useTranslations } from "next-intl";
 
 // Hook to get current theme colors from CSS variables
 function useThemeColors() {
@@ -52,15 +53,6 @@ function useThemeColors() {
   return colors;
 }
 
-const categoryLabels = {
-  backend: "Backend & Server",
-  frontend: "Frontend & UI",
-  database: "Database",
-  devops: "DevOps & Cloud",
-  api: "API & Communication",
-  methodologies: "Methodologies",
-};
-
 const renderActiveShape = (props: unknown) => {
   const {
     cx,
@@ -107,6 +99,7 @@ const renderActiveShape = (props: unknown) => {
 export default function TechStackDonut() {
   const [activeIndex, setActiveIndex] = useState<number | undefined>(0);
   const themeColors = useThemeColors();
+  const t = useTranslations("about.techStack");
 
   // Map categories to theme chart colors
   const categoryColors: Record<string, string> = {
@@ -116,6 +109,15 @@ export default function TechStackDonut() {
     devops: themeColors.chart4,
     api: themeColors.chart5,
     methodologies: themeColors.primary,
+  };
+
+  const categoryLabels: Record<string, string> = {
+    backend: t("categories.backend"),
+    frontend: t("categories.frontend"),
+    database: t("categories.database"),
+    devops: t("categories.devops"),
+    api: t("categories.api"),
+    methodologies: t("categories.methodologies"),
   };
 
   const chartData = Object.entries(technicalCompetencies).map(([category, items]) => ({
@@ -173,7 +175,7 @@ export default function TechStackDonut() {
                     >
                       <p className="font-semibold">{data.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {data.value} technologies
+                        {t("technologiesCount", { count: data.value })}
                       </p>
                     </div>
                   );
@@ -198,7 +200,7 @@ export default function TechStackDonut() {
           {selectedCategory.name}
         </div>
         <p className="text-sm text-muted-foreground">
-          {selectedCategory.value} technologies in this category
+          {t("technologiesInCategory", { count: selectedCategory.value })}
         </p>
         <div className="flex flex-wrap gap-2">
           {selectedCategory.items.map((item) => (

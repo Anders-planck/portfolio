@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { languages } from "@/lib/cv-data";
+import { useTranslations } from "next-intl";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 // Hook to get current theme colors from CSS variables
@@ -47,18 +47,26 @@ function useThemeColors() {
 
 export default function LanguagesDonut() {
   const themeColors = useThemeColors();
+  const tCv = useTranslations("cv.languages");
+
+  const languages = [
+    { key: 'french', level: 'native', proficiency: 100 },
+    { key: 'italian', level: 'b2', proficiency: 75 },
+    { key: 'english', level: 'b1', proficiency: 65 },
+  ];
 
   // Map languages to theme chart colors
   const languageColors: Record<string, string> = {
-    French: themeColors.chart1,
-    Italian: themeColors.chart2,
-    English: themeColors.chart3,
+    french: themeColors.chart1,
+    italian: themeColors.chart2,
+    english: themeColors.chart3,
   };
 
   const chartData = languages.map((language) => ({
-    name: language.name,
+    key: language.key,
+    name: tCv(language.key),
     value: language.proficiency,
-    level: language.level,
+    level: tCv(language.level),
   }));
 
   return (
@@ -78,8 +86,8 @@ export default function LanguagesDonut() {
           >
             {chartData.map((entry) => (
               <Cell
-                key={`cell-${entry.name}`}
-                fill={languageColors[entry.name]}
+                key={`cell-${entry.key}`}
+                fill={languageColors[entry.key]}
                 stroke="hsl(var(--background))"
                 strokeWidth={2}
               />
@@ -93,13 +101,13 @@ export default function LanguagesDonut() {
                   <div
                     className="rounded-lg border-2 bg-background p-4 shadow-lg"
                     style={{
-                      borderColor: languageColors[data.name],
+                      borderColor: languageColors[data.key],
                     }}
                   >
                     <div
                       className="mb-2 inline-block rounded px-2 py-1 text-xs font-bold text-white"
                       style={{
-                        backgroundColor: languageColors[data.name],
+                        backgroundColor: languageColors[data.key],
                       }}
                     >
                       {data.name}
@@ -108,7 +116,7 @@ export default function LanguagesDonut() {
                     <p
                       className="mt-1 text-lg font-bold"
                       style={{
-                        color: languageColors[data.name],
+                        color: languageColors[data.key],
                       }}
                     >
                       {data.value}%

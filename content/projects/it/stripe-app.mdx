@@ -1,0 +1,399 @@
+---
+title: 'Estensione Stripe E-Invoicing'
+summary: 'Estensione UI Stripe Dashboard per gestione completa documenti pagamento, validazione fatture ed elaborazione rimborsi con integrazione sistemi contabili esterni'
+image: '/images/projects/stripe-app.svg'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-09-01'
+tags: ['Stripe', 'React', 'TypeScript', 'Redux', 'React Hook Form', 'Zod']
+---
+
+## Panoramica
+
+**Estensione Stripe E-Invoicing** è un'estensione UI Stripe Dashboard production che fornisce gestione completa documenti pagamento direttamente all'interno della Stripe Dashboard. Costruita con Stripe UI Extension SDK, abilita validazione fatture seamless, elaborazione rimborsi e sincronizzazione con sistemi contabili esterni.
+
+### Risultati Chiave
+
+- 💳 **Integrazione Nativa Stripe**: Embedded direttamente nella Stripe Dashboard
+- 📄 **Validazione Fatture**: Validazione real-time contro standard contabili
+- 💰 **Elaborazione Rimborsi**: Workflow rimborsi semplificato con gestione metadata
+- 🔄 **Sync Sistema Esterno**: Sincronizzazione bidirezionale con piattaforme contabili
+- 📊 **Tracking Stato Documenti**: Gestione stato completa per fatture
+- 🎨 **Componenti UI Stripe**: Design consistente con design system Stripe
+- 🔒 **Gestione Metadata Sicura**: Storage criptato dati documenti sensibili
+- ⚡ **Aggiornamenti Real-time**: Sincronizzazione dati live tra sistemi
+
+---
+
+## Architettura Tecnica
+
+### Design del Sistema
+
+Ambiente Stripe Dashboard con contesto estensione UI embedded. Integrazione Stripe UI Extension SDK per dati pagamento, Metadata API e Actions. Layer stato Redux per documenti, focus views e validazione. API esterne per A-Cube API, sistemi contabili e e-invoice.
+
+### Architettura Componenti Core
+
+```typescript
+// Gerarchia componenti
+PaymentDocumentDetailsView
+├── DocumentInfo              // Informazioni documento base
+├── GatewayInfo              // Dettagli specifici gateway
+├── InvoiceStatus            // UI gestione stato
+├── RefundSection            // Elaborazione rimborsi
+└── MetadataFocusView        // Modal editor metadata
+```
+
+---
+
+## Funzionalità Core
+
+### 1. Gestione Documenti Pagamento
+
+**Componente Vista Principale**:
+```typescript
+import {
+  ContextView,
+  usePaymentData,
+  useMetadata
+} from '@stripe/ui-extension-sdk/context'
+import { Box, Banner } from '@stripe/ui-extension-sdk/ui'
+
+export default function PaymentDocumentDetailsView() {
+  const payment = usePaymentData()
+  const { document, loading } = useFetchStripeDocuments(payment.id)
+
+  return (
+    <ContextView title="Dettagli E-Invoice">
+      <Box css={{ stack: 'y', gap: 'medium' }}>
+        {document.validationErrors.length > 0 && (
+          <Banner
+            type="caution"
+            title="Problemi Validazione"
+            description={`${document.validationErrors.length} problemi trovati`}
+          />
+        )}
+
+        <DocumentInfo document={document} />
+        <GatewayInfo payment={payment} />
+        <InvoiceStatus document={document} onStatusChange={handleStatusChange} />
+        <RefundSection payment={payment} document={document} />
+      </Box>
+    </ContextView>
+  )
+}
+```
+
+### 2. Validazione Fatture
+
+**Engine Validazione Real-time**:
+```typescript
+import { z } from 'zod'
+
+const InvoiceSchema = z.object({
+  number: z.string().regex(/^[A-Z]{2}\d{4}-\d{6}$/),
+  date: z.string().datetime(),
+  amount: z.number().positive(),
+  currency: z.enum(['EUR', 'USD', 'GBP']),
+  taxInfo: z.object({
+    vatNumber: z.string().regex(/^[A-Z]{2}\d{9,12}$/),
+    taxableAmount: z.number(),
+    taxAmount: z.number(),
+    taxRate: z.number().min(0).max(100)
+  }),
+  lineItems: z.array(z.object({
+    description: z.string().min(1),
+    quantity: z.number().int().positive(),
+    unitPrice: z.number().positive(),
+    total: z.number().positive()
+  })).min(1)
+})
+
+export function useValidateDocuments(document: Invoice) {
+  const [errors, setErrors] = useState<ValidationError[]>([])
+
+  useEffect(() => {
+    const result = InvoiceSchema.safeParse(document)
+
+    if (!result.success) {
+      const validationErrors = result.error.issues.map(issue => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+        code: issue.code
+      }))
+      setErrors(validationErrors)
+    } else {
+      setErrors([])
+    }
+  }, [document])
+
+  return { errors, isValid: errors.length === 0 }
+}
+```
+
+**Visualizzazione Validazione**:
+Componente mostra badge positivo/negativo in base a validità. Se non valido, visualizza lista errori con Banner critici per ogni campo con problema rilevato.
+
+### 3. Elaborazione Rimborsi
+
+**Workflow Rimborsi**:
+```typescript
+import { useStripe } from '@stripe/ui-extension-sdk/stripe'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const RefundSchema = z.object({
+  amount: z.number().positive(),
+  reason: z.enum(['duplicate', 'fraudulent', 'requested_by_customer']),
+  notes: z.string().optional()
+})
+
+export function RefundSection({ payment, document }) {
+  const stripe = useStripe()
+  const { metadata, preparedMetadata } = usePrepareMetadataForRefund(document)
+
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(RefundSchema)
+  })
+
+  const processRefund = async (data) => {
+    try {
+      // Crea rimborso con metadata
+      const refund = await stripe.refunds.create({
+        payment_intent: payment.id,
+        amount: data.amount * 100, // Converti in centesimi
+        reason: data.reason,
+        metadata: {
+          ...preparedMetadata,
+          invoice_number: document.number,
+          refund_notes: data.notes
+        }
+      })
+
+      // Aggiorna stato documento in sistema esterno
+      await updateDocumentStatus(document.id, 'refunded')
+
+      return { success: true, refund }
+    } catch (error) {
+      console.error('Rimborso fallito:', error)
+      return { success: false, error }
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit(processRefund)}>
+      <TextField label="Importo Rimborso" type="number" {...register('amount')} />
+      <Select label="Motivo" {...register('reason')}>
+        <option value="duplicate">Duplicato</option>
+        <option value="fraudulent">Fraudolento</option>
+        <option value="requested_by_customer">Richiesta Cliente</option>
+      </Select>
+      <TextArea label="Note (opzionale)" {...register('notes')} />
+      <Button type="submit">Elabora Rimborso</Button>
+    </form>
+  )
+}
+```
+
+### 4. Gestione Metadata
+
+**Modal Editor Metadata**:
+```typescript
+import { FocusView } from '@stripe/ui-extension-sdk/ui'
+
+export function MetadataFocusView({ document, onClose }) {
+  const [metadata, setMetadata] = useState(document.metadata)
+  const { updateMetadata } = useMetadataManager()
+
+  const handleSave = async () => {
+    await updateMetadata(document.id, metadata)
+    onClose()
+  }
+
+  return (
+    <FocusView
+      title="Modifica Metadata"
+      primaryAction={{ label: 'Salva', onPress: handleSave }}
+      secondaryAction={{ label: 'Annulla', onPress: onClose }}
+    >
+      <Box css={{ stack: 'y', gap: 'medium' }}>
+        {Object.entries(metadata).map(([key, value]) => (
+          <TextField
+            key={key}
+            label={formatLabel(key)}
+            value={value}
+            onChange={(e) => setMetadata({
+              ...metadata,
+              [key]: e.target.value
+            })}
+          />
+        ))}
+
+        <Button onPress={() => setMetadata({
+          ...metadata,
+          [`custom_field_${Date.now()}`]: ''
+        })}>
+          Aggiungi Campo Custom
+        </Button>
+      </Box>
+    </FocusView>
+  )
+}
+```
+
+---
+
+## Integrazione Sistema Esterno
+
+### Integrazione API A-Cube
+
+**Recupero Dati Fattura**:
+```typescript
+export function useFetchACubeInvoiceAndCreditNotes(documentId: string) {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.ACUBE_API_URL}/documents/${documentId}`,
+          {
+            headers: {
+              'Authorization': `Bearer ${process.env.ACUBE_API_TOKEN}`,
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+
+        const document = await response.json()
+        const creditNotes = await fetchCreditNotes(documentId)
+
+        setData({ invoice: document, creditNotes })
+      } catch (error) {
+        console.error('Recupero dati A-Cube fallito:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [documentId])
+
+  return { data, loading }
+}
+```
+
+### Sincronizzazione Bidirezionale
+
+**Sincronizzazione Stato**:
+Aggiornamento metadata Stripe con document_status e last_sync. Aggiornamento sistema esterno via API REST con status e stripe_payment_id. Sincronizzazione completa bidirezionale tra Stripe e sistema contabile.
+
+---
+
+## Gestione Stato con Redux
+
+**Configurazione Store**:
+```typescript
+import { configureStore, createSlice } from '@reduxjs/toolkit'
+
+const documentsSlice = createSlice({
+  name: 'documents',
+  initialState: {
+    current: null,
+    loading: false,
+    validationErrors: []
+  },
+  reducers: {
+    setDocument(state, action) {
+      state.current = action.payload
+    },
+    setValidationErrors(state, action) {
+      state.validationErrors = action.payload
+    }
+  }
+})
+
+export const store = configureStore({
+  reducer: {
+    documents: documentsSlice.reducer,
+    focusViews: focusViewsSlice.reducer,
+    global: globalSlice.reducer
+  }
+})
+```
+
+---
+
+## Sviluppo & Deployment
+
+### Sviluppo Locale
+
+```bash
+# 1. Installa dipendenze
+bun install
+
+# 2. Avvia server sviluppo Stripe Apps
+stripe apps start
+
+# 3. Visualizza nella Stripe Dashboard
+# Naviga a qualsiasi pagamento in modalità test
+```
+
+### Deployment su Stripe
+
+```bash
+# Upload su account Stripe
+stripe apps upload -p <account-id>
+
+# Pubblica in production
+stripe apps publish
+```
+
+### Configurazione Ambiente
+
+**Manifest estensione** (stripe-app.json):
+Configurazione ID, versione, nome, icon. Permessi per payment_intent_read, payment_intent_write, refund_write. Viewport stripe.dashboard.payment.detail.
+
+---
+
+## Stack Tecnico Riepilogativo
+
+### Framework Frontend
+- React 17.0.2
+- TypeScript 5.3.3
+- @stripe/ui-extension-sdk 8.9.3
+
+### Stato & Form
+- Redux (implicito da descrizione)
+- React Hook Form 7.55.0
+- Zod 3.24.2
+- @hookform/resolvers 3.9.0
+
+### Utility
+- Moment.js 2.30.1
+- React Intl 6.6.8
+- UUID 10.0.0
+- use-debounce 10.0.4
+
+### Strumenti Sviluppo
+- ESLint 8.56.0
+- Prettier 3.3.2
+- Husky 8.0.3
+- TypeScript ESLint
+
+---
+
+## Considerazioni Sicurezza
+
+1. **OAuth 2.0**: Autenticazione API Stripe
+2. **Permessi Scoped**: Permessi minimi richiesti
+3. **Metadata Criptati**: Crittografia dati sensibili
+4. **Audit Logging**: Tutte le azioni loggiate
+5. **Rate Limiting**: Throttling richieste API
+
+---
+
+## Conclusione
+
+**Estensione Stripe E-Invoicing** dimostra integrazione seamless con ecosistema Stripe, fornendo capacità essenziali gestione fatture direttamente all'interno della Stripe Dashboard con robusta sincronizzazione sistemi esterni.
+
+**Licenza**: Proprietaria (A-Cube S.r.l.)

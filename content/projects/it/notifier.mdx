@@ -1,0 +1,256 @@
+---
+title: 'Servizio AWS Lambda Notifier'
+summary: 'Sistema di notifiche serverless costruito con AWS Lambda, SES, SQS e SNS per invio email scalabile e affidabile con test completi e supporto sviluppo locale'
+image: '/images/projects/notifier.svg'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-03-01'
+tags: ['AWS Lambda', 'Python', 'Serverless', 'SES', 'SQS', 'SNS', 'SAM']
+---
+
+## Panoramica
+
+**A3-Shared-Notifier** è un servizio di notifiche serverless production-grade costruito con AWS Lambda e Python 3.12. Fornisce invio email affidabile e scalabile tramite AWS SES con attivazione flessibile via SQS, SNS e invocazione diretta Lambda, supportando contenuti HTML e testo semplice.
+
+### Risultati Chiave
+
+- ⚡ **Architettura Serverless**: AWS Lambda per scalabilità infinita
+- 📧 **Integrazione AWS SES**: Invio email affidabile con gestione bounce/reclami
+- 🔄 **Supporto Multi-Trigger**: SQS, SNS e invocazione diretta Lambda
+- 🐳 **Sviluppo Locale**: SAM Local per testing basato su Docker
+- 🧪 **Test Completi**: Suite test unitari e di integrazione
+- 📊 **Logging CloudWatch**: Logging strutturato per monitoring
+- 🔒 **Sicurezza IAM**: Principio del privilegio minimo
+- 🚀 **Pronto CI/CD**: Pipeline deployment automatizzata con SAM
+
+---
+
+## Architettura Tecnica
+
+### Design del Sistema
+
+L'architettura prevede tre sorgenti di trigger (AWS SQS, AWS SNS, invocazione diretta) che attivano la funzione AWS Lambda (Python 3.12) per l'elaborazione email e validazione. La Lambda interagisce con AWS SES per invio email, tracciamento bounce e gestione reclami, e con CloudWatch per logs, metriche e allarmi.
+
+### Flusso Funzione Lambda
+
+1. Evento SQS/SNS → Handler Lambda
+2. Validazione Payload
+3. Parsing Contenuto Email
+4. Generazione Email HTML/Testo
+5. Invio via AWS SES
+6. Log su CloudWatch → Successo
+
+---
+
+## Funzionalità Core
+
+### 1. Handler Lambda
+
+L'handler principale gestisce eventi da SQS, SNS e invocazione diretta. Esegue parsing dell'evento in base alla sorgente, processa ogni messaggio con validazione e invio, gestisce errori con logging dettagliato.
+
+**Validazione Messaggio**:
+- Campi obbligatori: sender, recipients, subject
+- Recipients deve essere lista non vuota
+- Almeno uno tra text_content o html_content richiesto
+- Validazione formato email e domini
+
+**Costruzione Email**:
+```python
+def build_email(sender, recipients, subject, text_content='',
+                html_content='', bucket_name=''):
+    msg = MIMEMultipart('alternative')
+    msg['From'] = sender
+    msg['To'] = ', '.join(recipients)
+    msg['Subject'] = subject
+
+    if text_content:
+        msg.attach(MIMEText(text_content, 'plain'))
+    if html_content:
+        msg.attach(MIMEText(html_content, 'html'))
+
+    return msg
+```
+
+### 2. Integrazione SQS/SNS
+
+**Formato Messaggio SQS**:
+```json
+{
+  "sender": "noreply@acubeapi.com",
+  "recipients": ["user@example.com"],
+  "subject": "La tua fattura è pronta",
+  "text_content": "La fattura #12345 è disponibile per il download.",
+  "html_content": "<h1>Fattura Pronta</h1><p>Fattura #12345 disponibile.</p>",
+  "bucket_name": "acube-invoices"
+}
+```
+
+**Integrazione Topic SNS**:
+Pubblicazione notifiche email su topic SNS con gestione sottoscrizioni multiple e filtri messaggi basati su attributi.
+
+**Elaborazione Code SQS**:
+Invio messaggi a coda SQS con batch processing fino a 10 messaggi per invocazione, visibility timeout configurabile e gestione retry automatica.
+
+### 3. Sviluppo Locale con SAM
+
+**Template SAM**:
+Definizione completa della funzione Lambda con configurazione runtime Python 3.12, timeout 30s, memoria 256MB. Policies SES per invio email. Eventi SQS e SNS configurati. CloudWatch Log Group con retention 30 giorni.
+
+**Invocazione Locale**:
+```bash
+# Build funzione Lambda
+sam build
+
+# Invocazione locale con evento test
+sam local invoke NotifierFunction \
+    --env-vars local/env.json \
+    --event tests/events/sqs-email-event.json
+
+# Avvio API Gateway locale
+sam local start-api
+
+# Debug locale
+sam local invoke NotifierFunction \
+    --debug-port 5858 \
+    --env-vars local/env.json \
+    --event tests/events/sqs-email-event.json
+```
+
+### 4. Strategia di Testing
+
+**Test Unitari**:
+- Validazione messaggi con dati validi e invalidi
+- Test handler Lambda con mock SES client
+- Test costruzione email con contenuti HTML e testo
+- Verifica gestione errori e eccezioni
+- Coverage >90% del codice
+
+**Test di Integrazione**:
+- Test invio email con SES reale (email verificate richieste)
+- Verifica integrazione SQS e SNS
+- Test end-to-end del flusso completo
+- Validazione logging CloudWatch
+
+**Esempio Test**:
+```python
+@patch('src.handler.ses_client')
+def test_lambda_handler_success(self, mock_ses):
+    mock_ses.send_raw_email.return_value = {
+        'MessageId': 'test-message-id-123'
+    }
+
+    event = {
+        'sender': 'test@example.com',
+        'recipients': ['user@example.com'],
+        'subject': 'Test Email',
+        'text_content': 'Test content'
+    }
+
+    response = lambda_handler(event, None)
+    assert response['statusCode'] == 200
+```
+
+---
+
+## Workflow di Sviluppo
+
+### Ambiente Sviluppo Docker
+
+**Makefile** per gestione semplificata:
+- `make init`: Inizializzazione ambiente
+- `make build`: Build container Docker
+- `make test`: Esecuzione test completi
+- `make tests.unit`: Solo test unitari
+- `make tests.integration`: Solo test integrazione
+- `make lint`: Validazione CloudFormation
+- `make invoke.local`: Invocazione locale funzione
+
+---
+
+## Deployment
+
+### Deployment SAM
+
+**Deploy su Dev**:
+```bash
+sam build -u
+sam deploy --profile acube-dev --config-env dev --no-confirm-changeset
+```
+
+**Deploy su Production**:
+```bash
+sam build -u --use-container
+sam deploy --profile acube-prod --config-env production \
+  --no-confirm-changeset \
+  --parameter-overrides Environment=production LogRetentionDays=90
+```
+
+**Configurazione SAM** (samconfig.toml):
+Configurazione separata per ambienti dev e production con stack name, region, capabilities IAM e parameter overrides specifici per ambiente.
+
+---
+
+## Monitoring & Logging
+
+### CloudWatch Logs
+
+**Logging Strutturato**:
+```python
+def log_event(event_type: str, data: Dict[str, Any]) -> None:
+    log_entry = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'event_type': event_type,
+        'data': data
+    }
+    logger.info(json.dumps(log_entry))
+```
+
+### Allarmi CloudWatch
+
+Configurazione allarmi per:
+- Errori Lambda (threshold: 5 in 5 minuti)
+- Durata esecuzione anomala
+- Throttling invocazioni
+- Dead Letter Queue messaggi
+- Bounce rate email elevato
+
+---
+
+## Stack Tecnico Riepilogativo
+
+### Runtime & Framework
+- Python 3.12 - Python moderno
+- AWS Lambda - Compute serverless
+- AWS SAM - Framework deployment
+
+### Servizi AWS
+- AWS SES - Invio email
+- AWS SQS - Coda messaggi
+- AWS SNS - Messaging pub/sub
+- CloudWatch - Logging & monitoring
+
+### Strumenti Sviluppo
+- Docker - Sviluppo locale
+- Pytest - Framework testing
+- Boto3 - AWS SDK per Python
+- cfn-lint - Validazione CloudFormation
+
+---
+
+## Best Practices Implementate
+
+1. **Idempotenza**: Deduplicazione messaggi via SQS
+2. **Gestione Errori**: Gestione eccezioni completa
+3. **Logica Retry**: Visibility timeout SQS e DLQ
+4. **Monitoring**: Logging strutturato e allarmi CloudWatch
+5. **Sicurezza**: IAM least privilege, SQS criptato
+6. **Testing**: Coverage test unitari e integrazione
+7. **Documentazione**: Commenti inline e README
+8. **CI/CD**: Deployment automatizzato con SAM
+
+---
+
+## Conclusione
+
+**A3-Shared-Notifier** dimostra un'architettura serverless production-ready con AWS Lambda, fornendo notifiche email affidabili e scalabili con capacità complete di testing e monitoring.
+
+**Licenza**: Proprietaria (A-Cube S.r.l.)

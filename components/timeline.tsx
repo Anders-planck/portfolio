@@ -1,7 +1,10 @@
+'use client';
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Briefcase, GraduationCap, Rocket, Check, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export interface TimelineProject {
   title: string;
@@ -33,6 +36,8 @@ interface TimelineProps {
 }
 
 export function Timeline({ items, showProjects = false }: TimelineProps) {
+  const t = useTranslations('about.timeline');
+
   const getIcon = (type: TimelineItem['type']) => {
     switch (type) {
       case 'work':
@@ -125,7 +130,7 @@ export function Timeline({ items, showProjects = false }: TimelineProps) {
                 {item.achievements && item.achievements.length > 0 && (
                   <div>
                     <h4 className="mb-2 text-sm font-semibold text-foreground">
-                      Key Achievements:
+                      {t('keyAchievements')}
                     </h4>
                     <ul className="space-y-1.5 text-sm text-muted-foreground">
                       {item.achievements.map((achievement, i) => (
@@ -156,7 +161,7 @@ export function Timeline({ items, showProjects = false }: TimelineProps) {
                 {showProjects && item.projects && item.projects.length > 0 && (
                   <div className="mt-6 space-y-6 border-l-2 border-dashed border-muted-foreground/20 pl-6">
                     <h4 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      Projects ({item.projects.length})
+                      {t('projects', { count: item.projects.length })}
                     </h4>
                     {item.projects.map((project, pIndex) => (
                       <div

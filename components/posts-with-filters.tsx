@@ -5,12 +5,14 @@ import { PostMetadata } from '@/lib/posts'
 import PostFilters from '@/components/post-filters'
 import Posts from '@/components/posts'
 import Pagination from '@/components/pagination'
+import { useTranslations } from 'next-intl'
 
 interface PostsWithFiltersProps {
   initialPosts: PostMetadata[]
 }
 
 export default function PostsWithFilters({ initialPosts }: PostsWithFiltersProps) {
+  const t = useTranslations('posts')
   const [filteredPosts, setFilteredPosts] = useState<PostMetadata[]>(initialPosts)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(4)
@@ -61,9 +63,9 @@ export default function PostsWithFilters({ initialPosts }: PostsWithFiltersProps
         </>
       ) : (
         <div className="text-center py-12">
-          <p className="text-muted-foreground text-lg">No posts found.</p>
+          <p className="text-muted-foreground text-lg">{t('noPosts')}</p>
           <p className="text-muted-foreground text-sm mt-2">
-            Try adjusting your filters to see more results.
+            {t('adjustFilters')}
           </p>
         </div>
       )}

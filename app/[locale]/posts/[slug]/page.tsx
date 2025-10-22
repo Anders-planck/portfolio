@@ -10,17 +10,33 @@ import MdxContent from '@/components/mdx-content';
 import { BlogPostingStructuredData, BreadcrumbStructuredData } from '@/components/structured-data';
 import ShareButtons from '@/components/share-buttons';
 import { Separator } from '@/components/ui/separator';
+import type { Locale } from '@/i18n/config';
+import { locales } from '@/i18n/config';
+
+type Props = {
+  params: Promise<{ locale: Locale; slug: string }>;
+};
 
 export async function generateStaticParams() {
     const posts = await getPosts();
-    return posts.map(post => ({
-        slug: post.slug,
-    }));
+    const params = [];
+
+    // Generate params for all locales and all posts
+    for (const locale of locales) {
+        for (const post of posts) {
+            params.push({
+                locale,
+                slug: post.slug,
+            });
+        }
+    }
+
+    return params;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const { slug } = await params;
-    const post = await getPostBySlug(slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { locale, slug } = await params;
+    const post = await getPostBySlug(slug, locale);
 
     if (!post) {
         return {
@@ -37,16 +53,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
         keywords: tags || [],
         alternates: {
-            canonical: `https://anders-games.com/posts/${slug}`,
+            canonical: `https://anders-games.com/${locale}/posts/${slug}`,
         },
         openGraph: {
             title: `${title} | Anders Planck`,
             description: summary || `Read ${title}`,
             type: 'article',
-            url: `https://anders-games.com/posts/${slug}`,
+            url: `https://anders-games.com/${locale}/posts/${slug}`,
             publishedTime: publishedAt,
             authors: author ? [author] : ['Anders Planck'],
             tags: tags || [],
+            locale: locale === 'en' ? 'en_US' : locale === 'it' ? 'it_IT' : 'fr_FR',
             images: image ? [
                 {
                     url: image,
@@ -66,9 +83,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 
-export default async function Post({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const post = await getPostBySlug(slug);
+export default async function Post({ params }: Props) {
+    const { locale, slug } = await params;
+    const post = await getPostBySlug(slug, locale);
 
     if (!post) {
         notFound();
@@ -90,14 +107,14 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
       />
       <BreadcrumbStructuredData
         items={[
-          { name: 'Home', url: 'https://anders-games.com' },
-          { name: 'Posts', url: 'https://anders-games.com/posts' },
-          { name: title || 'Post', url: `https://anders-games.com/posts/${slug}` },
+          { name: 'Home', url: `https://anders-games.com/${locale}` },
+          { name: 'Posts', url: `https://anders-games.com/${locale}/posts` },
+          { name: title || 'Post', url: `https://anders-games.com/${locale}/posts/${slug}` },
         ]}
       />
       <section className="pb-24 pt-44 md:pt-40">
         <div className='container max-w-4xl'>
-            <Link href="/posts" className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
+            <Link href={`/${locale}/posts`} className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
                <ArrowLeftIcon className='h-5 w-5' />
                <span>Back to posts</span>
             </Link>
@@ -116,7 +133,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
             <header>
                 <h1 className='title'>{title}</h1>
                 <p className='mt-3 text-xs text-muted-foreground'>
-                    {author} / {formatDate(publishedAt ?? '')} {readingTime && `• ${readingTime}`}
+                    {author} / {formatDate(publishedAt ?? '', locale)} {readingTime && `• ${readingTime}`}
                 </p>
                 <div className='mt-6 flex flex-wrap gap-2'>
                     {tags?.map((tag) => (
@@ -135,7 +152,7 @@ export default async function Post({ params }: { params: Promise<{ slug: string 
 
             <div className='flex flex-col gap-6'>
                 <ShareButtons
-                    url={`https://anders-games.com/posts/${slug}`}
+                    url={`https://anders-games.com/${locale}/posts/${slug}`}
                     title={title || 'Blog Post'}
                     description={summary}
                 />

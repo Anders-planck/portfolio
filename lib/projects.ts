@@ -1,8 +1,13 @@
 import path from "path";
 import fs from "fs";
 import matter from "gray-matter";
+import { calculateReadingTime } from "./reading-time";
+import type { Locale } from "@/i18n/config";
+import { defaultLocale } from "@/i18n/config";
 
-const rootPostDirectory =  path.join(process.cwd(), "content", "projects");
+function getRootProjectDirectory(locale: Locale) {
+  return path.join(process.cwd(), "content", "projects", locale);
+}
 
 export type Project = {
     metadata: ProjectMetadata;
@@ -17,36 +22,67 @@ export type ProjectMetadata = {
     publishedAt?: string;
     tags?: string[];
     slug?: string;
+    readingTime?: string;
 }
 
-export async function getProjectBySlug(slug: string): Promise<Project | null> {
-    const filePath = path.join(rootPostDirectory, `${slug}.mdx`);
+export async function getProjectBySlug(slug: string, locale: Locale = defaultLocale): Promise<Project | null> {
+    let filePath = path.join(getRootProjectDirectory(locale), `${slug}.mdx`);
+
+    // Try requested locale first
     try {
         const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
-        
-        const {data, content} = matter(fileContent); // Parse front matter and content
+        const {data, content} = matter(fileContent);
+        const readingTime = calculateReadingTime(content);
 
         return {
-            metadata: {...data, slug},
+            metadata: {...data, slug, readingTime},
             content
         }
     } catch (error) {
-        console.error("Error reading post file:", error);
+        // Fallback to default locale if requested locale doesn't exist
+        if (locale !== defaultLocale) {
+            try {
+                filePath = path.join(getRootProjectDirectory(defaultLocale), `${slug}.mdx`);
+                const fileContent = await fs.readFileSync(filePath, { encoding: "utf-8" });
+                const {data, content} = matter(fileContent);
+                const readingTime = calculateReadingTime(content);
+
+                return {
+                    metadata: {...data, slug, readingTime},
+                    content
+                }
+            } catch (fallbackError) {
+                console.error("Error reading project file (fallback also failed):", fallbackError);
+                return null;
+            }
+        }
+
+        console.error("Error reading project file:", error);
         return null;
     }
 }
 
-export async function getProjects(limit?: number): Promise<ProjectMetadata[]> {
-    const files = await fs.readdirSync(rootPostDirectory);
+export async function getProjects(limit?: number, locale: Locale = defaultLocale): Promise<ProjectMetadata[]> {
+    const rootProjectDirectory = getRootProjectDirectory(locale);
+
+    // Check if directory exists, if not use default locale
+    if (!fs.existsSync(rootProjectDirectory)) {
+        if (locale !== defaultLocale) {
+            return getProjects(limit, defaultLocale);
+        }
+        return [];
+    }
+
+    const files = await fs.readdirSync(rootProjectDirectory);
     const projects = files
         .filter((fileName) => !fileName.startsWith('_')) // Exclude template files
-        .map((fileName) => getProjectMetadata(fileName))
+        .map((fileName) => getProjectMetadata(fileName, locale))
         .sort((a, b) => {
             const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
             const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
             return dateB - dateA; // Newest first
         });
-    
+
     if (limit) {
         return projects.slice(0, limit);
     }
@@ -54,14 +90,17 @@ export async function getProjects(limit?: number): Promise<ProjectMetadata[]> {
     return projects;
 }
 
-export function getProjectMetadata(fileName: string): ProjectMetadata {
+export function getProjectMetadata(fileName: string, locale: Locale = defaultLocale): ProjectMetadata {
     const slug = fileName.replace(/\.mdx?$/, '');
-    const filePath = path.join(rootPostDirectory, fileName);
+    const rootProjectDirectory = getRootProjectDirectory(locale);
+    const filePath = path.join(rootProjectDirectory, fileName);
     const fileContent = fs.readFileSync(filePath, { encoding: "utf-8" });
-    const { data } = matter(fileContent); // Parse front matter
+    const { data, content } = matter(fileContent); // Parse front matter and content
+    const readingTime = calculateReadingTime(content);
 
     return {
         ...data,
-        slug
+        slug,
+        readingTime
     }
 }

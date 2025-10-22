@@ -1,42 +1,51 @@
+'use client'
+
 import React from 'react'
 import Link from 'next/link'
 import { Linkedin, Github, Mail, FileText, Rss } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
-
-const socialLinks = [
-  {
-    name: 'LinkedIn',
-    href: 'https://linkedin.com/in/anders-planck-53184b1b4',
-    icon: Linkedin,
-    label: 'Connect on LinkedIn',
-  },
-  {
-    name: 'GitHub',
-    href: 'https://github.com/Anders-planck',
-    icon: Github,
-    label: 'Follow on GitHub',
-  },
-  {
-    name: 'Email',
-    href: 'mailto:anders.jipwouo@gmail.com',
-    icon: Mail,
-    label: 'Send an email',
-  },
-]
-
-const footerLinks = {
-  content: [
-    { href: '/posts', label: 'Posts' },
-    { href: '/projects', label: 'Projects' },
-  ],
-  resources: [
-    { href: '/rss', label: 'RSS Feed', icon: Rss },
-    { href: '/resume', label: 'Resume', icon: FileText },
-  ],
-}
+import type { Locale } from '@/i18n/config'
 
 export default function Footer() {
+  const t = useTranslations('footer')
+  const tNav = useTranslations('common.nav')
+  const params = useParams()
+  const currentLocale = (params.locale as Locale) || 'en'
   const currentYear = new Date().getFullYear()
+
+  const socialLinks = [
+    {
+      name: 'LinkedIn',
+      href: 'https://linkedin.com/in/anders-planck-53184b1b4',
+      icon: Linkedin,
+      label: t('social.linkedin'),
+    },
+    {
+      name: 'GitHub',
+      href: 'https://github.com/Anders-planck',
+      icon: Github,
+      label: t('social.github'),
+    },
+    {
+      name: 'Email',
+      href: 'mailto:anders.jipwouo@gmail.com',
+      icon: Mail,
+      label: t('social.email'),
+    },
+  ]
+
+  const footerLinks = {
+    content: [
+      { href: `/${currentLocale}/posts`, label: tNav('posts') },
+      { href: `/${currentLocale}/projects`, label: tNav('projects') },
+    ],
+    resources: [
+      { href: '/rss', label: t('rssFeed'), icon: Rss },
+      { href: '/resume', label: t('resume'), icon: FileText },
+    ],
+  }
 
   return (
     <footer className="border-t bg-background">
@@ -45,17 +54,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand Section */}
           <div className="space-y-4 md:col-span-2">
-            <Link href="/" className="inline-block">
+            <Link href={`/${currentLocale}`} className="inline-block">
               <span className="font-serif text-2xl font-bold">Anders Planck</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">
-              Software engineer based in Ferrara, Italy. Passionate about learning new technologies and building things that make life easier.
+              {t('description')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Content</h3>
+            <h3 className="text-sm font-semibold">{t('content')}</h3>
             <ul className="space-y-2 text-sm">
               {footerLinks.content.map(({ href, label }) => (
                 <li key={href}>
@@ -72,7 +81,7 @@ export default function Footer() {
 
           {/* Resources */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold">Resources</h3>
+            <h3 className="text-sm font-semibold">{t('resources')}</h3>
             <ul className="space-y-2 text-sm">
               {footerLinks.resources.map(({ href, label, icon: Icon }) => (
                 <li key={href}>
@@ -96,7 +105,7 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           {/* Copyright */}
           <p className="text-sm text-muted-foreground">
-            © {currentYear} Anders Planck. All rights reserved.
+            {t('copyright', { year: currentYear })}
           </p>
 
           {/* Social Links */}

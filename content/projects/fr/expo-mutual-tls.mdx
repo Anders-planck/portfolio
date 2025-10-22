@@ -1,0 +1,329 @@
+---
+title: 'Expo Mutual TLS'
+summary: 'Authentification par certificat client Mutual TLS (mTLS) prête pour la production pour Expo/React Native avec sécurité matérielle'
+image: '/images/projects/expo-mutual-tls.png'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-12-15'
+tags: ['React Native', 'Expo', 'Security', 'mTLS', 'iOS', 'Android', 'TypeScript', 'Swift', 'Kotlin']
+---
+
+## Aperçu
+
+**expo-mutual-tls** est un module Expo prêt pour la production qui fournit une authentification par certificat client mutual TLS (mTLS) sécurisée et matériellement sauvegardée pour les applications mobiles. Construit avec des implémentations natives pour iOS (Swift) et Android (Kotlin), il offre des fonctionnalités de sécurité de niveau entreprise avec une API conviviale pour les développeurs.
+
+### Réalisations Clés
+
+- 🔐 Sécurité matérielle utilisant iOS Keychain & Android Keystore
+- 📱 Implémentations natives multi-plateformes (iOS Swift + Android Kotlin)
+- 🎯 Conception d'API simple et intuitive avec support TypeScript
+- 📋 Support certificats multi-format (P12/PKCS#12 et PEM)
+- 🔒 Intégration authentification biométrique optionnelle
+- 📊 Système d'événements complet pour débogage et surveillance
+- ⚡ Performances optimisées pour la production
+- 🛡️ Prêt pour l'entreprise avec validation des certificats
+
+[Voir sur GitHub](https://github.com/a-cube-io/expo-mutual-tls) | [Package NPM](https://www.npmjs.com/package/@a-cube-io/expo-mutual-tls)
+
+---
+
+## Architecture Technique
+
+### Conception du Système
+
+Le module suit le modèle d'architecture des modules natifs Expo avec trois couches distinctes:
+
+```
+┌─────────────────────────────────────────┐
+│     Couche JavaScript/TypeScript        │
+│  (ExpoMutualTls Utility Wrapper)        │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
+│       Couche Bridge Module Expo         │
+│   (Intégration ExpoModulesCore)         │
+└──────┬───────────────────────┬──────────┘
+       │                       │
+┌──────▼────────┐     ┌────────▼─────────┐
+│  iOS Native   │     │ Android Native   │
+│    (Swift)    │     │    (Kotlin)      │
+└───────────────┘     └──────────────────┘
+```
+
+### Composants Core
+
+#### Couche TypeScript (`src/`)
+
+1. **ExpoMutualTls.ts** - Classe utilitaire principale fournissant une API simplifiée
+2. **ExpoMutualTls.types.ts** - Définitions de types TypeScript
+3. **ExpoMutualTlsModule.ts** - Exports de module brut
+
+#### Couche iOS Native (`ios/`)
+
+1. **ExpoMutualTlsModule.swift** - Module iOS principal
+2. **KeychainManager.swift** - Stockage sécurisé des certificats
+3. **CertificateParser.swift** - Gestion des formats de certificats
+4. **SSLContextManager.swift** - Gestion du contexte TLS
+5. **NetworkManager.swift** - Réseautage HTTP
+
+#### Couche Android Native (`android/`)
+
+1. **ExpoMutualTlsModule.kt** - Module Android principal
+2. **KeychainManager.kt** - Stockage sécurisé Android
+3. **PemCertificateParser.kt** - Analyse des certificats
+
+---
+
+## Utilisation de l'API
+
+### Configuration Initiale
+
+```typescript
+import ExpoMutualTls from '@a-cube-io/expo-mutual-tls'
+
+// Configurer le module (requis avant utilisation)
+await ExpoMutualTls.configureP12(
+  'my-app-identifier',
+  true // Activer logging debug
+)
+```
+
+### Gestion des Certificats P12
+
+```typescript
+// Stocker le certificat P12 dans Keychain sécurisé
+const certificateData = await FileSystem.readAsStringAsync(
+  'path/to/certificate.p12',
+  { encoding: FileSystem.EncodingType.Base64 }
+)
+
+await ExpoMutualTls.storeP12(certificateData, 'certificate-password')
+
+// Vérifier si le certificat est stocké
+const hasP12 = await ExpoMutualTls.hasP12()
+console.log('Certificate stored:', hasP12)
+
+// Supprimer le certificat
+await ExpoMutualTls.removeP12()
+```
+
+### Effectuer des Requêtes HTTPS Sécurisées
+
+```typescript
+// Requête GET avec mTLS
+const response = await ExpoMutualTls.sendRequest(
+  'https://api.example.com/data',
+  {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer token123'
+    }
+  }
+)
+
+console.log('Status:', response.statusCode)
+console.log('Data:', response.data)
+
+// Requête POST avec body
+const postResponse = await ExpoMutualTls.sendRequest(
+  'https://api.example.com/submit',
+  {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: 'value' })
+  }
+)
+```
+
+### Système d'Événements
+
+```typescript
+// Écouter les événements du module
+const subscription = ExpoMutualTls.addListener('onMtlsEvent', (event) => {
+  console.log('Event:', event.type, event.data)
+})
+
+// Retirer le listener lorsqu'il n'est plus nécessaire
+subscription.remove()
+```
+
+---
+
+## Fonctionnalités de Sécurité
+
+### Stockage Matériel
+
+**Implémentation iOS**:
+- Utilise iOS Keychain Services pour stockage sécurisé
+- Certificats stockés avec attribut `kSecAttrAccessibleWhenUnlockedThisDeviceOnly`
+- Chiffrement matériel sur appareils avec Secure Enclave
+- Support Touch ID/Face ID pour protection d'accès au certificat
+
+**Implémentation Android**:
+- Utilise Android Keystore System pour stockage sécurisé
+- Clés matérielles sur appareils supportés (Android 6.0+)
+- Support BiometricPrompt pour authentification
+- Protection StrongBox Keymaster sur appareils compatibles
+
+### Validation des Certificats
+
+```typescript
+// Le module valide automatiquement:
+// - Chaîne de certificats
+// - Dates d'expiration
+// - Extended Key Usage (EKU)
+// - Vérification hostname (iOS)
+// - Révocation de certificat (si configuré)
+```
+
+### Support Biométrique
+
+```typescript
+// Activer la protection biométrique pour l'accès au certificat
+await ExpoMutualTls.configureP12(
+  'my-app-identifier',
+  true,
+  {
+    requireBiometrics: true,
+    biometricPrompt: {
+      title: 'Authentifier',
+      subtitle: 'Accéder au certificat',
+      description: 'Utilisez la biométrie pour continuer'
+    }
+  }
+)
+```
+
+---
+
+## Caractéristiques de Performance
+
+### Benchmarks
+
+| Opération | iOS | Android |
+|-----------|-----|---------|
+| Configuration Module | ~50ms | ~80ms |
+| Stockage Certificat P12 | ~150ms | ~200ms |
+| Chargement Certificat depuis Keychain | ~30ms | ~50ms |
+| Requête HTTPS (mTLS) | ~500-800ms | ~600-900ms |
+| Authentification Biométrique | ~200-500ms | ~300-600ms |
+
+### Optimisations
+
+- **Mise en Cache**: Contexte SSL mis en cache après première initialisation
+- **Thread Safety**: Opérations thread-safe avec files dédiées
+- **Gestion Mémoire**: Nettoyage approprié des certificats et ressources natives
+- **Gestion d'Erreurs**: Récupération automatique des erreurs transitoires
+
+---
+
+## Exemple d'Intégration
+
+### Application React Native Complète
+
+```typescript
+import React, { useEffect, useState } from 'react'
+import { View, Button, Text } from 'react-native'
+import * as FileSystem from 'expo-file-system'
+import ExpoMutualTls from '@a-cube-io/expo-mutual-tls'
+
+export default function SecureApiScreen() {
+  const [configured, setConfigured] = useState(false)
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    setupMTLS()
+  }, [])
+
+  const setupMTLS = async () => {
+    try {
+      // 1. Configurer le module
+      await ExpoMutualTls.configureP12('my-app', true)
+
+      // 2. Charger et stocker le certificat
+      const cert = await FileSystem.readAsStringAsync(
+        'certificate.p12',
+        { encoding: FileSystem.EncodingType.Base64 }
+      )
+      await ExpoMutualTls.storeP12(cert, 'password')
+
+      setConfigured(true)
+    } catch (error) {
+      console.error('Setup failed:', error)
+    }
+  }
+
+  const fetchData = async () => {
+    try {
+      const response = await ExpoMutualTls.sendRequest(
+        'https://api.example.com/secure-data',
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': 'Bearer token',
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+
+      setData(JSON.parse(response.data))
+    } catch (error) {
+      console.error('Request failed:', error)
+    }
+  }
+
+  return (
+    <View style={{ padding: 20 }}>
+      <Text>mTLS Configuré: {configured ? 'Oui' : 'Non'}</Text>
+      <Button
+        title="Récupérer Données Sécurisées"
+        onPress={fetchData}
+        disabled={!configured}
+      />
+      {data && <Text>Data: {JSON.stringify(data)}</Text>}
+    </View>
+  )
+}
+```
+
+---
+
+## Stack Technique
+
+### Langages
+- **TypeScript** (5.0+) - Couche API et types
+- **Swift** (5.9+) - Implémentation iOS native
+- **Kotlin** (1.9+) - Implémentation Android native
+
+### Frameworks & Bibliothèques
+- **Expo Modules Core** (2.0+) - Bridge natif
+- **React Native** (0.72+) - Framework mobile
+- **expo-module-scripts** - Système de build
+
+### Dépendances Natives
+**iOS**:
+- iOS Keychain Services
+- Security.framework
+- Foundation.framework
+
+**Android**:
+- Android Keystore
+- BouncyCastle (certificats PEM)
+- BiometricPrompt API
+
+---
+
+## Conclusion
+
+**expo-mutual-tls** fournit une authentification mTLS prête pour la production pour les apps Expo/React Native avec un focus sur:
+
+- ✅ **Sécurité**: Stockage matériel et authentification biométrique
+- ✅ **Multi-plateforme**: Base de code unique avec implémentations natives optimisées
+- ✅ **Expérience Développeur**: API simple avec TypeScript complet
+- ✅ **Prêt pour l'Entreprise**: Validation des certificats et gestion d'erreurs robuste
+- ✅ **Performance**: Optimisé pour utilisation production avec mise en cache intelligente
+- ✅ **Open Source**: Disponible sur GitHub avec licence MIT
+
+**Dépôt**: [github.com/a-cube-io/expo-mutual-tls](https://github.com/a-cube-io/expo-mutual-tls)
+**Package**: [@a-cube-io/expo-mutual-tls](https://www.npmjs.com/package/@a-cube-io/expo-mutual-tls)
+**Licence**: MIT

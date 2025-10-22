@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -37,6 +38,7 @@ interface ProjectFiltersProps {
 }
 
 export default function ProjectFilters({ Projects, onFilteredProjectsChange }: ProjectFiltersProps) {
+  const t = useTranslations('common.filters')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [sortBy, setSortBy] = useState<SortOption>('newest')
@@ -222,7 +224,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
               <div className="flex items-center gap-2 flex-1 truncate">
                 <Search className="h-4 w-4 shrink-0 opacity-50" />
                 <span className="truncate">
-                  {searchQuery || 'Search Projects...'}
+                  {searchQuery || t('search.placeholder', { type: 'Projects' })}
                 </span>
               </div>
               {searchQuery && (
@@ -239,15 +241,15 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
           <PopoverContent className="w-full min-w-[400px] max-w-[500px] p-0" align="start">
             <Command shouldFilter={false}>
               <CommandInput
-                placeholder="Search Projects, tags, or content..."
+                placeholder={t('search.inputPlaceholder', { type: 'Projects' })}
                 value={searchQuery}
                 onValueChange={setSearchQuery}
               />
               <CommandList>
                 {isSearching ? (
-                  <CommandEmpty>Searching...</CommandEmpty>
+                  <CommandEmpty>{t('search.searching')}</CommandEmpty>
                 ) : searchSuggestions.length > 0 ? (
-                  <CommandGroup heading="Suggestions">
+                  <CommandGroup heading={t('search.suggestions')}>
                     {searchSuggestions.map(Project => (
                       <CommandItem
                         key={Project.slug}
@@ -275,9 +277,9 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
                     ))}
                   </CommandGroup>
                 ) : searchQuery.trim() ? (
-                  <CommandEmpty>No Projects found.</CommandEmpty>
+                  <CommandEmpty>{t('search.noResults', { type: 'Projects' })}</CommandEmpty>
                 ) : (
-                  <CommandEmpty>Type to search Projects...</CommandEmpty>
+                  <CommandEmpty>{t('search.typeToSearch', { type: 'Projects' })}</CommandEmpty>
                 )}
               </CommandList>
             </Command>
@@ -286,13 +288,13 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
 
         <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
           <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder="Sort by..." />
+            <SelectValue placeholder={t('sort.label')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-            <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+            <SelectItem value="newest">{t('sort.newest')}</SelectItem>
+            <SelectItem value="oldest">{t('sort.oldest')}</SelectItem>
+            <SelectItem value="title-asc">{t('sort.titleAsc')}</SelectItem>
+            <SelectItem value="title-desc">{t('sort.titleDesc')}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -303,7 +305,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
         <Popover open={tagsOpen} onOpenChange={setTagsOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
-              Tags
+              {t('tags.label')}
               {selectedTags.length > 0 && (
                 <Badge variant="secondary" className="ml-1 h-5 px-1.5">
                   {selectedTags.length}
@@ -313,9 +315,9 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
           </PopoverTrigger>
           <PopoverContent className="w-[280px] p-0" align="start">
             <Command>
-              <CommandInput placeholder="Search tags..." />
+              <CommandInput placeholder={t('tags.searchPlaceholder')} />
               <CommandList>
-                <CommandEmpty>No tags found.</CommandEmpty>
+                <CommandEmpty>{t('tags.noTags')}</CommandEmpty>
                 <CommandGroup>
                   {allTags.map(tag => (
                     <CommandItem
@@ -343,7 +345,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
           <Popover open={authorsOpen} onOpenChange={setAuthorsOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="gap-2">
-                Authors
+                {t('authors.label')}
                 {selectedAuthors.length > 0 && (
                   <Badge variant="secondary" className="ml-1 h-5 px-1.5">
                     {selectedAuthors.length}
@@ -353,9 +355,9 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
             </PopoverTrigger>
             <PopoverContent className="w-[280px] p-0" align="start">
               <Command>
-                <CommandInput placeholder="Search authors..." />
+                <CommandInput placeholder={t('authors.searchPlaceholder')} />
                 <CommandList>
-                  <CommandEmpty>No authors found.</CommandEmpty>
+                  <CommandEmpty>{t('authors.noAuthors')}</CommandEmpty>
                   <CommandGroup>
                     {allAuthors.map(author => (
                       <CommandItem
@@ -390,7 +392,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
               )}
             >
               <CalendarIcon className="h-4 w-4" />
-              {dateFrom ? format(dateFrom, 'MMM dd, yyyy') : 'From date'}
+              {dateFrom ? format(dateFrom, 'MMM dd, yyyy') : t('date.from')}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -412,7 +414,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
               )}
             >
               <CalendarIcon className="h-4 w-4" />
-              {dateTo ? format(dateTo, 'MMM dd, yyyy') : 'To date'}
+              {dateTo ? format(dateTo, 'MMM dd, yyyy') : t('date.to')}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -428,7 +430,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
         {hasActiveFilters && (
           <Button variant="ghost" onClick={resetFilters} className="gap-2">
             <X className="h-4 w-4" />
-            Reset
+            {t('reset')}
           </Button>
         )}
       </div>
@@ -464,7 +466,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
               className="gap-1 pr-1 cursor-pointer hover:bg-accent"
               onClick={() => setDateFrom(undefined)}
             >
-              From: {format(dateFrom, 'MMM dd, yyyy')}
+              {t('date.fromLabel')} {format(dateFrom, 'MMM dd, yyyy')}
               <X className="h-3 w-3" />
             </Badge>
           )}
@@ -474,7 +476,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
               className="gap-1 pr-1 cursor-pointer hover:bg-accent"
               onClick={() => setDateTo(undefined)}
             >
-              To: {format(dateTo, 'MMM dd, yyyy')}
+              {t('date.toLabel')} {format(dateTo, 'MMM dd, yyyy')}
               <X className="h-3 w-3" />
             </Badge>
           )}
@@ -483,7 +485,7 @@ export default function ProjectFilters({ Projects, onFilteredProjectsChange }: P
 
       {/* Results Count */}
       <div className="text-sm text-muted-foreground">
-        Showing {filteredProjects.length} of {Projects.length} Projects
+        {t('showing', { count: filteredProjects.length, total: Projects.length, type: 'Projects' })}
       </div>
     </div>
   )

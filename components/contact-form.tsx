@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { User, Mail, MessageSquare } from "lucide-react";
 import { sendEmail, isEmailJSConfigured } from "@/lib/emailjs";
+import { useTranslations } from "next-intl";
 
 interface ContactFormData {
   name: string;
@@ -29,6 +30,7 @@ export default function ContactForm({
   title,
   description
 }: ContactFormProps) {
+  const t = useTranslations("components.contactForm");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
@@ -44,8 +46,8 @@ export default function ContactForm({
     try {
       // Check if EmailJS is properly configured
       if (!isEmailJSConfigured()) {
-        toast.error("Configuration Error", {
-          description: "Email service is not configured. Please contact the administrator.",
+        toast.error(t("toasts.configError"), {
+          description: t("toasts.configErrorDescription"),
         });
         setIsSubmitting(false);
         return;
@@ -60,19 +62,19 @@ export default function ContactForm({
       });
 
       if (result.success) {
-        toast.success("Message sent!", {
-          description: "Thanks for reaching out! I'll get back to you soon.",
+        toast.success(t("toasts.successTitle"), {
+          description: t("toasts.successDescription"),
         });
         reset();
       } else {
-        toast.error("Error", {
+        toast.error(t("toasts.errorTitle"), {
           description: result.message,
         });
       }
     } catch (error) {
       console.error("Contact form error:", error);
-      toast.error("Error", {
-        description: "An unexpected error occurred. Please try again.",
+      toast.error(t("toasts.errorTitle"), {
+        description: t("toasts.unexpectedError"),
       });
     } finally {
       setIsSubmitting(false);
@@ -92,21 +94,21 @@ export default function ContactForm({
           {/* Name Field */}
           <div className="space-y-2">
             <Label htmlFor="name">
-              Name <span className="text-destructive">*</span>
+              {t("labels.name")} <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="name"
                 type="text"
-                placeholder="Your name"
+                placeholder={t("placeholders.name")}
                 className="h-12 text-base pl-10"
                 aria-invalid={!!errors.name}
                 {...register("name", {
-                  required: "Name is required",
+                  required: t("errors.nameRequired"),
                   minLength: {
                     value: 2,
-                    message: "Name must be at least 2 characters",
+                    message: t("errors.nameMinLength"),
                   },
                 })}
               />
@@ -119,21 +121,21 @@ export default function ContactForm({
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email">
-              Email <span className="text-destructive">*</span>
+              {t("labels.email")} <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               <Input
                 id="email"
                 type="email"
-                placeholder="your.email@example.com"
+                placeholder={t("placeholders.email")}
                 className="h-12 text-base pl-10"
                 aria-invalid={!!errors.email}
                 {...register("email", {
-                  required: "Email is required",
+                  required: t("errors.emailRequired"),
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                    message: "Invalid email address",
+                    message: t("errors.emailInvalid"),
                   },
                 })}
               />
@@ -146,21 +148,21 @@ export default function ContactForm({
           {/* Message Field */}
           <div className="space-y-2">
             <Label htmlFor="message">
-              Message <span className="text-destructive">*</span>
+              {t("labels.message")} <span className="text-destructive">*</span>
             </Label>
             <div className="relative">
               <MessageSquare className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
               <Textarea
                 id="message"
-                placeholder="Tell me about your project, opportunity, or inquiry..."
+                placeholder={t("placeholders.message")}
                 rows={compact ? 5 : 6}
                 className="text-base min-h-[140px] pl-10 pt-3"
                 aria-invalid={!!errors.message}
                 {...register("message", {
-                  required: "Message is required",
+                  required: t("errors.messageRequired"),
                   minLength: {
                     value: 10,
-                    message: "Message must be at least 10 characters",
+                    message: t("errors.messageMinLength"),
                   },
                 })}
               />
@@ -171,11 +173,11 @@ export default function ContactForm({
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="w-full h-12 text-base font-semibold">
-            {isSubmitting ? "Sending..." : "Send Message"}
+            {isSubmitting ? t("buttons.sending") : t("buttons.sendMessage")}
           </Button>
 
           <p className="text-xs text-center text-muted-foreground">
-            I typically respond within 24 hours
+            {t("responseTime")}
           </p>
         </form>
       </div>

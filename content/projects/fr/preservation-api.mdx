@@ -1,0 +1,300 @@
+---
+title: 'Preservation API'
+summary: "Service d'archivage numérique pour conservation documents à long terme conforme aux standards réglementaires italiens, avec tests complets et intégration AWS"
+image: '/images/projects/preservation-api.svg'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2024-12-01'
+tags: ['Symfony', 'PHP', 'API Platform', 'PostgreSQL', 'AWS', 'Docker', 'Behat', 'PHPStan']
+---
+
+## Vue d'ensemble
+
+**Preservation API** (Gov-It-API v2) est un service d'archivage numérique production-grade qui garantit la conservation à long terme de documents électroniques en conformité avec les standards réglementaires italiens. Construit avec Symfony 6.2+ et API Platform 3, il fournit un stockage sécurisé et scalable avec validation et testing complets.
+
+### Réalisations Clés
+
+- 🏛️ **Conformité Réglementaire**: Pleine conformité avec lois italiennes conservation numérique
+- 📊 **200+ Scénarios Behat**: Couverture testing behavior-driven complète
+- 🔍 **PHPStan Niveau 8**: Analyse statique maximale pour qualité code
+- ☁️ **Intégration AWS**: S3 pour stockage, Lambda pour traitement
+- 🐳 **Développement Docker**: Environnement développement consistant
+- 🔒 **Authentification JWT**: Contrôle accès API sécurisé
+- 📡 **API RESTful**: API Platform avec documentation OpenAPI
+- ⚡ **Hautes Performances**: Optimisé pour grands volumes documents
+
+---
+
+## Architecture Technique
+
+### Conception du Système
+
+Couche application Symfony 6.2+ avec API Platform 3, Doctrine ORM et Validators. Couche logique métier pour traitement documents, validation et archivage. Intégration avec PostgreSQL pour documents, métadonnées et logs audit, et services AWS pour stockage S3, processeur Lambda et logs CloudWatch.
+
+### Composants Core
+
+**Ressources API Platform**:
+- Entité document avec gestion lifecycle
+- Suivi métadonnées conservation
+- Entrées log audit
+- Gestion utilisateurs et permissions
+
+**Services Symfony**:
+- Service traitement documents
+- Service validation
+- Service stockage (AWS S3)
+- Service notifications (AWS Lambda)
+
+---
+
+## Fonctionnalités Core
+
+### 1. Conservation Documents
+
+**Entité Document**:
+```php
+#[ORM\Entity]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new GetCollection(),
+        new Post(security: "is_granted('ROLE_USER')")
+    ]
+)]
+class Document
+{
+    #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    private string $fileName;
+
+    #[ORM\Column(length: 64)]
+    #[Assert\NotBlank]
+    private string $sha256Hash;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $uploadedAt;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\Choice(choices: [
+        'pending', 'validated', 'preserved', 'error'
+    ])]
+    private string $status = 'pending';
+}
+```
+
+**Service Traitement Documents**:
+Workflow complet: validation document, upload sur S3 avec chiffrement AES256, génération métadonnées conservation, mise à jour statut document.
+
+**Métadonnées Conservation**:
+```php
+private function generatePreservationMetadata(Document $document): array
+{
+    return [
+        'preservation_timestamp' => (new \DateTimeImmutable())->format(\DateTimeInterface::ISO8601),
+        'preservation_agent' => 'A-Cube Preservation API v2',
+        'checksum_algorithm' => 'SHA-256',
+        'checksum_value' => $document->getSha256Hash(),
+        'file_format' => mime_content_type($document->getFileName()),
+        'file_size' => strlen($document->getS3Key())
+    ];
+}
+```
+
+### 2. Testing Complet avec Behat
+
+**Configuration Behat**:
+Suite de tests avec contextes pour documents, API et authentification. Filtres tags pour exclure tests work-in-progress. Intégration Symfony2Extension pour kernel et bootstrap.
+
+**Scénario Behat Exemple**:
+```gherkin
+Feature: Conservation Documents
+  Pour me conformer aux exigences réglementaires
+  Comme client API
+  Je dois pouvoir conserver documents de manière sécurisée
+
+  Background:
+    Given Je suis authentifié comme "user@example.com"
+
+  @critical
+  Scenario: Conservation succès document PDF valide
+    Given J'ai un document PDF "facture-2024.pdf"
+    When J'envoie une requête "POST" à "/api/documents"
+    Then Le code statut réponse doit être 201
+    And La réponse doit être en JSON
+    And Le nœud JSON "status" doit être égal à "pending"
+    And Le nœud JSON "sha256Hash" doit correspondre "/^[a-f0-9]{64}$/"
+
+    When Le document est traité
+    Then Le statut document doit être "preserved"
+    And Le document doit être stocké dans S3
+    And Le document doit avoir métadonnées conservation
+```
+
+**Implémentation Context Behat**:
+Context fournit step definitions pour traitement documents, vérification stockage S3 et validation métadonnées conservation avec assertions complètes.
+
+### 3. Analyse Statique PHPStan Niveau 8
+
+**Configuration PHPStan**:
+```neon
+parameters:
+    level: 8
+    paths:
+        - src
+        - tests
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+    reportUnmatchedIgnoredErrors: true
+```
+
+**Code Propre PHPStan**:
+Utilisation templates generics pour type safety complet, annotations PHPDoc détaillées pour paramètres et return types, gestion null safety rigoureuse.
+
+---
+
+## Intégration AWS
+
+### Configuration Stockage S3
+
+**Configuration Client S3**:
+```php
+class S3Service
+{
+    public function __construct(
+        #[Autowire('%env(AWS_REGION)%')]
+        private string $region,
+        #[Autowire('%env(AWS_S3_BUCKET)%')]
+        private string $bucket
+    ) {
+        $this->client = new S3Client([
+            'region' => $this->region,
+            'version' => 'latest'
+        ]);
+    }
+
+    public function upload(string $key, string $content, array $metadata = []): void
+    {
+        $this->client->putObject([
+            'Bucket' => $this->bucket,
+            'Key' => $key,
+            'Body' => $content,
+            'Metadata' => $metadata,
+            'ServerSideEncryption' => 'AES256',
+            'StorageClass' => 'STANDARD_IA' // Accès peu fréquent pour archivage
+        ]);
+    }
+}
+```
+
+### Intégration Lambda
+
+**Invocation Lambda pour Traitement Documents**:
+Invocation asynchrone Lambda pour traitement documents avec payload JSON contenant documentId et action. Traitement arrière-plan sans blocage requête HTTP.
+
+---
+
+## Workflow de Développement
+
+### Environnement Développement Docker
+
+**docker-compose.yml**:
+Services PHP (avec volume mount), PostgreSQL (avec données persistantes), Nginx (port 8080). Configuration variables d'environnement pour APP_ENV, DATABASE_URL et AWS_S3_BUCKET.
+
+### Exécution Tests
+
+```bash
+# Entrer dans container PHP
+docker-compose exec php bash
+
+# Installer dépendances
+composer install
+
+# Exécuter PHPStan
+composer run phpstan
+
+# Exécuter tests Behat
+composer run behat
+
+# Exécuter tous contrôles CI
+composer ci
+```
+
+---
+
+## Déploiement
+
+**Script Déploiement**:
+```bash
+#!/bin/bash
+
+set -e
+
+ENV=${ENV:-dev}
+AWS_PROFILE=${AWS_PROFILE:-acube-dev}
+
+echo "Déploiement Preservation API sur environnement ${ENV}"
+
+# 1. Exécuter tests
+docker-compose exec -T php composer ci
+
+# 2. Build image production
+docker build -t preservation-api:${ENV} -f Dockerfile.prod .
+
+# 3. Push sur ECR
+aws --profile=${AWS_PROFILE} ecr get-login-password --region eu-west-1 | \
+  docker login --username AWS --password-stdin ${ECR_REGISTRY}
+
+docker tag preservation-api:${ENV} ${ECR_REGISTRY}/preservation-api:${ENV}
+docker push ${ECR_REGISTRY}/preservation-api:${ENV}
+
+# 4. Mettre à jour service ECS
+aws --profile=${AWS_PROFILE} ecs update-service \
+  --cluster preservation-${ENV} \
+  --service preservation-api \
+  --force-new-deployment
+```
+
+---
+
+## Stack Technique Récapitulatif
+
+### Framework Backend
+- Symfony 6.2+ - Framework PHP
+- API Platform 3 - REST API
+- Doctrine ORM - Abstraction base de données
+- PHP 8.1+ - PHP moderne
+
+### Base de Données & Stockage
+- PostgreSQL - Base de données relationnelle
+- AWS S3 - Stockage documents
+- AWS Lambda - Traitement documents
+
+### Testing & Qualité
+- Behat - BDD testing (200+ scénarios)
+- PHPStan Niveau 8 - Analyse statique
+- PHPUnit - Tests unitaires
+- Psalm - Analyse statique additionnelle
+
+### Outils Développement
+- Docker - Conteneurisation
+- Composer - Gestion dépendances
+- Symfony CLI - Serveur développement
+
+---
+
+## Conformité Réglementaire
+
+### Standards Conservation Numérique Italienne
+
+- **Lignes Directrices AgID**: Pleine conformité
+- **CAD (Code Administration Numérique)**: Certifié
+- **Horodatage Conservation**: Conforme RFC 3161
+- **Format Long Terme**: Support PDF/A
+- **Piste Audit**: Logging complet opérations
+
+---
+
+## Conclusion
+
+**Preservation API** démontre développement backend enterprise-grade avec qualité code exceptionnelle (PHPStan niveau 8) et testing complet (200+ scénarios Behat), garantissant conformité réglementaire et archivage documents fiable à long terme.
+
+**Licence**: Propriétaire (A-Cube S.r.l.)

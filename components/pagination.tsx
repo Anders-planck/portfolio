@@ -15,6 +15,7 @@ import {
   ChevronsRight,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface PaginationProps {
   currentPage: number
@@ -35,6 +36,7 @@ export default function Pagination({
   totalItems,
   className,
 }: PaginationProps) {
+  const t = useTranslations('common.pagination')
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1
   const endItem = Math.min(currentPage * itemsPerPage, totalItems)
 
@@ -91,10 +93,10 @@ export default function Pagination({
       {/* Items info and per page selector */}
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <span>
-          Showing {startItem}-{endItem} of {totalItems}
+          {t('showing', { start: startItem, end: endItem, total: totalItems })}
         </span>
         <div className="flex items-center gap-2">
-          <span className="whitespace-nowrap">Per page:</span>
+          <span className="whitespace-nowrap">{t('perPage')}</span>
           <Select
             value={itemsPerPage.toString()}
             onValueChange={(value) => onItemsPerPageChange(Number(value))}
@@ -122,6 +124,7 @@ export default function Pagination({
           className="h-8 w-8"
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
+          aria-label={t('firstPage')}
         >
           <ChevronsLeft className="h-4 w-4" />
         </Button>
@@ -133,6 +136,7 @@ export default function Pagination({
           className="h-8 w-8"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
+          aria-label={t('previousPage')}
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>
@@ -158,6 +162,7 @@ export default function Pagination({
                 size="icon"
                 className="h-8 w-8"
                 onClick={() => onPageChange(page as number)}
+                aria-label={t('goToPage', { page })}
               >
                 {page}
               </Button>
@@ -172,6 +177,7 @@ export default function Pagination({
           className="h-8 w-8"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
+          aria-label={t('nextPage')}
         >
           <ChevronRight className="h-4 w-4" />
         </Button>
@@ -183,6 +189,7 @@ export default function Pagination({
           className="h-8 w-8"
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
+          aria-label={t('lastPage')}
         >
           <ChevronsRight className="h-4 w-4" />
         </Button>

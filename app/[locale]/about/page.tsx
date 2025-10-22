@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Mail, Github, Linkedin, MapPin, Briefcase } from 'lucide-react';
@@ -10,27 +11,39 @@ import {
   workExperience,
   education,
   personalProjects,
-  skills,
-  languages,
-  softSkills,
-  professionalGoal
+  skills
 } from '@/lib/cv-data';
+import type { Locale } from '@/i18n/config';
 
-export const metadata: Metadata = {
-  title: 'About',
-  description: 'Learn more about Anders Planck - Full-Stack Developer with 3+ years of experience. Professional journey, technical expertise, values, and what drives my passion for software engineering.',
-  alternates: {
-    canonical: 'https://anders-games.com/about',
-  },
-  openGraph: {
-    title: 'About Anders Planck | Full-Stack Developer',
-    description: 'Professional journey, technical expertise, and what drives my passion for software engineering.',
-    url: 'https://anders-games.com/about',
-    type: 'profile',
-  },
+type Props = {
+  params: Promise<{ locale: Locale }>;
 };
 
-export default function AboutPage() {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'about.meta' });
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: `https://anders-games.com/${locale}/about`,
+    },
+    openGraph: {
+      title: 'About Anders Planck | Full-Stack Developer',
+      description: t('description'),
+      url: `https://anders-games.com/${locale}/about`,
+      type: 'profile',
+      locale: locale === 'en' ? 'en_US' : locale === 'it' ? 'it_IT' : 'fr_FR',
+    },
+  };
+}
+
+export default async function AboutPage({ params }: Props) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'about' });
+  const tCv = await getTranslations({ locale, namespace: 'cv' });
+
   const contactInfo = [
     { icon: MapPin, label: 'Ferrara, Italy', href: null },
     { icon: Mail, label: 'anders.jipwouo@gmail.com', href: 'mailto:anders.jipwouo@gmail.com' },
@@ -48,37 +61,49 @@ export default function AboutPage() {
   }, {} as Record<string, typeof skills>);
 
   // Convert work experience to timeline format
-  const workTimeline: TimelineItem[] = workExperience.map(exp => ({
+  const workTimeline: TimelineItem[] = workExperience.map((exp, expIndex) => ({
     type: 'work' as const,
     title: exp.role,
     organization: exp.company,
     period: exp.period,
     location: exp.location,
-    description: exp.description,
-    projects: exp.projects,
+    description: tCv(`experience.${expIndex}.description`),
+    projects: exp.projects.map((proj, projIndex) => ({
+      title: proj.title,
+      period: proj.period,
+      description: tCv(`experience.${expIndex}.projects.${projIndex}.description`),
+      technologies: proj.technologies,
+      achievements: proj.achievements.map((_, achIndex) =>
+        tCv(`experience.${expIndex}.projects.${projIndex}.achievements.${achIndex}`)
+      ),
+      metrics: proj.metrics,
+      isOngoing: proj.isOngoing,
+    })),
     isOngoing: exp.isOngoing,
   }));
 
   // Convert education to timeline format
-  const educationTimeline: TimelineItem[] = education.map(edu => ({
+  const educationTimeline: TimelineItem[] = education.map((edu, eduIndex) => ({
     type: 'education' as const,
     title: edu.degree,
     organization: edu.institution,
     period: edu.period,
     location: edu.location,
-    description: edu.description,
+    description: tCv(`education.${eduIndex}.description`),
     isOngoing: edu.isOngoing,
   }));
 
   // Convert personal projects to timeline format
-  const projectsTimeline: TimelineItem[] = personalProjects.map(project => ({
+  const projectsTimeline: TimelineItem[] = personalProjects.map((project, projIndex) => ({
     type: 'project' as const,
     title: project.title,
     organization: 'Personal Project',
     period: project.year,
-    description: project.description,
+    description: tCv(`personalProjects.${projIndex}.description`),
     technologies: project.technologies,
-    achievements: project.achievements,
+    achievements: project.achievements.map((_, achIndex) =>
+      tCv(`personalProjects.${projIndex}.achievements.${achIndex}`)
+    ),
     isOngoing: false,
   }));
 
@@ -98,9 +123,9 @@ export default function AboutPage() {
           </div>
 
           <div className="flex-1 text-center md:text-left">
-            <h1 className="title mb-4">About Me</h1>
+            <h1 className="title mb-4">{t('aboutMe')}</h1>
             <p className="mb-6 text-lg text-muted-foreground">
-              Full-Stack Developer specializing in modern web technologies
+              {t('subtitle')}
             </p>
 
             {/* Contact Info */}
@@ -125,9 +150,9 @@ export default function AboutPage() {
 
         {/* Professional Goal */}
         <div className="mb-16">
-          <h2 className="mb-8 text-2xl font-bold">Professional Vision</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('professionalVision')}</h2>
           <p className="leading-relaxed text-muted-foreground">
-            {professionalGoal}
+            {tCv('professionalGoal')}
           </p>
         </div>
 
@@ -135,23 +160,11 @@ export default function AboutPage() {
 
         {/* Journey & Story */}
         <div className="mb-16">
-          <h2 className="mb-8 text-2xl font-bold">My Journey</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('myJourney')}</h2>
           <div className="space-y-4 leading-relaxed text-muted-foreground">
-            <p>
-              I&apos;m a passionate Full-Stack Developer based in Ferrara, Italy, with over 3 years of professional experience
-              building scalable web applications and contributing to innovative projects. My journey in software development
-              began with a fascination for how code can solve real-world problems and create meaningful user experiences.
-            </p>
-            <p>
-              Throughout my career, I&apos;ve specialized in both backend and frontend technologies, with a strong focus on
-              PHP frameworks (Laravel, Symfony) and modern JavaScript ecosystem (React, Next.js, TypeScript). I believe
-              in writing clean, maintainable code and following best practices that stand the test of time.
-            </p>
-            <p>
-              What drives me is the constant learning and evolution in our field. Whether it&apos;s exploring new frameworks,
-              optimizing performance, or solving complex architectural challenges, I approach each project with curiosity
-              and dedication to delivering high-quality solutions.
-            </p>
+            <p>{t('journeyP1')}</p>
+            <p>{t('journeyP2')}</p>
+            <p>{t('journeyP3')}</p>
           </div>
         </div>
 
@@ -159,7 +172,7 @@ export default function AboutPage() {
 
         {/* Work Experience Timeline */}
         <div id="work-experience" className="mb-24 scroll-mt-24">
-          <h2 className="mb-8 text-2xl font-bold">Work Experience</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('workExperience')}</h2>
           <Timeline items={workTimeline} showProjects={true} />
         </div>
 
@@ -167,7 +180,7 @@ export default function AboutPage() {
 
         {/* Education Timeline */}
         <div className="mb-24">
-          <h2 className="mb-8 text-2xl font-bold">Education</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('education')}</h2>
           <Timeline items={educationTimeline} />
         </div>
 
@@ -175,7 +188,7 @@ export default function AboutPage() {
 
         {/* Personal Projects Timeline */}
         <div className="mb-24">
-          <h2 className="mb-8 text-2xl font-bold">Personal Projects</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('personalProjects')}</h2>
           <Timeline items={projectsTimeline} />
         </div>
 
@@ -183,7 +196,7 @@ export default function AboutPage() {
 
         {/* Technical Skills */}
         <div id="skills" className="mb-24 scroll-mt-24">
-          <h2 className="mb-8 text-2xl font-bold">Technical Expertise</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('technicalExpertise')}</h2>
           <div className="space-y-6">
             {Object.entries(skillsByCategory).map(([category, categorySkills]) => (
               <div key={category}>
@@ -206,12 +219,14 @@ export default function AboutPage() {
 
         {/* Languages */}
         <div id="languages" className="mb-16 scroll-mt-24">
-          <h2 className="mb-8 text-2xl font-bold">Languages</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('languages')}</h2>
           <div className="grid gap-4 md:grid-cols-3">
-            {languages.map((language) => (
-              <div key={language.name} className="rounded-lg border p-4">
-                <h3 className="font-semibold">{language.name}</h3>
-                <p className="text-sm text-muted-foreground">{language.level}</p>
+            {['french', 'italian', 'english'].map((langKey) => (
+              <div key={langKey} className="rounded-lg border p-4">
+                <h3 className="font-semibold">{tCv(`languages.${langKey}`)}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {tCv(`languages.${langKey === 'french' ? 'native' : langKey === 'italian' ? 'b2' : 'b1'}`)}
+                </p>
               </div>
             ))}
           </div>
@@ -221,12 +236,12 @@ export default function AboutPage() {
 
         {/* Soft Skills */}
         <div className="mb-16">
-          <h2 className="mb-8 text-2xl font-bold">Professional Strengths</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('professionalStrengths')}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {softSkills.map((skill) => (
-              <div key={skill.name} className="rounded-lg border p-4">
-                <h3 className="mb-2 font-semibold">{skill.name}</h3>
-                <p className="text-sm text-muted-foreground">{skill.description}</p>
+            {['problemSolving', 'teamCollaboration', 'adaptability', 'qualityFocus'].map((skillKey) => (
+              <div key={skillKey} className="rounded-lg border p-4">
+                <h3 className="mb-2 font-semibold">{tCv(`softSkills.${skillKey}.name`)}</h3>
+                <p className="text-sm text-muted-foreground">{tCv(`softSkills.${skillKey}.description`)}</p>
               </div>
             ))}
           </div>
@@ -236,37 +251,33 @@ export default function AboutPage() {
 
         {/* Values & Approach */}
         <div className="mb-16">
-          <h2 className="mb-8 text-2xl font-bold">My Approach</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('myApproach')}</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">💡 Continuous Learning</h3>
+              <h3 className="text-lg font-semibold">💡 {t('continuousLearning')}</h3>
               <p className="text-sm text-muted-foreground">
-                I stay updated with the latest technologies and best practices through continuous learning,
-                experimentation, and contributing to open-source projects.
+                {t('continuousLearningDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🎯 User-Centric Development</h3>
+              <h3 className="text-lg font-semibold">🎯 {t('userCentricDev')}</h3>
               <p className="text-sm text-muted-foreground">
-                Every line of code should serve a purpose and contribute to a better user experience.
-                I prioritize accessibility, performance, and intuitive design.
+                {t('userCentricDevDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🔧 Clean Code Advocate</h3>
+              <h3 className="text-lg font-semibold">🔧 {t('cleanCode')}</h3>
               <p className="text-sm text-muted-foreground">
-                Writing maintainable, well-documented code is not optional. I follow SOLID principles
-                and design patterns to ensure long-term code quality.
+                {t('cleanCodeDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🤝 Collaborative Mindset</h3>
+              <h3 className="text-lg font-semibold">🤝 {t('collaborative')}</h3>
               <p className="text-sm text-muted-foreground">
-                Great software is built by great teams. I value open communication, code reviews,
-                and knowledge sharing to elevate the entire team.
+                {t('collaborativeDesc')}
               </p>
             </div>
           </div>
@@ -276,27 +287,24 @@ export default function AboutPage() {
 
         {/* Outside of Work */}
         <div className="mb-24">
-          <h2 className="mb-8 text-2xl font-bold">Beyond Code</h2>
+          <h2 className="mb-8 text-2xl font-bold">{t('beyondCode')}</h2>
           <p className="leading-relaxed text-muted-foreground">
-            When I&apos;m not coding, you&apos;ll find me exploring new technologies through side projects,
-            contributing to open-source communities, or staying active with outdoor activities.
-            I believe that maintaining a healthy work-life balance fuels creativity and productivity
-            in professional work.
+            {t('beyondCodeDesc')}
           </p>
         </div>
 
         {/* CTA */}
         <div className="rounded-lg border bg-muted/30 p-8 text-center">
-          <h2 className="mb-4 text-2xl font-bold">Let&apos;s Build Something Together</h2>
+          <h2 className="mb-4 text-2xl font-bold">{t('letsBuildTogether')}</h2>
           <p className="mb-6 text-muted-foreground">
-            I&apos;m always open to discussing new projects, creative ideas, or opportunities to be part of your vision.
+            {t('letsBuildTogetherDesc')}
           </p>
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
-              href="/#contact"
+              href={`/${locale}#contact`}
               className="rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              Get In Touch
+              {t('getInTouch')}
             </Link>
             <Link
               href="/cv.pdf"

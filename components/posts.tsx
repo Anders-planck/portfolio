@@ -14,19 +14,15 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 export default function Posts({ posts }: { posts: PostMetadata[] }) {
-  // Calculate estimated reading time (rough estimate: 200 words per minute)
-  const getReadingTime = (summary?: string) => {
-    if (!summary) return 1
-    const words = summary.split(' ').length
-    return Math.max(1, Math.ceil(words / 50)) // Rough estimate
-  }
+  const t = useTranslations('common')
+  const locale = useLocale()
 
   return (
     <div className="grid grid-cols-1 gap-6">
       {posts.map((post) => {
-        const readingTime = getReadingTime(post.summary)
         const authorInitials = post.author
           ? post.author
               .split(' ')
@@ -97,22 +93,24 @@ export default function Posts({ posts }: { posts: PostMetadata[] }) {
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-3.5 w-3.5" />
                       <time dateTime={post.publishedAt} className="text-xs">
-                        {formatDate(post.publishedAt)}
+                        {formatDate(post.publishedAt, locale)}
                       </time>
                     </div>
                   )}
 
                   {/* Reading time */}
-                  <div className="flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span className="text-xs">{readingTime} min read</span>
-                  </div>
+                  {post.readingTime && (
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span className="text-xs">{post.readingTime}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
 
               <CardFooter className="pt-2 px-6 pb-6 mt-auto">
                 <div className="flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
-                  <span>Read article</span>
+                  <span>{t('readArticle')}</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>
               </CardFooter>

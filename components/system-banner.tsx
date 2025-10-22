@@ -3,6 +3,7 @@
 import { X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 type BannerType = 'info' | 'warning' | 'error' | 'success'
 
@@ -24,6 +25,7 @@ export default function SystemBanner({
   type,
   dismissible = true,
 }: SystemBannerProps) {
+  const t = useTranslations("components.systemBanner");
   const [isVisible, setIsVisible] = useState(false)
   const [isDismissed, setIsDismissed] = useState(false)
 
@@ -55,7 +57,7 @@ export default function SystemBanner({
     return null
   }
 
-  const bannerMessage = message || process.env.NEXT_PUBLIC_BANNER_MESSAGE || '🚧 Website under construction - New features coming soon!'
+  const bannerMessage = message || process.env.NEXT_PUBLIC_BANNER_MESSAGE || t("defaultMessage");
   const bannerType: BannerType = (type || process.env.NEXT_PUBLIC_BANNER_TYPE as BannerType) || 'info'
 
   return (
@@ -76,7 +78,7 @@ export default function SystemBanner({
           <button
             onClick={handleDismiss}
             className="shrink-0 rounded-lg p-1 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-            aria-label="Dismiss banner"
+            aria-label={t("dismissBanner")}
           >
             <X className="h-4 w-4" />
           </button>

@@ -1,0 +1,297 @@
+---
+title: 'Pempel Dashboard'
+summary: 'Application mobile pour gestion reçus électroniques construite avec Expo et React Native, avec support hors ligne et authentification mTLS'
+image: '/images/projects/pempel-dashboard.svg'
+author: 'Anders & A-Cube S.r.l.'
+publishedAt: '2025-07-15'
+tags: ['Expo', 'React Native', 'TypeScript', 'Zustand', 'i18next', 'Mobile', 'E-Receipts']
+---
+
+## Vue d'ensemble
+
+**Pempel Dashboard** est une application mobile production-ready pour la gestion de reçus électroniques, construite sur Expo 53 et React Native 0.79. Elle fournit une expérience offline-first transparente avec authentification mTLS sécurisée, internationalisation complète et standards de qualité code enterprise-grade.
+
+### Réalisations Clés
+
+- 📱 **Stack Expo Moderne**: Expo 53, React Native 0.79, Expo Router pour navigation file-based
+- 🔐 **Authentification Sécurisée**: Authentification certificat client mTLS via expo-mutual-tls
+- 💾 **Architecture Offline-First**: Cache IndexedDB avec stratégies sync intelligentes
+- 🌍 **Internationalisation Complète**: i18next avec support multilingue complet
+- 📊 **Gestion État**: Zustand pour gestion état légère et scalable
+- ⚡ **Performances Optimisées**: FlashList, virtualisation React Table, rendus optimisés
+- 🛡️ **Qualité Code**: Règles ESLint complètes, Prettier, TypeScript strict mode
+- 🔄 **Git Hooks**: Husky + lint-staged pour contrôles qualité pré-commit
+
+---
+
+## Architecture Technique
+
+### Conception du Système
+
+Expo Router (file-based) gère navigation avec app/(tabs)/* et app/modal/*. Couche état Zustand pour Reçus, Auth, UI, Sync et Paramètres. Couche données avec E-Receipt SDK, SQLite et AsyncStorage. Couche sécurité avec expo-mutual-tls, Secure Store et Keychain/Keystore.
+
+### Technologies Core
+
+**Écosystème Expo**:
+- Expo 53: SDK Expo le plus récent avec fonctionnalités modernes
+- Expo Router 5.1: Routing file-based avec layouts et navigation
+- Expo SQLite: Base de données locale pour stockage reçus hors ligne
+- Expo Secure Store: Stockage credentials chiffré
+- Expo File System: Cache PDF reçus
+- Expo Haptics: Feedback tactile pour meilleure UX
+
+**Stack React Native**:
+- React 19: Fonctionnalités et optimisations React les plus récentes
+- React Native 0.79: React Native moderne avec renderer Fabric
+- React Hook Form: Validation formulaire performante
+- Lucide React Native: Iconographie consistante
+
+**Gestion État & Données**:
+- Zustand: Gestion état avec boilerplate minimal
+- @a-cube-io/ereceipts-js-sdk: Opérations données reçus
+- i18next + react-i18next: Framework internationalisation
+
+---
+
+## Fonctionnalités Core
+
+### 1. Gestion Reçus
+
+**Liste Reçus** avec virtualisation:
+```typescript
+import { FlashList } from '@shopify/flash-list'
+import { useReceiptsStore } from '@/store/receipts'
+
+export default function ReceiptsScreen() {
+  const { receipts, loading, fetchReceipts } = useReceiptsStore()
+
+  return (
+    <FlashList
+      data={receipts}
+      estimatedItemSize={120}
+      renderItem={({ item }) => <ReceiptCard receipt={item} />}
+      onRefresh={fetchReceipts}
+      refreshing={loading}
+    />
+  )
+}
+```
+
+**Détails Reçu** avec visualisation PDF:
+Récupération reçu via ID avec possibilité téléchargement et partage PDF. Intégration expo-file-system pour gestion fichiers locale et expo-sharing pour partage multi-app.
+
+### 2. Flux Authentification mTLS
+
+**Configuration Certificat**:
+```typescript
+import ExpoMutualTls from '@a-cube-io/expo-mutual-tls'
+import * as SecureStore from 'expo-secure-store'
+
+export const setupMTLS = async (credentials: Credentials) => {
+  try {
+    // Configure module mTLS
+    await ExpoMutualTls.configureP12('pempel-app', true)
+
+    // Stocke certificat de manière sécurisée
+    const certificateData = await fetchUserCertificate(credentials)
+    await ExpoMutualTls.storeP12(
+      certificateData.p12Base64,
+      certificateData.password
+    )
+
+    // Stocke metadata dans secure storage
+    await SecureStore.setItemAsync('cert_expiry', certificateData.expiryDate)
+    await SecureStore.setItemAsync('user_id', credentials.userId)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Configuration mTLS échouée:', error)
+    return { success: false, error }
+  }
+}
+```
+
+**Appels API Authentifiés**:
+SDK EReceipts utilise automatiquement mTLS pour toutes les requêtes avec configuration timeout 30s et gestion erreurs complète.
+
+### 3. Synchronisation Données Offline-First
+
+**Stratégie Sync**:
+```typescript
+export const useSyncManager = () => {
+  const { lastSync, isSyncing, setLastSync } = useSyncStore()
+
+  const syncReceipts = async () => {
+    const netInfo = await NetInfo.fetch()
+
+    if (!netInfo.isConnected) {
+      return { success: false, reason: 'offline' }
+    }
+
+    setIsSyncing(true)
+
+    try {
+      // Récupère derniers reçus du serveur
+      const serverReceipts = await receiptsSDK.getReceipts({
+        since: lastSync
+      })
+
+      // Met à jour cache local
+      await db.receipts.bulkPut(serverReceipts)
+
+      // Charge modifications en attente
+      const pendingChanges = await db.pendingChanges.toArray()
+      for (const change of pendingChanges) {
+        await uploadChange(change)
+        await db.pendingChanges.delete(change.id)
+      }
+
+      setLastSync(new Date())
+      return { success: true }
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  return { syncReceipts, lastSync, isSyncing }
+}
+```
+
+### 4. Internationalisation
+
+**Configuration Traductions**:
+```typescript
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import * as Localization from 'expo-localization'
+
+i18n
+  .use(initReactI18next)
+  .init({
+    compatibilityJSON: 'v3',
+    resources: {
+      en: { translation: require('./locales/en.json') },
+      it: { translation: require('./locales/it.json') },
+      fr: { translation: require('./locales/fr.json') }
+    },
+    lng: Localization.locale.split('-')[0],
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false }
+  })
+```
+
+---
+
+## Qualité Code & Développement
+
+### Scripts Qualité
+
+**Tooling Qualité Complet**:
+- `lint`: Linting complet code
+- `lint:fix`: Fix automatique problèmes
+- `lint:check`: Linting avec zéro warning
+- `lint:unused`: Suppression imports inutilisés
+- `format`: Formatage Prettier
+- `type:check`: Vérification TypeScript
+- `quality:check`: Contrôles qualité complets
+- `quality:fix`: Fix automatique tous problèmes
+- `quality:full`: Fix et vérification complets
+
+### Configuration ESLint
+
+**Règles Linting Complètes**:
+- @typescript-eslint: Règles spécifiques TypeScript
+- react-hooks: Best practices React hooks
+- react-native: Règles spécifiques React Native
+- react-native-a11y: Validation accessibilité
+- react-perf: Contrôles optimisation performances
+- unused-imports: Détection imports/variables inutilisés
+- simple-import-sort: Tri imports consistant
+
+### Git Hooks avec Husky
+
+**Quality Gates Pré-commit**:
+```json
+{
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "tsc-files --noEmit"
+    ]
+  }
+}
+```
+
+---
+
+## Optimisations Performances
+
+### Intégration FlashList
+
+Remplacement FlatList avec FlashList pour rendu 10x plus rapide. Avant (FlatList): ~16ms par frame pour 1000 items. Après (FlashList): ~2ms par frame pour 1000 items.
+
+### Virtualisation React Table
+
+Gestion efficace grands datasets avec @tanstack/react-virtual. Rendu uniquement éléments visibles avec overscan 5 items. Calcul dynamique positions éléments avec estimateSize.
+
+### Optimisation Rendu
+
+**Stratégie Mémoïsation**:
+```typescript
+import { memo, useMemo, useCallback } from 'react'
+
+const ReceiptCard = memo(({ receipt, onPress }) => {
+  const formattedDate = useMemo(
+    () => formatDate(receipt.date),
+    [receipt.date]
+  )
+
+  const handlePress = useCallback(() => {
+    onPress(receipt.id)
+  }, [receipt.id, onPress])
+
+  return (
+    <Pressable onPress={handlePress}>
+      <Text>{receipt.merchantName}</Text>
+      <Text>{formattedDate}</Text>
+    </Pressable>
+  )
+})
+```
+
+---
+
+## Stack Technique Récapitulatif
+
+### Framework Core
+- Expo 53.0 - Framework React Native universel
+- React Native 0.79.5 - Framework mobile
+- TypeScript 5.8.3 - Développement type-safe
+- Expo Router 5.1.4 - Navigation file-based
+
+### État & Données
+- Zustand 5.0.7 - Gestion état
+- @a-cube-io/ereceipts-js-sdk 0.1.0 - Opérations reçus
+- i18next 25.4.0 - Internationalisation
+- React Hook Form 7.62.0 - Validation formulaire
+- Zod 4.0.17 - Validation runtime
+
+### UI & Performances
+- @shopify/flash-list 2.0.2 - Listes haute-performance
+- @tanstack/react-table 8.21.3 - Tableaux données
+- @tanstack/react-virtual 3.13.12 - Virtualisation
+- lucide-react-native 0.536.0 - Icônes
+
+### Stockage & Sécurité
+- expo-secure-store 14.2.3 - Stockage chiffré
+- expo-sqlite 15.2.14 - Base de données locale
+- @a-cube-io/expo-mutual-tls 1.0.5 - Authentification mTLS
+
+---
+
+## Conclusion
+
+**Pempel Dashboard** démontre développement mobile production-ready avec Expo et React Native, atteignant qualité enterprise-grade grâce à tooling complet et best practices. Le projet équilibre avec succès performances, sécurité et expérience développeur.
+
+**Licence**: Propriétaire (A-Cube S.r.l.)

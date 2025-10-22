@@ -16,13 +16,15 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, Clock, ArrowRight, FileText, FolderGit2 } from 'lucide-react';
+import { getTranslations } from 'next-intl/server';
 
 type ContentItem = {
   type: 'post' | 'project';
   metadata: PostMetadata | ProjectMetadata;
 };
 
-export default async function RecentContent() {
+export default async function RecentContent({ locale }: { locale: string }) {
+  const t = await getTranslations("components.recentContent");
   const posts = await getPosts(2);
   const projects = await getProjects(2);
 
@@ -58,7 +60,7 @@ export default async function RecentContent() {
   return (
     <section className="pb-24">
       <div>
-        <h2 className="title mb-12">Recent Work</h2>
+        <h2 className="title mb-12">{t("title")}</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {content.map((item, index) => {
@@ -94,12 +96,12 @@ export default async function RecentContent() {
                         {isPost ? (
                           <Badge variant="outline" className="text-xs flex items-center gap-1">
                             <FileText className="h-3 w-3" />
-                            Post
+                            {t("postBadge")}
                           </Badge>
                         ) : (
                           <Badge variant="default" className="text-xs flex items-center gap-1">
                             <FolderGit2 className="h-3 w-3" />
-                            Project
+                            {t("projectBadge")}
                           </Badge>
                         )}
                       </div>
@@ -160,7 +162,7 @@ export default async function RecentContent() {
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3.5 w-3.5" />
                           <time dateTime={item.metadata.publishedAt} className="text-xs">
-                            {formatDate(item.metadata.publishedAt)}
+                            {formatDate(item.metadata.publishedAt, locale)}
                           </time>
                         </div>
                       )}
@@ -168,14 +170,14 @@ export default async function RecentContent() {
                       {/* Reading time */}
                       <div className="flex items-center gap-1.5">
                         <Clock className="h-3.5 w-3.5" />
-                        <span className="text-xs">{readingTime} min read</span>
+                        <span className="text-xs">{readingTime} {t("minRead")}</span>
                       </div>
                     </div>
                   </CardContent>
 
                   <CardFooter className="pt-2 px-6 pb-6 mt-auto">
                     <div className="flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
-                      <span>Read {isPost ? 'article' : 'more'}</span>
+                      <span>{isPost ? t("readArticle") : t("readMore")}</span>
                       <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                     </div>
                   </CardFooter>
@@ -192,7 +194,7 @@ export default async function RecentContent() {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground underline"
           >
             <FileText className="h-4 w-4" />
-            <span>All posts</span>
+            <span>{t("allPosts")}</span>
           </Link>
           <span className="text-muted-foreground">•</span>
           <Link
@@ -200,7 +202,7 @@ export default async function RecentContent() {
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground underline"
           >
             <FolderGit2 className="h-4 w-4" />
-            <span>All projects</span>
+            <span>{t("allProjects")}</span>
           </Link>
         </div>
       </div>

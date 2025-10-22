@@ -1,0 +1,479 @@
+{
+  "common": {
+    "nav": {
+      "about": "Chi Sono",
+      "posts": "Articoli",
+      "projects": "Progetti",
+      "contact": "Contatti"
+    },
+    "skipToContent": "Salta al contenuto principale",
+    "downloadCV": "Scarica CV",
+    "readMore": "Leggi di più",
+    "viewProject": "Vedi progetto",
+    "loading": "Caricamento...",
+    "noResults": "Nessun risultato trovato",
+    "minRead": "min di lettura",
+    "readArticle": "Leggi articolo",
+    "pagination": {
+      "showing": "Mostrando {start}-{end} di {total}",
+      "perPage": "Per pagina:",
+      "firstPage": "Vai alla prima pagina",
+      "previousPage": "Vai alla pagina precedente",
+      "nextPage": "Vai alla pagina successiva",
+      "lastPage": "Vai all'ultima pagina",
+      "goToPage": "Vai alla pagina {page}"
+    },
+    "share": {
+      "label": "Condividi:",
+      "twitter": "Condividi su Twitter",
+      "linkedin": "Condividi su LinkedIn",
+      "facebook": "Condividi su Facebook",
+      "copyLink": "Copia link negli appunti",
+      "linkCopied": "Link copiato negli appunti!",
+      "copyFailed": "Impossibile copiare il link"
+    },
+    "filters": {
+      "search": {
+        "placeholder": "Cerca {type}...",
+        "inputPlaceholder": "Cerca {type}, tag o contenuto...",
+        "searching": "Ricerca in corso...",
+        "noResults": "Nessun {type} trovato.",
+        "typeToSearch": "Digita per cercare {type}...",
+        "suggestions": "Suggerimenti"
+      },
+      "sort": {
+        "label": "Ordina per...",
+        "newest": "Più Recenti",
+        "oldest": "Più Vecchi",
+        "titleAsc": "Titolo (A-Z)",
+        "titleDesc": "Titolo (Z-A)"
+      },
+      "tags": {
+        "label": "Tag",
+        "searchPlaceholder": "Cerca tag...",
+        "noTags": "Nessun tag trovato."
+      },
+      "authors": {
+        "label": "Autori",
+        "searchPlaceholder": "Cerca autori...",
+        "noAuthors": "Nessun autore trovato."
+      },
+      "date": {
+        "from": "Data inizio",
+        "to": "Data fine",
+        "fromLabel": "Da:",
+        "toLabel": "A:"
+      },
+      "reset": "Ripristina",
+      "showing": "Mostrando {count} di {total} {type}"
+    },
+    "languageSwitcher": {
+      "selectLanguage": "Seleziona lingua"
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "Home",
+      "description": "Portfolio di Anders Planck - Full-Stack Developer specializzato in React, Next.js, TypeScript, PHP, Laravel. Scopri progetti, competenze tecniche, visualizza grafici interattivi skills e scarica il CV. 3+ anni esperienza."
+    },
+    "intro": {
+      "location": "Ferrara, Italia",
+      "role": "Full-Stack Developer",
+      "greeting": "Ciao, sono Anders!",
+      "tagline": "Full-Stack Developer specializzato nella creazione di esperienze digitali eccezionali",
+      "descriptionBefore": "Creo applicazioni web scalabili con",
+      "descriptionAfter": "di esperienza in tecnologie moderne. Appassionato di codice pulito, ottimizzazione delle prestazioni e creazione di interfacce utente intuitive che risolvono problemi reali.",
+      "yearsExperience": "oltre 3 anni",
+      "coreTechnologies": "Tecnologie Principali",
+      "moreAboutMe": "Scopri di Più",
+      "getInTouch": "Contattami",
+      "imageAlt": "Anders Planck - Full-Stack Developer"
+    },
+    "stats": {
+      "yearsExperience": {
+        "label": "Anni di Esperienza",
+        "value": "3+",
+        "description": "Sviluppo professionale"
+      },
+      "technologies": {
+        "label": "Tecnologie",
+        "value": "20+",
+        "description": "Linguaggi e framework"
+      },
+      "projects": {
+        "label": "Progetti",
+        "value": "15+",
+        "description": "Soluzioni enterprise"
+      },
+      "languages": {
+        "label": "Lingue",
+        "value": "3",
+        "description": "Parlate fluentemente"
+      }
+    },
+    "atAGlance": "A Colpo d'Occhio",
+    "technicalProficiency": "Competenze Tecniche",
+    "technicalProficiencyDesc": "Top 3 competenze per ogni dominio tecnologico che mostrano la profondità dell'expertise",
+    "featuredProjects": "Progetti in Evidenza",
+    "featuredProjectsDesc": "Progetti enterprise reali con impatto misurabile e stack tecnologici moderni",
+    "letsWorkTogether": "Lavoriamo Insieme",
+    "letsWorkTogetherDesc": "Aperto a nuove opportunità e collaborazioni. Contattami per discutere del tuo progetto."
+  },
+  "about": {
+    "meta": {
+      "title": "Chi Sono",
+      "description": "Scopri di più su Anders Planck - Full-Stack Developer con oltre 3 anni di esperienza. Percorso professionale, competenze tecniche, valori e cosa alimenta la mia passione per l'ingegneria del software."
+    },
+    "aboutMe": "Chi Sono",
+    "subtitle": "Full-Stack Developer specializzato in tecnologie web moderne",
+    "professionalSummary": {
+      "aboutMe": "Chi Sono",
+      "professionalGoal": "Obiettivo Professionale",
+      "softSkills": "Competenze Trasversali",
+      "softSkillsDescription": "Qualità personali che guidano il mio successo professionale"
+    },
+    "techStack": {
+      "title": "Stack Tecnologico",
+      "description": "Panoramica completa delle tecnologie e metodologie",
+      "categories": {
+        "backend": "Backend & Server",
+        "frontend": "Frontend & UI",
+        "database": "Database",
+        "devops": "DevOps & Cloud",
+        "api": "API & Comunicazione",
+        "methodologies": "Metodologie",
+        "methodologiesQuality": "Metodologie & Qualità"
+      },
+      "technologiesCount": "{count} tecnologie",
+      "technologiesInCategory": "{count} tecnologie in questa categoria"
+    },
+    "languages": {
+      "title": "Lingue",
+      "description": "Comunicazione tra culture"
+    },
+    "cvDownload": {
+      "title": "Scarica il Mio CV",
+      "description": "Ottieni una panoramica dettagliata della mia esperienza e competenze",
+      "viewSource": "Visualizza Sorgente",
+      "downloadPdf": "Scarica PDF"
+    },
+    "timeline": {
+      "keyAchievements": "Risultati Chiave:",
+      "projects": "Progetti ({count})"
+    },
+    "skillsComparison": {
+      "title": "Confronto Competenze Principali",
+      "description": "Le 3 competenze principali in Backend, Frontend e DevOps"
+    },
+    "professionalVision": "Visione Professionale",
+    "myJourney": "Il Mio Percorso",
+    "journeyP1": "Sono un Full-Stack Developer appassionato con sede a Ferrara, Italia, con oltre 3 anni di esperienza professionale nello sviluppo di applicazioni web scalabili e nella partecipazione a progetti innovativi. Il mio percorso nello sviluppo software è iniziato con il fascino di come il codice possa risolvere problemi reali e creare esperienze utente significative.",
+    "journeyP2": "Durante la mia carriera, mi sono specializzato sia in tecnologie backend che frontend, con un forte focus sui framework PHP (Laravel, Symfony) e l'ecosistema JavaScript moderno (React, Next.js, TypeScript). Credo nella scrittura di codice pulito e manutenibile e nel seguire le best practice che resistono alla prova del tempo.",
+    "journeyP3": "Ciò che mi spinge è l'apprendimento costante e l'evoluzione nel nostro campo. Che si tratti di esplorare nuovi framework, ottimizzare le performance o risolvere sfide architetturali complesse, affronto ogni progetto con curiosità e dedizione nel fornire soluzioni di alta qualità.",
+    "workExperience": "Esperienza Lavorativa",
+    "education": "Formazione",
+    "personalProjects": "Progetti Personali",
+    "technicalExpertise": "Competenze Tecniche",
+    "languages": "Lingue",
+    "professionalStrengths": "Punti di Forza Professionali",
+    "myApproach": "Il Mio Approccio",
+    "continuousLearning": "Apprendimento Continuo",
+    "continuousLearningDesc": "Mi mantengo aggiornato con le ultime tecnologie e best practice attraverso l'apprendimento continuo, la sperimentazione e il contributo a progetti open-source.",
+    "userCentricDev": "Sviluppo Centrato sull'Utente",
+    "userCentricDevDesc": "Ogni riga di codice deve avere uno scopo e contribuire a una migliore esperienza utente. Do priorità all'accessibilità, alle performance e al design intuitivo.",
+    "cleanCode": "Sostenitore del Clean Code",
+    "cleanCodeDesc": "Scrivere codice manutenibile e ben documentato non è opzionale. Seguo i principi SOLID e i design pattern per garantire la qualità del codice a lungo termine.",
+    "collaborative": "Mentalità Collaborativa",
+    "collaborativeDesc": "Il grande software è costruito da grandi team. Valorizzo la comunicazione aperta, le code review e la condivisione della conoscenza per elevare l'intero team.",
+    "beyondCode": "Oltre il Codice",
+    "beyondCodeDesc": "Quando non sto programmando, mi troverai a esplorare nuove tecnologie attraverso progetti personali, a contribuire a comunità open-source o a fare attività all'aperto. Credo che mantenere un sano equilibrio tra lavoro e vita privata alimenti creatività e produttività nel lavoro professionale.",
+    "letsBuildTogether": "Costruiamo Qualcosa Insieme",
+    "letsBuildTogetherDesc": "Sono sempre aperto a discutere di nuovi progetti, idee creative o opportunità per far parte della tua visione.",
+    "getInTouch": "Contattami"
+  },
+  "posts": {
+    "meta": {
+      "title": "Articoli",
+      "description": "Post di blog tecnici, tutorial e approfondimenti su sviluppo web, React, Next.js, TypeScript e pratiche moderne di ingegneria del software."
+    },
+    "title": "Articoli del Blog",
+    "subtitle": "Pensieri, tutorial e approfondimenti sullo sviluppo web",
+    "filterBy": "Filtra per",
+    "sortBy": "Ordina per",
+    "allTags": "Tutti i Tag",
+    "newest": "Più Recenti",
+    "oldest": "Più Vecchi",
+    "readingTime": "min di lettura",
+    "noPostsFound": "Nessun articolo trovato con i tuoi filtri.",
+    "tryDifferentFilters": "Prova a selezionare tag diversi o modifica la tua ricerca.",
+    "noPosts": "Nessun articolo trovato.",
+    "adjustFilters": "Prova a modificare i tuoi filtri per vedere più risultati."
+  },
+  "projects": {
+    "meta": {
+      "title": "Progetti",
+      "description": "Portfolio di progetti professionali e personali che mostrano competenze di sviluppo full-stack in React, Next.js, Laravel, TypeScript e tecnologie web moderne."
+    },
+    "title": "Progetti",
+    "subtitle": "Una raccolta del mio lavoro e dei miei contributi",
+    "filterBy": "Filtra per",
+    "sortBy": "Ordina per",
+    "allTags": "Tutti i Tag",
+    "newest": "Più Recenti",
+    "oldest": "Più Vecchi",
+    "noProjectsFound": "Nessun progetto trovato con i tuoi filtri.",
+    "tryDifferentFilters": "Prova a selezionare tag diversi o modifica la tua ricerca.",
+    "noProjects": "Nessun progetto trovato.",
+    "adjustFilters": "Prova a modificare i tuoi filtri per vedere più risultati."
+  },
+  "contact": {
+    "name": "Nome",
+    "namePlaceholder": "Il tuo nome",
+    "email": "Email",
+    "emailPlaceholder": "tua.email@esempio.com",
+    "subject": "Oggetto",
+    "subjectPlaceholder": "Di cosa si tratta?",
+    "message": "Messaggio",
+    "messagePlaceholder": "Raccontami del tuo progetto o idea...",
+    "send": "Invia Messaggio",
+    "sending": "Invio in corso...",
+    "successTitle": "Messaggio inviato!",
+    "successDesc": "Grazie per avermi contattato. Ti risponderò il prima possibile.",
+    "errorTitle": "Invio del messaggio fallito",
+    "errorDesc": "Per favore riprova o contattami direttamente via email.",
+    "validation": {
+      "nameRequired": "Il nome è obbligatorio",
+      "nameMin": "Il nome deve contenere almeno 2 caratteri",
+      "emailRequired": "L'email è obbligatoria",
+      "emailInvalid": "Inserisci un indirizzo email valido",
+      "subjectRequired": "L'oggetto è obbligatorio",
+      "subjectMin": "L'oggetto deve contenere almeno 5 caratteri",
+      "messageRequired": "Il messaggio è obbligatorio",
+      "messageMin": "Il messaggio deve contenere almeno 10 caratteri"
+    }
+  },
+  "footer": {
+    "description": "Ingegnere del software con sede a Ferrara, Italia. Appassionato di apprendimento di nuove tecnologie e della costruzione di cose che rendono la vita più facile.",
+    "content": "Contenuti",
+    "resources": "Risorse",
+    "rssFeed": "Feed RSS",
+    "resume": "Curriculum",
+    "copyright": "© {year} Anders Planck. Tutti i diritti riservati.",
+    "social": {
+      "linkedin": "Connetti su LinkedIn",
+      "github": "Segui su GitHub",
+      "email": "Invia una email"
+    }
+  },
+  "components": {
+    "featuredProjects": {
+      "ongoing": "In Corso",
+      "keyAchievements": "Risultati Chiave",
+      "viewCaseStudy": "Visualizza studio di caso dettagliato",
+      "viewAllProjects": "Visualizza tutti i 9 progetti nella timeline"
+    },
+    "recentContent": {
+      "title": "Lavori Recenti",
+      "postBadge": "Post",
+      "projectBadge": "Progetto",
+      "minRead": "min di lettura",
+      "readArticle": "Leggi articolo",
+      "readMore": "Leggi di più",
+      "allPosts": "Tutti i post",
+      "allProjects": "Tutti i progetti"
+    },
+    "recentProjects": {
+      "title": "Progetti Recenti",
+      "allProjects": "Tutti i progetti"
+    },
+    "recentPosts": {
+      "title": "Post Recenti",
+      "allPosts": "Tutti i post"
+    },
+    "systemBanner": {
+      "defaultMessage": "🚧 Sito in costruzione - Nuove funzionalità in arrivo!",
+      "dismissBanner": "Chiudi banner"
+    },
+    "contactForm": {
+      "labels": {
+        "name": "Nome",
+        "email": "Email",
+        "message": "Messaggio"
+      },
+      "placeholders": {
+        "name": "Il tuo nome",
+        "email": "tua.email@esempio.com",
+        "message": "Parlami del tuo progetto, opportunità o richiesta..."
+      },
+      "errors": {
+        "nameRequired": "Il nome è obbligatorio",
+        "nameMinLength": "Il nome deve contenere almeno 2 caratteri",
+        "emailRequired": "L'email è obbligatoria",
+        "emailInvalid": "Indirizzo email non valido",
+        "messageRequired": "Il messaggio è obbligatorio",
+        "messageMinLength": "Il messaggio deve contenere almeno 10 caratteri"
+      },
+      "toasts": {
+        "configError": "Errore di Configurazione",
+        "configErrorDescription": "Il servizio email non è configurato. Contatta l'amministratore.",
+        "successTitle": "Messaggio inviato!",
+        "successDescription": "Grazie per avermi contattato! Ti risponderò presto.",
+        "errorTitle": "Errore",
+        "unexpectedError": "Si è verificato un errore imprevisto. Riprova."
+      },
+      "buttons": {
+        "sending": "Invio in corso...",
+        "sendMessage": "Invia Messaggio"
+      },
+      "responseTime": "Di solito rispondo entro 24 ore"
+    },
+    "counter": {
+      "currentVotes": "voti attuali:"
+    }
+  },
+  "cv": {
+    "bio": "Full Stack Developer con ~3 anni di esperienza, specializzato in PHP e tecnologie web moderne. Forte passione per la progettazione di soluzioni scalabili seguendo le best practice. Collaboratore attivo in progetti open source e privati, gestendo backend, frontend, API, infrastruttura e interfacce utente.",
+    "professionalGoal": "Miro a contribuire a progetti full-stack impegnativi in un ambiente dinamico, sfruttando i miei oltre 3 anni di esperienza in PHP e tecnologie web moderne per fornire soluzioni scalabili di alta qualità, crescendo continuamente la mia competenza tecnica.",
+    "softSkills": {
+      "problemSolving": {
+        "name": "Problem Solving",
+        "description": "Approccio analitico alle sfide tecniche complesse"
+      },
+      "teamCollaboration": {
+        "name": "Collaborazione di Team",
+        "description": "Lavoro di squadra efficace in ambienti Agile/Scrum"
+      },
+      "adaptability": {
+        "name": "Adattabilità",
+        "description": "Apprendimento rapido con tecnologie e framework emergenti"
+      },
+      "qualityFocus": {
+        "name": "Focus sulla Qualità",
+        "description": "Forte enfasi sulla qualità del codice, testing e best practice"
+      }
+    },
+    "languages": {
+      "french": "Francese",
+      "italian": "Italiano",
+      "english": "Inglese",
+      "native": "Madrelingua",
+      "b2": "B2",
+      "b1": "B1"
+    },
+    "experience": {
+      "0": {
+        "description": "Sviluppo full-stack specializzato in PHP, TypeScript e tecnologie web moderne. Guida soluzioni enterprise, sviluppo SDK e modernizzazione dell'infrastruttura su oltre 9 progetti principali.",
+        "projects": {
+          "0": {
+            "description": "SDK basato su TypeScript per l'integrazione della gestione delle ricevute elettroniche con sistemi aziendali.",
+            "achievements": [
+              "Architettura modulare ad alte prestazioni per ambienti online/offline",
+              "Sistema di caching intelligente per il recupero ottimizzato dei dati",
+              "Sistema di code per operazioni offline con sincronizzazione automatica",
+              "Implementazione dell'autenticazione mTLS per comunicazioni sicure"
+            ]
+          },
+          "1": {
+            "description": "Modulo React Native/Expo open-source per autenticazione TLS mutua su piattaforme iOS e Android.",
+            "achievements": [
+              "Implementazioni native per iOS (Swift) e Android (Kotlin)",
+              "Integrazione del supporto per autenticazione biometrica",
+              "Sistema completo di gestione eventi",
+              "Contributo open-source all'ecosistema React Native"
+            ]
+          },
+          "2": {
+            "description": "Applicazione mobile cross-platform con UI reattiva e ottimizzazione delle prestazioni.",
+            "achievements": [
+              "UI reattiva con tecniche avanzate di ottimizzazione delle prestazioni",
+              "Gestione dello stato tramite React Context e React Query",
+              "Compatibilità cross-platform per iOS e Android"
+            ]
+          },
+          "3": {
+            "description": "Sviluppo frontend e design UI/UX per gestione fatture e dashboard per la pubblica amministrazione.",
+            "achievements": [
+              "Implementazione del code-splitting per ottimizzazione delle prestazioni",
+              "Supporto multilingua con localizzazione completa",
+              "Generazione e gestione PDF con integrazione PDF.js"
+            ]
+          },
+          "4": {
+            "description": "Estensione app Stripe di livello enterprise per fatturazione elettronica con gestione avanzata dello stato.",
+            "achievements": [
+              "Architettura context a 6 livelli senza Redux per prestazioni ottimizzate",
+              "8 viste principali con validazione avanzata dei form",
+              "173 istanze di memoization per ottimizzazione delle prestazioni"
+            ]
+          },
+          "5": {
+            "description": "Dashboard avanzata di gestione documenti con backend API RESTful e frontend responsive.",
+            "achievements": [
+              "Sviluppo backend API RESTful",
+              "Implementazione frontend React/TypeScript responsive",
+              "Testing automatizzato con copertura completa dei test"
+            ]
+          },
+          "6": {
+            "description": "SPA React per sistemi di pagamento SEPA con supporto multilingua e gestione documenti.",
+            "achievements": [
+              "Integrazione sistemi di pagamento SEPA e SEPA Instant",
+              "Supporto multilingua con React Intl",
+              "Integrazione PDF.js per gestione documenti"
+            ]
+          },
+          "7": {
+            "description": "Servizio di archiviazione digitale conforme alle normative italiane per conservazione documenti a lungo termine.",
+            "achievements": [
+              "Conformità normativa italiana per archiviazione digitale",
+              "Integrazione AWS S3/Lambda per storage scalabile",
+              "Autenticazione e autorizzazione JWT",
+              "Standard di qualità del codice PHPStan livello 8"
+            ]
+          },
+          "8": {
+            "description": "Sistema di notifiche email serverless AWS con tracciamento eventi e analisi.",
+            "achievements": [
+              "Implementazione architettura serverless AWS",
+              "Template email responsive HTML/Tailwind CSS",
+              "Tracciamento eventi SES con archiviazione DynamoDB"
+            ]
+          }
+        }
+      }
+    },
+    "education": {
+      "0": {
+        "description": "Studi avanzati in ingegneria informatica con focus su automazione, architettura software e sistemi distribuiti."
+      },
+      "1": {
+        "description": "Formazione di base in informatica, sviluppo software e sistemi elettronici."
+      }
+    },
+    "personalProjects": {
+      "0": {
+        "description": "Sito web portfolio moderno e ottimizzato per SEO che mostra esperienza professionale, competenze tecniche e progetti. Costruito con Next.js 15 e TypeScript con visualizzazione timeline completa.",
+        "achievements": [
+          "Componente timeline avanzato per visualizzazione esperienza lavorativa e formazione",
+          "Ottimizzazione SEO con sitemap.xml, robots.txt, dati strutturati (JSON-LD) e immagini OG",
+          "Visualizzazioni interattive delle competenze con grafici a ciambella e grafici radar",
+          "Blog alimentato da MDX con syntax highlighting e calcolo del tempo di lettura",
+          "Feed RSS per iscritti al blog e funzionalità di condivisione social",
+          "Integrazione Vercel Analytics e Speed Insights per monitoraggio prestazioni",
+          "Piena conformità accessibilità (WCAG 2.1 AA) con navigazione skip-to-content",
+          "Design responsive con supporto tema scuro/chiaro"
+        ]
+      },
+      "1": {
+        "description": "Piattaforma SaaS Next.js/Firebase con libreria completa di componenti e controllo accessi basato su ruoli.",
+        "achievements": [
+          "65+ componenti React costruiti con Chakra UI",
+          "Implementazione controllo accessi basato su ruoli",
+          "Ottimizzazione prestazioni con Tailwind CSS",
+          "Visualizzazione dati con Chart.js",
+          "Deploy su Vercel con continuous deployment"
+        ]
+      }
+    }
+  }
+}

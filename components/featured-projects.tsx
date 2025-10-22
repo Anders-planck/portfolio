@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar, TrendingUp, Award, Check } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface FeaturedProject {
   title: string;
@@ -79,6 +80,8 @@ const featuredProjects: FeaturedProject[] = [
 ];
 
 export default function FeaturedProjects() {
+  const t = useTranslations("components.featuredProjects");
+
   return (
     <div className="space-y-8">
       {featuredProjects.map((project, index) => (
@@ -90,7 +93,7 @@ export default function FeaturedProjects() {
           {project.isOngoing && (
             <div className="absolute right-4 top-4">
               <Badge variant="default" className="font-semibold">
-                Ongoing
+                {t("ongoing")}
               </Badge>
             </div>
           )}
@@ -129,7 +132,7 @@ export default function FeaturedProjects() {
             <div>
               <h4 className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
                 <Award className="h-4 w-4" />
-                Key Achievements
+                {t("keyAchievements")}
               </h4>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {project.achievements.map((achievement, i) => (
@@ -157,7 +160,7 @@ export default function FeaturedProjects() {
                   href={`/projects/${project.slug}`}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
                 >
-                  View detailed case study
+                  {t("viewCaseStudy")}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>
@@ -172,7 +175,7 @@ export default function FeaturedProjects() {
           href="/about#work-experience"
           className="inline-flex items-center gap-2 rounded-md border px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent"
         >
-          View all 9 projects in timeline
+          {t("viewAllProjects")}
           <ArrowRight className="h-4 w-4" />
         </Link>
       </div>

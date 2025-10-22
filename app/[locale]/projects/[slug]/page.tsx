@@ -7,17 +7,33 @@ import Image from 'next/image';
 import { formatDate } from '@/lib/utils';
 import MdxContent from '@/components/mdx-content';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
+import type { Locale } from '@/i18n/config';
+import { locales } from '@/i18n/config';
+
+type Props = {
+  params: Promise<{ locale: Locale; slug: string }>;
+};
 
 export async function generateStaticParams() {
     const projects = await getProjects();
-    return projects.map(project => ({
-        slug: project.slug,
-    }));
+    const params = [];
+
+    // Generate params for all locales and all projects
+    for (const locale of locales) {
+        for (const project of projects) {
+            params.push({
+                locale,
+                slug: project.slug,
+            });
+        }
+    }
+
+    return params;
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-    const { slug } = await params;
-    const project = await getProjectBySlug(slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const { locale, slug } = await params;
+    const project = await getProjectBySlug(slug, locale);
 
     if (!project) {
         return {
@@ -34,16 +50,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],
         keywords: tags || [],
         alternates: {
-            canonical: `https://anders-games.com/projects/${slug}`,
+            canonical: `https://anders-games.com/${locale}/projects/${slug}`,
         },
         openGraph: {
             title: `${title} | Anders Planck`,
             description: summary || `Explore ${title}`,
             type: 'article',
-            url: `https://anders-games.com/projects/${slug}`,
+            url: `https://anders-games.com/${locale}/projects/${slug}`,
             publishedTime: publishedAt,
             authors: author ? [author] : ['Anders Planck'],
             tags: tags || [],
+            locale: locale === 'en' ? 'en_US' : locale === 'it' ? 'it_IT' : 'fr_FR',
             images: image ? [
                 {
                     url: image,
@@ -63,21 +80,21 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 
-export default async function Project({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = await params;
-    const project = await getProjectBySlug(slug);
+export default async function Project({ params }: Props) {
+    const { locale, slug } = await params;
+    const project = await getProjectBySlug(slug, locale);
 
     if (!project) {
         notFound();
     }
 
     const { metadata, content } = project;
-    const { title, image, author, publishedAt, tags } = metadata;
+    const { title, image, author, publishedAt, tags, readingTime } = metadata;
 
   return (
     <section className="pb-24 pt-44 md:pt-40">
         <div className='container max-w-4xl'>
-            <Link href="/projects" className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
+            <Link href={`/${locale}/projects`} className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
                <ArrowLeftIcon className='h-5 w-5' />
                <span>Back to projects</span>
             </Link>
@@ -86,7 +103,7 @@ export default async function Project({ params }: { params: Promise<{ slug: stri
                 <div className='relative mb-6 h-96 w-full overflow-hidden rounded-lg'>
                     <Image
                         src={image}
-                        alt={title || 'Post Image'}
+                        alt={title || 'Project Image'}
                         fill
                         className='object-cover'
                     />
@@ -96,7 +113,7 @@ export default async function Project({ params }: { params: Promise<{ slug: stri
             <header>
                 <h1 className='title'>{title}</h1>
                 <p className='mt-3 text-xs text-muted-foreground'>
-                    {author} / {formatDate(publishedAt ?? '')}
+                    {author} / {formatDate(publishedAt ?? '', locale)} {readingTime && `• ${readingTime}`}
                 </p>
                 <div className='mt-6 flex flex-wrap gap-2'>
                     {tags?.map((tag) => (

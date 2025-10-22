@@ -1,0 +1,324 @@
+---
+title: "Introduzione a MDX"
+summary: "Impara come usare MDX per combinare Markdown e JSX nei tuoi progetti React."
+image: "/images/posts/introduction-to-mdx.webp"
+author: 'Anders Planck'
+publishedAt: '2024-06-15'
+tags: ['MDX', 'React', 'JavaScript', 'Sviluppo Web']
+---
+
+## Cos'è MDX?
+
+MDX è un formato potente che combina Markdown con JSX, permettendoti di scrivere contenuti interattivi con componenti React direttamente nei tuoi file markdown. È perfetto per documentazione, blog e qualsiasi contenuto che necessiti sia di formattazione ricca che di funzionalità dinamiche.
+
+## Perché Usare MDX in Next.js?
+
+- **Integrazione Componenti**: Incorpora facilmente componenti React nel tuo contenuto
+- **Contenuto Dinamico**: Crea documentazione e post di blog interattivi
+- **Type Safety**: Supporto completo TypeScript per componenti e props
+- **Performance**: Compilato al momento della build per prestazioni ottimali
+- **Esperienza Sviluppatore**: Scrivi contenuti con la sintassi familiare di Markdown con la potenza dei componenti
+
+<Counter />
+## Installazione
+
+### Passo 1: Installa i Pacchetti Richiesti
+
+Prima, installa MDX e le dipendenze correlate usando Bun:
+
+```bash
+bun add @next/mdx @mdx-js/loader @mdx-js/react @types/mdx
+```
+
+### Passo 2: Configura Next.js
+
+Crea o aggiorna il tuo file `next.config.mjs` per abilitare il supporto MDX:
+
+```javascript
+import createMDX from '@next/mdx'
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
+  experimental: {
+    mdxRs: true,
+  },
+}
+
+const withMDX = createMDX({
+  options: {
+    remarkPlugins: [],
+    rehypePlugins: [],
+  },
+})
+
+export default withMDX(nextConfig)
+```
+
+### Passo 3: Crea il Provider dei Componenti MDX
+
+Crea un file `mdx-components.tsx` nella radice del tuo progetto:
+
+```typescript
+import type { MDXComponents } from 'mdx/types'
+import Image, { ImageProps } from 'next/image'
+
+export function useMDXComponents(components: MDXComponents): MDXComponents {
+  return {
+    h1: ({ children }) => (
+      <h1 className="text-4xl font-bold mb-4">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-3xl font-semibold mb-3 mt-8">{children}</h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-2xl font-semibold mb-2 mt-6">{children}</h3>
+    ),
+    p: ({ children }) => (
+      <p className="mb-4 leading-7">{children}</p>
+    ),
+    code: ({ children }) => (
+      <code className="bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded text-sm">
+        {children}
+      </code>
+    ),
+    pre: ({ children }) => (
+      <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto mb-4">
+        {children}
+      </pre>
+    ),
+    img: (props) => (
+      <Image
+        sizes="100vw"
+        style={{ width: '100%', height: 'auto' }}
+        {...(props as ImageProps)}
+      />
+    ),
+    ...components,
+  }
+}
+```
+
+## Utilizzo Base
+
+### Creare il Tuo Primo File MDX
+
+Crea un nuovo file `app/blog/my-post.mdx`:
+
+```mdx
+---
+title: "Il Mio Primo Post MDX"
+date: "2024-01-15"
+---
+
+# Benvenuto nel Mio Post
+
+Questo è un paragrafo con testo **grassetto** e *corsivo*.
+
+<CustomButton>Cliccami</CustomButton>
+
+## Esempi di Codice
+
+Ecco del JavaScript:
+
+\`\`\`javascript
+const saluto = "Ciao, MDX!"
+console.log(saluto)
+\`\`\`
+```
+
+### Usare Componenti Personalizzati
+
+Importa e usa componenti personalizzati nel tuo MDX:
+
+```mdx
+import { Alert } from '@/components/ui/alert'
+import { Card } from '@/components/ui/card'
+
+<Alert>
+  Questo è un messaggio importante!
+</Alert>
+
+<Card>
+  <h3>Titolo Card</h3>
+  <p>Il contenuto della card va qui</p>
+</Card>
+```
+
+## Funzionalità Avanzate
+
+### Supporto Frontmatter
+
+Aggiungi metadati ai tuoi file MDX usando il frontmatter:
+
+```mdx
+---
+title: "MDX Avanzato"
+author: "Anders Planck"
+publishedAt: "2024-06-15"
+tags: ["mdx", "nextjs", "react"]
+---
+
+Il tuo contenuto qui...
+```
+
+### Import Dinamici
+
+Carica componenti dinamicamente:
+
+```mdx
+import dynamic from 'next/dynamic'
+
+export const DynamicChart = dynamic(() => import('@/components/chart'), {
+  loading: () => <p>Caricamento grafico...</p>
+})
+
+<DynamicChart data={chartData} />
+```
+
+### Usare Props
+
+Passa props alla tua pagina MDX:
+
+```typescript
+// app/blog/[slug]/page.tsx
+import { MDXRemote } from 'next-mdx-remote/rsc'
+
+export default function BlogPost({ params }: { params: { slug: string } }) {
+  return (
+    <MDXRemote
+      source={content}
+      components={customComponents}
+      options={{
+        mdxOptions: {
+          remarkPlugins: [],
+          rehypePlugins: [],
+        },
+      }}
+    />
+  )
+}
+```
+
+## Syntax Highlighting
+
+### Installa Syntax Highlighting
+
+```bash
+bun add rehype-highlight rehype-pretty-code shiki
+```
+
+### Configura in next.config.mjs
+
+```javascript
+import rehypePrettyCode from 'rehype-pretty-code'
+
+const withMDX = createMDX({
+  options: {
+    rehypePlugins: [
+      [
+        rehypePrettyCode,
+        {
+          theme: 'github-dark',
+          keepBackground: false,
+        },
+      ],
+    ],
+  },
+})
+```
+
+## Best Practice
+
+1. **Organizza il Tuo Contenuto**: Mantieni i file MDX in una directory `content` dedicata
+2. **Type Safety**: Usa TypeScript per le props dei componenti
+3. **Performance**: Ottimizza le immagini e usa import dinamici per componenti pesanti
+4. **Accessibilità**: Assicurati che i componenti personalizzati siano accessibili
+5. **SEO**: Includi metadati appropriati nel frontmatter
+6. **Riusabilità Componenti**: Crea una libreria di componenti MDX riusabili
+
+## Casi d'Uso Comuni
+
+### Siti di Documentazione
+
+```mdx
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+
+<Tabs defaultValue="install">
+  <TabsList>
+    <TabsTrigger value="install">Installazione</TabsTrigger>
+    <TabsTrigger value="usage">Utilizzo</TabsTrigger>
+  </TabsList>
+  <TabsContent value="install">
+    Istruzioni di installazione...
+  </TabsContent>
+  <TabsContent value="usage">
+    Esempi di utilizzo...
+  </TabsContent>
+</Tabs>
+```
+
+### Post di Blog con Elementi Interattivi
+
+```mdx
+import { Counter } from '@/components/counter'
+import { CodeSandbox } from '@/components/code-sandbox'
+
+Prova questo contatore interattivo:
+
+<Counter initialValue={0} />
+
+Modifica il codice in tempo reale:
+
+<CodeSandbox template="react" />
+```
+
+### Portfolio Showcase
+
+```mdx
+import { ProjectCard } from '@/components/project-card'
+import { ImageGallery } from '@/components/image-gallery'
+
+<ProjectCard
+  title="Il Mio Progetto"
+  description="Descrizione del progetto"
+  image="/project.png"
+  link="/projects/my-project"
+/>
+
+<ImageGallery images={projectImages} />
+```
+
+## Risoluzione Problemi
+
+### Problemi Comuni
+
+1. **Module Not Found**: Assicurati che tutte le dipendenze siano installate
+2. **Componente Non Renderizzato**: Verifica i percorsi di import e gli export dei componenti
+3. **Problemi di Stile**: Verifica che Tailwind CSS o la tua soluzione CSS sia configurata
+4. **Errori di Build**: Controlla la sintassi MDX e chiudi correttamente tutti i tag JSX
+
+### Suggerimenti per il Debug
+
+```typescript
+// Aggiungi error boundaries
+import { ErrorBoundary } from 'react-error-boundary'
+
+<ErrorBoundary fallback={<div>Qualcosa è andato storto</div>}>
+  <YourMDXContent />
+</ErrorBoundary>
+```
+
+## Conclusione
+
+MDX è uno strumento potente per creare contenuti ricchi e interattivi nelle applicazioni Next.js. Combinando la semplicità di Markdown con la potenza dei componenti React, puoi costruire documentazione coinvolgente, blog e applicazioni basate sui contenuti.
+
+Inizia a sperimentare con MDX oggi e sblocca nuove possibilità per i tuoi progetti Next.js!
+
+## Risorse
+
+- [Documentazione Ufficiale MDX](https://mdxjs.com/)
+- [Guida MDX Next.js](https://nextjs.org/docs/pages/building-your-application/configuring/mdx)
+- [Componenti MDX](https://mdxjs.com/table-of-components/)
+- [Plugin Rehype](https://github.com/rehypejs/rehype/blob/main/doc/plugins.md)
+- [Plugin Remark](https://github.com/remarkjs/remark/blob/main/doc/plugins.md)

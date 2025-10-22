@@ -1,0 +1,479 @@
+{
+  "common": {
+    "nav": {
+      "about": "About",
+      "posts": "Posts",
+      "projects": "Projects",
+      "contact": "Contact"
+    },
+    "skipToContent": "Skip to main content",
+    "downloadCV": "Download CV",
+    "readMore": "Read more",
+    "viewProject": "View project",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "minRead": "min read",
+    "readArticle": "Read article",
+    "pagination": {
+      "showing": "Showing {start}-{end} of {total}",
+      "perPage": "Per page:",
+      "firstPage": "Go to first page",
+      "previousPage": "Go to previous page",
+      "nextPage": "Go to next page",
+      "lastPage": "Go to last page",
+      "goToPage": "Go to page {page}"
+    },
+    "share": {
+      "label": "Share:",
+      "twitter": "Share on Twitter",
+      "linkedin": "Share on LinkedIn",
+      "facebook": "Share on Facebook",
+      "copyLink": "Copy link to clipboard",
+      "linkCopied": "Link copied to clipboard!",
+      "copyFailed": "Failed to copy link"
+    },
+    "filters": {
+      "search": {
+        "placeholder": "Search {type}...",
+        "inputPlaceholder": "Search {type}, tags, or content...",
+        "searching": "Searching...",
+        "noResults": "No {type} found.",
+        "typeToSearch": "Type to search {type}...",
+        "suggestions": "Suggestions"
+      },
+      "sort": {
+        "label": "Sort by...",
+        "newest": "Newest First",
+        "oldest": "Oldest First",
+        "titleAsc": "Title (A-Z)",
+        "titleDesc": "Title (Z-A)"
+      },
+      "tags": {
+        "label": "Tags",
+        "searchPlaceholder": "Search tags...",
+        "noTags": "No tags found."
+      },
+      "authors": {
+        "label": "Authors",
+        "searchPlaceholder": "Search authors...",
+        "noAuthors": "No authors found."
+      },
+      "date": {
+        "from": "From date",
+        "to": "To date",
+        "fromLabel": "From:",
+        "toLabel": "To:"
+      },
+      "reset": "Reset",
+      "showing": "Showing {count} of {total} {type}"
+    },
+    "languageSwitcher": {
+      "selectLanguage": "Select language"
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "Home",
+      "description": "Portfolio of Anders Planck - Full-Stack Developer specializing in React, Next.js, TypeScript, PHP, Laravel. Discover projects, technical skills, view interactive skills charts and download CV. 3+ years experience."
+    },
+    "intro": {
+      "location": "Ferrara, Italy",
+      "role": "Full-Stack Developer",
+      "greeting": "Hello, I'm Anders!",
+      "tagline": "Full-Stack Developer specializing in building exceptional digital experiences",
+      "descriptionBefore": "I craft scalable web applications with",
+      "descriptionAfter": "of experience in modern technologies. Passionate about clean code, performance optimization, and creating intuitive user interfaces that solve real-world problems.",
+      "yearsExperience": "3+ years",
+      "coreTechnologies": "Core Technologies",
+      "moreAboutMe": "More About Me",
+      "getInTouch": "Get In Touch",
+      "imageAlt": "Anders Planck - Full-Stack Developer"
+    },
+    "stats": {
+      "yearsExperience": {
+        "label": "Years Experience",
+        "value": "3+",
+        "description": "Professional development"
+      },
+      "technologies": {
+        "label": "Technologies",
+        "value": "20+",
+        "description": "Languages & frameworks"
+      },
+      "projects": {
+        "label": "Projects",
+        "value": "15+",
+        "description": "Enterprise solutions"
+      },
+      "languages": {
+        "label": "Languages",
+        "value": "3",
+        "description": "Spoken fluently"
+      }
+    },
+    "atAGlance": "At a Glance",
+    "technicalProficiency": "Technical Proficiency",
+    "technicalProficiencyDesc": "Top 3 skills from each technology domain showing depth of expertise",
+    "featuredProjects": "Featured Projects",
+    "featuredProjectsDesc": "Showcasing real-world enterprise projects with measurable impact and modern tech stacks",
+    "letsWorkTogether": "Let's Work Together",
+    "letsWorkTogetherDesc": "Open to new opportunities and collaborations. Get in touch to discuss your project."
+  },
+  "about": {
+    "meta": {
+      "title": "About",
+      "description": "Learn more about Anders Planck - Full-Stack Developer with 3+ years of experience. Professional journey, technical expertise, values, and what drives my passion for software engineering."
+    },
+    "aboutMe": "About Me",
+    "subtitle": "Full-Stack Developer specializing in modern web technologies",
+    "professionalSummary": {
+      "aboutMe": "About Me",
+      "professionalGoal": "Professional Goal",
+      "softSkills": "Soft Skills",
+      "softSkillsDescription": "Personal qualities that drive my professional success"
+    },
+    "techStack": {
+      "title": "Technology Stack",
+      "description": "Comprehensive overview of technologies and methodologies",
+      "categories": {
+        "backend": "Backend & Server",
+        "frontend": "Frontend & UI",
+        "database": "Database",
+        "devops": "DevOps & Cloud",
+        "api": "API & Communication",
+        "methodologies": "Methodologies",
+        "methodologiesQuality": "Methodologies & Quality"
+      },
+      "technologiesCount": "{count} technologies",
+      "technologiesInCategory": "{count} technologies in this category"
+    },
+    "languages": {
+      "title": "Languages",
+      "description": "Communication across cultures"
+    },
+    "cvDownload": {
+      "title": "Download My CV",
+      "description": "Get a detailed overview of my experience and skills",
+      "viewSource": "View Source",
+      "downloadPdf": "Download PDF"
+    },
+    "timeline": {
+      "keyAchievements": "Key Achievements:",
+      "projects": "Projects ({count})"
+    },
+    "skillsComparison": {
+      "title": "Core Skills Comparison",
+      "description": "Top 3 skills in Backend, Frontend, and DevOps"
+    },
+    "professionalVision": "Professional Vision",
+    "myJourney": "My Journey",
+    "journeyP1": "I'm a passionate Full-Stack Developer based in Ferrara, Italy, with over 3 years of professional experience building scalable web applications and contributing to innovative projects. My journey in software development began with a fascination for how code can solve real-world problems and create meaningful user experiences.",
+    "journeyP2": "Throughout my career, I've specialized in both backend and frontend technologies, with a strong focus on PHP frameworks (Laravel, Symfony) and modern JavaScript ecosystem (React, Next.js, TypeScript). I believe in writing clean, maintainable code and following best practices that stand the test of time.",
+    "journeyP3": "What drives me is the constant learning and evolution in our field. Whether it's exploring new frameworks, optimizing performance, or solving complex architectural challenges, I approach each project with curiosity and dedication to delivering high-quality solutions.",
+    "workExperience": "Work Experience",
+    "education": "Education",
+    "personalProjects": "Personal Projects",
+    "technicalExpertise": "Technical Expertise",
+    "languages": "Languages",
+    "professionalStrengths": "Professional Strengths",
+    "myApproach": "My Approach",
+    "continuousLearning": "Continuous Learning",
+    "continuousLearningDesc": "I stay updated with the latest technologies and best practices through continuous learning, experimentation, and contributing to open-source projects.",
+    "userCentricDev": "User-Centric Development",
+    "userCentricDevDesc": "Every line of code should serve a purpose and contribute to a better user experience. I prioritize accessibility, performance, and intuitive design.",
+    "cleanCode": "Clean Code Advocate",
+    "cleanCodeDesc": "Writing maintainable, well-documented code is not optional. I follow SOLID principles and design patterns to ensure long-term code quality.",
+    "collaborative": "Collaborative Mindset",
+    "collaborativeDesc": "Great software is built by great teams. I value open communication, code reviews, and knowledge sharing to elevate the entire team.",
+    "beyondCode": "Beyond Code",
+    "beyondCodeDesc": "When I'm not coding, you'll find me exploring new technologies through side projects, contributing to open-source communities, or staying active with outdoor activities. I believe that maintaining a healthy work-life balance fuels creativity and productivity in professional work.",
+    "letsBuildTogether": "Let's Build Something Together",
+    "letsBuildTogetherDesc": "I'm always open to discussing new projects, creative ideas, or opportunities to be part of your vision.",
+    "getInTouch": "Get In Touch"
+  },
+  "posts": {
+    "meta": {
+      "title": "Posts",
+      "description": "Technical blog posts, tutorials, and insights on web development, React, Next.js, TypeScript, and modern software engineering practices."
+    },
+    "title": "Blog Posts",
+    "subtitle": "Thoughts, tutorials, and insights on web development",
+    "filterBy": "Filter by",
+    "sortBy": "Sort by",
+    "allTags": "All Tags",
+    "newest": "Newest First",
+    "oldest": "Oldest First",
+    "readingTime": "min read",
+    "noPostsFound": "No posts found matching your filters.",
+    "tryDifferentFilters": "Try selecting different tags or adjusting your search.",
+    "noPosts": "No Posts found.",
+    "adjustFilters": "Try adjusting your filters to see more results."
+  },
+  "projects": {
+    "meta": {
+      "title": "Projects",
+      "description": "Portfolio of professional and personal projects showcasing full-stack development expertise in React, Next.js, Laravel, TypeScript, and modern web technologies."
+    },
+    "title": "Projects",
+    "subtitle": "A collection of my work and contributions",
+    "filterBy": "Filter by",
+    "sortBy": "Sort by",
+    "allTags": "All Tags",
+    "newest": "Newest First",
+    "oldest": "Oldest First",
+    "noProjectsFound": "No projects found matching your filters.",
+    "tryDifferentFilters": "Try selecting different tags or adjusting your search.",
+    "noProjects": "No Projects found.",
+    "adjustFilters": "Try adjusting your filters to see more results."
+  },
+  "contact": {
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "your.email@example.com",
+    "subject": "Subject",
+    "subjectPlaceholder": "What's this about?",
+    "message": "Message",
+    "messagePlaceholder": "Tell me about your project or idea...",
+    "send": "Send Message",
+    "sending": "Sending...",
+    "successTitle": "Message sent!",
+    "successDesc": "Thank you for reaching out. I'll get back to you as soon as possible.",
+    "errorTitle": "Failed to send message",
+    "errorDesc": "Please try again or contact me directly via email.",
+    "validation": {
+      "nameRequired": "Name is required",
+      "nameMin": "Name must be at least 2 characters",
+      "emailRequired": "Email is required",
+      "emailInvalid": "Please enter a valid email address",
+      "subjectRequired": "Subject is required",
+      "subjectMin": "Subject must be at least 5 characters",
+      "messageRequired": "Message is required",
+      "messageMin": "Message must be at least 10 characters"
+    }
+  },
+  "footer": {
+    "description": "Software engineer based in Ferrara, Italy. Passionate about learning new technologies and building things that make life easier.",
+    "content": "Content",
+    "resources": "Resources",
+    "rssFeed": "RSS Feed",
+    "resume": "Resume",
+    "copyright": "© {year} Anders Planck. All rights reserved.",
+    "social": {
+      "linkedin": "Connect on LinkedIn",
+      "github": "Follow on GitHub",
+      "email": "Send an email"
+    }
+  },
+  "components": {
+    "featuredProjects": {
+      "ongoing": "Ongoing",
+      "keyAchievements": "Key Achievements",
+      "viewCaseStudy": "View detailed case study",
+      "viewAllProjects": "View all 9 projects in timeline"
+    },
+    "recentContent": {
+      "title": "Recent Work",
+      "postBadge": "Post",
+      "projectBadge": "Project",
+      "minRead": "min read",
+      "readArticle": "Read article",
+      "readMore": "Read more",
+      "allPosts": "All posts",
+      "allProjects": "All projects"
+    },
+    "recentProjects": {
+      "title": "Recent Projects",
+      "allProjects": "All projects"
+    },
+    "recentPosts": {
+      "title": "Recent Posts",
+      "allPosts": "All posts"
+    },
+    "systemBanner": {
+      "defaultMessage": "🚧 Website under construction - New features coming soon!",
+      "dismissBanner": "Dismiss banner"
+    },
+    "contactForm": {
+      "labels": {
+        "name": "Name",
+        "email": "Email",
+        "message": "Message"
+      },
+      "placeholders": {
+        "name": "Your name",
+        "email": "your.email@example.com",
+        "message": "Tell me about your project, opportunity, or inquiry..."
+      },
+      "errors": {
+        "nameRequired": "Name is required",
+        "nameMinLength": "Name must be at least 2 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email address",
+        "messageRequired": "Message is required",
+        "messageMinLength": "Message must be at least 10 characters"
+      },
+      "toasts": {
+        "configError": "Configuration Error",
+        "configErrorDescription": "Email service is not configured. Please contact the administrator.",
+        "successTitle": "Message sent!",
+        "successDescription": "Thanks for reaching out! I'll get back to you soon.",
+        "errorTitle": "Error",
+        "unexpectedError": "An unexpected error occurred. Please try again."
+      },
+      "buttons": {
+        "sending": "Sending...",
+        "sendMessage": "Send Message"
+      },
+      "responseTime": "I typically respond within 24 hours"
+    },
+    "counter": {
+      "currentVotes": "current votes:"
+    }
+  },
+  "cv": {
+    "bio": "Full Stack Developer with ~3 years of experience, specialized in PHP and modern web technologies. Strong passion for designing scalable solutions following best practices. Active contributor to open source and private projects, handling backend, frontend, APIs, infrastructure, and user interfaces.",
+    "professionalGoal": "I aim to contribute to challenging full-stack projects in a dynamic environment, leveraging my 3+ years of experience in PHP and modern web technologies to deliver scalable, high-quality solutions while continuously growing my technical expertise.",
+    "softSkills": {
+      "problemSolving": {
+        "name": "Problem Solving",
+        "description": "Analytical approach to complex technical challenges"
+      },
+      "teamCollaboration": {
+        "name": "Team Collaboration",
+        "description": "Effective teamwork in Agile/Scrum environments"
+      },
+      "adaptability": {
+        "name": "Adaptability",
+        "description": "Quick learner with emerging technologies and frameworks"
+      },
+      "qualityFocus": {
+        "name": "Quality Focus",
+        "description": "Strong emphasis on code quality, testing, and best practices"
+      }
+    },
+    "languages": {
+      "french": "French",
+      "italian": "Italian",
+      "english": "English",
+      "native": "Native",
+      "b2": "B2",
+      "b1": "B1"
+    },
+    "experience": {
+      "0": {
+        "description": "Full-stack development specializing in PHP, TypeScript, and modern web technologies. Leading enterprise solutions, SDK development, and infrastructure modernization across 9+ major projects.",
+        "projects": {
+          "0": {
+            "description": "TypeScript-based SDK for electronic receipt management integration with enterprise systems.",
+            "achievements": [
+              "High-performance modular architecture for online/offline environments",
+              "Intelligent caching system for optimized data retrieval",
+              "Queue system for offline operations with automatic synchronization",
+              "mTLS authentication implementation for secure communications"
+            ]
+          },
+          "1": {
+            "description": "Open-source React Native/Expo module for mutual TLS authentication across iOS and Android platforms.",
+            "achievements": [
+              "Native implementations for iOS (Swift) and Android (Kotlin)",
+              "Biometric authentication support integration",
+              "Comprehensive event management system",
+              "Open-source contribution to React Native ecosystem"
+            ]
+          },
+          "2": {
+            "description": "Cross-platform mobile application with reactive UI and performance optimization.",
+            "achievements": [
+              "Reactive UI with advanced performance optimization techniques",
+              "State management via React Context and React Query",
+              "Cross-platform compatibility for iOS and Android"
+            ]
+          },
+          "3": {
+            "description": "Frontend development and UI/UX design for invoice management and public administration dashboard.",
+            "achievements": [
+              "Code-splitting implementation for performance optimization",
+              "Multi-language support with comprehensive localization",
+              "PDF generation and management with PDF.js integration"
+            ]
+          },
+          "4": {
+            "description": "Enterprise-grade Stripe app extension for electronic invoicing with advanced state management.",
+            "achievements": [
+              "6-level context architecture without Redux for optimized performance",
+              "8 primary views with advanced form validation",
+              "173 memoization instances for performance optimization"
+            ]
+          },
+          "5": {
+            "description": "Advanced document management dashboard with RESTful API backend and responsive frontend.",
+            "achievements": [
+              "RESTful API backend development",
+              "Responsive React/TypeScript frontend implementation",
+              "Automated testing with comprehensive test coverage"
+            ]
+          },
+          "6": {
+            "description": "React SPA for SEPA payment systems with multi-language support and document management.",
+            "achievements": [
+              "SEPA and SEPA Instant payment systems integration",
+              "Multi-language support with React Intl",
+              "PDF.js integration for document handling"
+            ]
+          },
+          "7": {
+            "description": "Digital archival service compliant with Italian regulations for long-term document preservation.",
+            "achievements": [
+              "Italian regulatory compliance for digital archival",
+              "AWS S3/Lambda integration for scalable storage",
+              "JWT authentication and authorization",
+              "PHPStan level 8 code quality standards"
+            ]
+          },
+          "8": {
+            "description": "AWS serverless email notification system with event tracking and analytics.",
+            "achievements": [
+              "AWS serverless architecture implementation",
+              "HTML/Tailwind CSS responsive email templates",
+              "SES event tracking with DynamoDB storage"
+            ]
+          }
+        }
+      }
+    },
+    "education": {
+      "0": {
+        "description": "Advanced studies in computer engineering with focus on automation, software architecture, and distributed systems."
+      },
+      "1": {
+        "description": "Foundational education in computer science, software development, and electronic systems."
+      }
+    },
+    "personalProjects": {
+      "0": {
+        "description": "Modern, SEO-optimized portfolio website showcasing professional experience, technical skills, and projects. Built with Next.js 15 and TypeScript with comprehensive timeline visualization.",
+        "achievements": [
+          "Advanced timeline component for work experience and education visualization",
+          "SEO optimization with sitemap.xml, robots.txt, structured data (JSON-LD), and OG images",
+          "Interactive skill visualizations with donut charts and radar charts",
+          "MDX-powered blog with syntax highlighting and reading time calculation",
+          "RSS feed for blog subscribers and social sharing functionality",
+          "Vercel Analytics and Speed Insights integration for performance monitoring",
+          "Full accessibility compliance (WCAG 2.1 AA) with skip-to-content navigation",
+          "Responsive design with dark/light theme support"
+        ]
+      },
+      "1": {
+        "description": "Next.js/Firebase SaaS platform with comprehensive component library and role-based access control.",
+        "achievements": [
+          "65+ React components built with Chakra UI",
+          "Role-based access control implementation",
+          "Performance optimization with Tailwind CSS",
+          "Data visualization with Chart.js",
+          "Deployed on Vercel with continuous deployment"
+        ]
+      }
+    }
+  }
+}

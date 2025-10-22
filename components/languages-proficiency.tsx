@@ -1,27 +1,36 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { languages } from "@/lib/cv-data";
 import { Globe } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function LanguagesProficiency() {
+  const t = useTranslations("about.languages");
+  const tCv = useTranslations("cv.languages");
+
+  const languages = [
+    { key: 'french', level: 'native', proficiency: 100 },
+    { key: 'italian', level: 'b2', proficiency: 75 },
+    { key: 'english', level: 'b1', proficiency: 65 },
+  ];
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Globe className="h-5 w-5" />
-          Languages
+          {t("title")}
         </CardTitle>
-        <CardDescription>Communication across cultures</CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {languages.map((language) => (
-          <div key={language.name} className="space-y-2">
+          <div key={language.key} className="space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <span className="font-medium">{language.name}</span>
+                <span className="font-medium">{tCv(language.key)}</span>
                 <span className="ml-2 text-sm text-muted-foreground">
-                  {language.level}
+                  {tCv(language.level)}
                 </span>
               </div>
               <span className="text-sm font-medium text-primary">
