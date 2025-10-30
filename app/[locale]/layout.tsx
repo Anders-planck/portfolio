@@ -165,7 +165,7 @@ export default async function LocaleLayout({
           <Providers>
             <SystemBanner dismissible={false} />
             <Header />
-            <main id="main-content" className="grow">
+            <main id="main-content" className="grow md:px-4 lg:px-0">
               {children}
             </main>
             <Footer />
