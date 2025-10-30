@@ -87,6 +87,7 @@ export default function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
+                    download
                     className="text-muted-foreground transition-colors hover:text-foreground inline-flex items-center gap-2"
                   >
                     {Icon && <Icon className="h-3.5 w-3.5" />}
