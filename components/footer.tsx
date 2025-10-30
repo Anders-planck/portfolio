@@ -42,14 +42,14 @@ export default function Footer() {
       { href: `/${currentLocale}/projects`, label: tNav('projects') },
     ],
     resources: [
-      { href: '/rss', label: t('rssFeed'), icon: Rss },
-      { href: '/resume', label: t('resume'), icon: FileText },
+      { href: '/rss.xml', label: t('rssFeed'), icon: Rss },
+      { href: '/cv.pdf', label: t('resume'), icon: FileText },
     ],
   }
 
   return (
     <footer className="border-t bg-background">
-      <div className="container max-w-6xl py-12 md:py-16">
+      <div className="container max-w-4xl py-12 md:py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand Section */}
@@ -87,6 +87,7 @@ export default function Footer() {
                 <li key={href}>
                   <Link
                     href={href}
+                    download
                     className="text-muted-foreground transition-colors hover:text-foreground inline-flex items-center gap-2"
                   >
                     {Icon && <Icon className="h-3.5 w-3.5" />}

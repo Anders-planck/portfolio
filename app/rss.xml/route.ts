@@ -1,10 +1,13 @@
 import { getPosts } from '@/lib/posts';
+import { getProjects } from '@/lib/projects';
 
 export async function GET() {
   const posts = await getPosts();
+  const projects = await getProjects();
+
   const baseUrl = 'https://anders-games.com';
 
-  const rssItemsXml = posts
+  const rssPostsItemsXml = posts
     .map((post) => {
       const postUrl = `${baseUrl}/posts/${post.slug}`;
       const pubDate = post.publishedAt
@@ -24,6 +27,25 @@ export async function GET() {
     })
     .join('\n');
 
+  const rssProjectsItemsXml = projects
+    .map((project) => {
+      const projectUrl = `${baseUrl}/projects/${project.slug}`;
+      const pubDate = project.publishedAt
+        ? new Date(project.publishedAt).toUTCString()
+        : new Date().toUTCString();
+
+      return `
+    <item>
+      <title><![CDATA[${project.title}]]></title>
+      <link>${projectUrl}</link>
+      <guid isPermaLink="true">${projectUrl}</guid>
+      <description><![CDATA[${project.summary || ''}]]></description>
+      <pubDate>${pubDate}</pubDate>
+      <author><![CDATA[Anders Planck]]></author>
+    </item>`;
+    })
+    .join('\n');
+
   const rssFeed = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
@@ -33,7 +55,8 @@ export async function GET() {
     <language>en-us</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${baseUrl}/rss.xml" rel="self" type="application/rss+xml"/>
-    ${rssItemsXml}
+    ${rssPostsItemsXml}
+    ${rssProjectsItemsXml}
   </channel>
 </rss>`;
 
