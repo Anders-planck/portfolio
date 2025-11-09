@@ -2,12 +2,16 @@ import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Briefcase, Code2 } from 'lucide-react'
+import { MapPin, Briefcase, Code2, Share2 } from 'lucide-react'
 import authorImage from '@/public/images/authors/me2.jpg'
 import { getTranslations } from 'next-intl/server'
+import { SocialLinks, DEFAULT_SOCIAL_LINKS } from '@/components/social-links'
 
 export default async function Intro() {
-  const t = await getTranslations('home.intro')
+  const [t, footerT] = await Promise.all([
+    getTranslations('home.intro'),
+    getTranslations('footer'),
+  ])
   const topSkills = ['React', 'Next.js', 'TypeScript', 'PHP', 'Laravel'];
 
   return (
@@ -31,7 +35,7 @@ export default async function Intro() {
 
         <p className='font-light text-muted-foreground mb-6'>
           {t('descriptionBefore')}{' '}
-          <strong className='font-semibold text-foreground'>{t('yearsExperience')}</strong>
+          <strong className='font-semibold text-accent-foreground'>{t('yearsExperience')}</strong>
           {' '}{t('descriptionAfter')}
         </p>
 
@@ -48,6 +52,22 @@ export default async function Intro() {
               </Badge>
             ))}
           </div>
+        </div>
+
+        {/* Social Links */}
+        <div className='mb-6'>
+          <div className='mb-2 flex items-center gap-2 text-sm font-semibold'>
+            <Share2 className='h-4 w-4' />
+            <span>{t('socialTitle')}</span>
+          </div>
+          <SocialLinks
+            links={DEFAULT_SOCIAL_LINKS}
+            showLabels
+            ariaLabelResolver={(link) => footerT(`social.${link.id}`)}
+            labelResolver={(link) => footerT(`social.${link.id}`)}
+            className='flex flex-wrap gap-2'
+            linkClassName='rounded-md border px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
+          />
         </div>
 
         {/* CTA */}

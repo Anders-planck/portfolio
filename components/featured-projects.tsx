@@ -83,7 +83,9 @@ export default function FeaturedProjects() {
   const t = useTranslations("components.featuredProjects");
 
   return (
-    <div className="space-y-8">
+    <div className="w-full space-y-8">
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {featuredProjects.map((project, index) => (
         <div
           key={index}
@@ -101,7 +103,7 @@ export default function FeaturedProjects() {
           <div className="space-y-4">
             {/* Header */}
             <div>
-              <h3 className="text-xl font-semibold text-foreground mb-2 pr-20">
+              <h3 className="text-xl font-semibold mb-2 pr-20">
                 {project.title}
               </h3>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
@@ -134,7 +136,7 @@ export default function FeaturedProjects() {
                 <Award className="h-4 w-4" />
                 {t("keyAchievements")}
               </h4>
-              <ul className="grid gap-2 sm:grid-cols-2">
+              <ul className="grid gap-2 ">
                 {project.achievements.map((achievement, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
@@ -168,9 +170,10 @@ export default function FeaturedProjects() {
           </div>
         </div>
       ))}
+    </div>
 
       {/* View All Projects Link */}
-      <div className="pt-4 text-center">
+      <div className="w-full flex justify-end items-center">
         <Link
           href="/about#work-experience"
           className="inline-flex items-center gap-2 rounded-md border px-6 py-3 text-sm font-semibold transition-colors hover:bg-accent"

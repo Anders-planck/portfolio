@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Merriweather, Oxanium } from "next/font/google";
+import { Antic, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -17,13 +17,15 @@ import { locales, type Locale } from '@/i18n/config';
 import "../globals.css";
 import { cn } from "@/lib/utils";
 
-const geistSans = Oxanium({
-  variable: "--font-geist-sans",
+const geistSans = Antic({
+  variable: "--font-antic",
   subsets: ["latin"],
+  weight: ["400"],  
 });
 
-const geistMono = Merriweather({
-  variable: "--font-geist-mono",
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   weight: ["300", "400", "700"],
 });
@@ -152,7 +154,8 @@ export default async function LocaleLayout({
         className={cn(
           "flex flex-col font-sans antialiased",
           geistSans.variable,
-          geistMono.variable
+          //signifier.variable,
+          jetbrainsMono.variable
         )}
       >
         <NextIntlClientProvider messages={messages}>

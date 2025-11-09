@@ -5,7 +5,6 @@ import FeaturedProjects from "@/components/featured-projects";
 import ContactForm from "@/components/contact-form";
 import StatsOverview from "@/components/stats-overview";
 import SkillsRadarChart from "@/components/skills-radar-chart";
-import { Separator } from "@/components/ui/separator";
 import { Download } from "lucide-react";
 import type { Locale } from "@/i18n/config";
 
@@ -40,7 +39,7 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <section className="py-44 md:py-32">
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl space-y-12">
         <Intro />
 
         {/* Floating Download CV Button */}
@@ -60,8 +59,6 @@ export default async function HomePage({ params }: Props) {
           <StatsOverview />
         </div>
 
-        <Separator className="my-12" />
-
         {/* Skills Proficiency - Primary Visualization */}
         <div className="my-24">
           <h2 className="title mb-8">{t('technicalProficiency')}</h2>
@@ -71,8 +68,7 @@ export default async function HomePage({ params }: Props) {
           <SkillsRadarChart />
         </div>
 
-        <Separator className="my-12" />
-
+  
         {/* Featured Projects - Real Work */}
         <div className="my-24">
           <h2 className="title mb-8">{t('featuredProjects')}</h2>
@@ -82,7 +78,6 @@ export default async function HomePage({ params }: Props) {
           <FeaturedProjects />
         </div>
 
-        <Separator className="my-12" />
 
         {/* Contact Section */}
         <section id="contact" className="mt-24 scroll-mt-24">
