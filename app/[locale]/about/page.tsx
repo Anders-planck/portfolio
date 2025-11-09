@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { LucideIcon } from 'lucide-react';
 import {
   Mail,
   Github,
@@ -13,10 +12,6 @@ import {
   Target,
   Wrench,
   Handshake,
-  Brain,
-  Users2,
-  RefreshCw,
-  ShieldCheck
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import authorImage from '@/public/images/authors/me2.jpg';
@@ -59,13 +54,6 @@ export default async function AboutPage({ params }: Props) {
   const tCv = await getTranslations({ locale, namespace: 'cv' });
 
   const softSkillKeys = ['problemSolving', 'teamCollaboration', 'adaptability', 'qualityFocus'] as const;
-  type SoftSkillKey = typeof softSkillKeys[number];
-  const softSkillIconMap: Record<SoftSkillKey, LucideIcon> = {
-    problemSolving: Brain,
-    teamCollaboration: Users2,
-    adaptability: RefreshCw,
-    qualityFocus: ShieldCheck
-  };
 
   const contactInfo = [
     { icon: MapPin, label: 'Ferrara, Italy', href: null },
@@ -246,11 +234,9 @@ export default async function AboutPage({ params }: Props) {
           <h2 className="mb-8 text-2xl font-bold">{t('professionalStrengths')}</h2>
           <div className="grid gap-4 md:grid-cols-2">
             {softSkillKeys.map((skillKey) => {
-             // const Icon = softSkillIconMap[skillKey];
               return (
                 <div key={skillKey} className="rounded-lg border p-4">
                   <h3 className="mb-2 flex items-center gap-2 font-semibold">
-                   {/*  <Icon className="h-5 w-5 text-primary" aria-hidden="true" /> */}
                     {tCv(`softSkills.${skillKey}.name`)}
                   </h3>
                   <p className="text-sm text-muted-foreground">

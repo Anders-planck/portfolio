@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Antic, JetBrains_Mono, Merriweather, Oxanium} from "next/font/google";
+import { Antic, JetBrains_Mono } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 import { notFound } from 'next/navigation';
