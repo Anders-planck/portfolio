@@ -2,8 +2,22 @@ import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Mail, Github, Linkedin, MapPin, Briefcase } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Mail,
+  Github,
+  Linkedin,
+  MapPin,
+  Briefcase,
+  Lightbulb,
+  Target,
+  Wrench,
+  Handshake,
+  Brain,
+  Users2,
+  RefreshCw,
+  ShieldCheck
+} from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import authorImage from '@/public/images/authors/me2.jpg';
 import { Timeline, TimelineItem } from '@/components/timeline';
@@ -43,6 +57,15 @@ export default async function AboutPage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'about' });
   const tCv = await getTranslations({ locale, namespace: 'cv' });
+
+  const softSkillKeys = ['problemSolving', 'teamCollaboration', 'adaptability', 'qualityFocus'] as const;
+  type SoftSkillKey = typeof softSkillKeys[number];
+  const softSkillIconMap: Record<SoftSkillKey, LucideIcon> = {
+    problemSolving: Brain,
+    teamCollaboration: Users2,
+    adaptability: RefreshCw,
+    qualityFocus: ShieldCheck
+  };
 
   const contactInfo = [
     { icon: MapPin, label: 'Ferrara, Italy', href: null },
@@ -109,7 +132,7 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <section className="py-44 md:py-32">
-      <div className="container mx-auto max-w-4xl">
+      <div className="container mx-auto max-w-4xl space-y-12">
         {/* Hero Section */}
         <div className="mb-16 flex flex-col items-center gap-8 md:flex-row">
           <div className="relative h-48 w-48 overflow-hidden rounded-2xl md:h-56 md:w-56">
@@ -146,8 +169,6 @@ export default async function AboutPage({ params }: Props) {
           </div>
         </div>
 
-        <Separator className="my-12" />
-
         {/* Professional Goal */}
         <div className="mb-16">
           <h2 className="mb-8 text-2xl font-bold">{t('professionalVision')}</h2>
@@ -155,8 +176,6 @@ export default async function AboutPage({ params }: Props) {
             {tCv('professionalGoal')}
           </p>
         </div>
-
-        <Separator className="my-12" />
 
         {/* Journey & Story */}
         <div className="mb-16">
@@ -168,15 +187,11 @@ export default async function AboutPage({ params }: Props) {
           </div>
         </div>
 
-        <Separator className="my-12" />
-
         {/* Work Experience Timeline */}
         <div id="work-experience" className="mb-24 scroll-mt-24">
           <h2 className="mb-8 text-2xl font-bold">{t('workExperience')}</h2>
           <Timeline items={workTimeline} showProjects={true} />
         </div>
-
-        <Separator className="my-12" />
 
         {/* Education Timeline */}
         <div className="mb-24">
@@ -184,15 +199,11 @@ export default async function AboutPage({ params }: Props) {
           <Timeline items={educationTimeline} />
         </div>
 
-        <Separator className="my-12" />
-
         {/* Personal Projects Timeline */}
         <div className="mb-24">
           <h2 className="mb-8 text-2xl font-bold">{t('personalProjects')}</h2>
           <Timeline items={projectsTimeline} />
         </div>
-
-        <Separator className="my-12" />
 
         {/* Technical Skills */}
         <div id="skills" className="mb-24 scroll-mt-24">
@@ -215,8 +226,6 @@ export default async function AboutPage({ params }: Props) {
           </div>
         </div>
 
-        <Separator className="my-12" />
-
         {/* Languages */}
         <div id="languages" className="mb-16 scroll-mt-24">
           <h2 className="mb-8 text-2xl font-bold">{t('languages')}</h2>
@@ -232,58 +241,72 @@ export default async function AboutPage({ params }: Props) {
           </div>
         </div>
 
-        <Separator className="my-12" />
-
         {/* Soft Skills */}
         <div className="mb-16">
           <h2 className="mb-8 text-2xl font-bold">{t('professionalStrengths')}</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            {['problemSolving', 'teamCollaboration', 'adaptability', 'qualityFocus'].map((skillKey) => (
-              <div key={skillKey} className="rounded-lg border p-4">
-                <h3 className="mb-2 font-semibold">{tCv(`softSkills.${skillKey}.name`)}</h3>
-                <p className="text-sm text-muted-foreground">{tCv(`softSkills.${skillKey}.description`)}</p>
-              </div>
-            ))}
+            {softSkillKeys.map((skillKey) => {
+             // const Icon = softSkillIconMap[skillKey];
+              return (
+                <div key={skillKey} className="rounded-lg border p-4">
+                  <h3 className="mb-2 flex items-center gap-2 font-semibold">
+                   {/*  <Icon className="h-5 w-5 text-primary" aria-hidden="true" /> */}
+                    {tCv(`softSkills.${skillKey}.name`)}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {tCv(`softSkills.${skillKey}.description`)}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        <Separator className="my-12" />
 
         {/* Values & Approach */}
         <div className="mb-16">
           <h2 className="mb-8 text-2xl font-bold">{t('myApproach')}</h2>
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">💡 {t('continuousLearning')}</h3>
+              <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Lightbulb className="h-5 w-5 text-primary" aria-hidden="true" />
+                {t('continuousLearning')}
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {t('continuousLearningDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🎯 {t('userCentricDev')}</h3>
+              <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Target className="h-5 w-5 text-primary" aria-hidden="true" />
+                {t('userCentricDev')}
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {t('userCentricDevDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🔧 {t('cleanCode')}</h3>
+              <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Wrench className="h-5 w-5 text-primary" aria-hidden="true" />
+                {t('cleanCode')}
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {t('cleanCodeDesc')}
               </p>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">🤝 {t('collaborative')}</h3>
+              <h3 className="flex items-center gap-2 text-lg font-semibold">
+                <Handshake className="h-5 w-5 text-primary" aria-hidden="true" />
+                {t('collaborative')}
+              </h3>
               <p className="text-sm text-muted-foreground">
                 {t('collaborativeDesc')}
               </p>
             </div>
           </div>
         </div>
-
-        <Separator className="my-12" />
 
         {/* Outside of Work */}
         <div className="mb-24">

@@ -13,18 +13,31 @@ import {
   Legend,
 } from "recharts";
 
+type ThemeColors = {
+  foreground: string;
+  mutedForeground: string;
+  chart1: string;
+  chart2: string;
+  chart3: string;
+  chart4: string;
+  chart5: string;
+  border: string;
+};
+
+const DEFAULT_THEME_COLORS: ThemeColors = {
+  foreground: "oklch(0.3438 0.0269 95.7226)",
+  mutedForeground: "oklch(0.6059 0.0075 97.4233)",
+  chart1: "oklch(0.62 0.24 40)",
+  chart2: "oklch(0.68 0.2 305)",
+  chart3: "oklch(0.78 0.13 100)",
+  chart4: "oklch(0.63 0.2 210)",
+  chart5: "oklch(0.7 0.19 335)",
+  border: "oklch(0.8847 0.0069 97.3627)",
+};
+
 // Hook to get current theme colors from CSS variables
-function useThemeColors() {
-  const [colors, setColors] = useState({
-    foreground: "oklch(0.3660 0.0251 49.6085)",
-    mutedForeground: "oklch(0.5534 0.0116 58.0708)",
-    chart1: "oklch(0.5553 0.1455 48.9975)",
-    chart2: "oklch(0.5534 0.0116 58.0708)",
-    chart3: "oklch(0.5538 0.1207 66.4416)",
-    chart4: "oklch(0.5534 0.0116 58.0708)",
-    chart5: "oklch(0.6806 0.1423 75.8340)",
-    border: "oklch(0.8866 0.0404 89.6994)",
-  });
+function useThemeColors(): ThemeColors {
+  const [colors, setColors] = useState<ThemeColors>(DEFAULT_THEME_COLORS);
 
   useEffect(() => {
     const updateColors = () => {
@@ -32,14 +45,15 @@ function useThemeColors() {
       const style = getComputedStyle(root);
 
       setColors({
-        foreground: style.getPropertyValue("--foreground").trim() || "oklch(0.3660 0.0251 49.6085)",
-        mutedForeground: style.getPropertyValue("--muted-foreground").trim() || "oklch(0.5534 0.0116 58.0708)",
-        chart1: style.getPropertyValue("--chart-1").trim() || "oklch(0.5553 0.1455 48.9975)",
-        chart2: style.getPropertyValue("--chart-2").trim() || "oklch(0.5534 0.0116 58.0708)",
-        chart3: style.getPropertyValue("--chart-3").trim() || "oklch(0.5538 0.1207 66.4416)",
-        chart4: style.getPropertyValue("--chart-4").trim() || "oklch(0.5534 0.0116 58.0708)",
-        chart5: style.getPropertyValue("--chart-5").trim() || "oklch(0.6806 0.1423 75.8340)",
-        border: style.getPropertyValue("--border").trim() || "oklch(0.8866 0.0404 89.6994)",
+        foreground: style.getPropertyValue("--foreground").trim() || DEFAULT_THEME_COLORS.foreground,
+        mutedForeground:
+          style.getPropertyValue("--muted-foreground").trim() || DEFAULT_THEME_COLORS.mutedForeground,
+        chart1: style.getPropertyValue("--chart-1").trim() || DEFAULT_THEME_COLORS.chart1,
+        chart2: style.getPropertyValue("--chart-2").trim() || DEFAULT_THEME_COLORS.chart2,
+        chart3: style.getPropertyValue("--chart-3").trim() || DEFAULT_THEME_COLORS.chart3,
+        chart4: style.getPropertyValue("--chart-4").trim() || DEFAULT_THEME_COLORS.chart4,
+        chart5: style.getPropertyValue("--chart-5").trim() || DEFAULT_THEME_COLORS.chart5,
+        border: style.getPropertyValue("--border").trim() || DEFAULT_THEME_COLORS.border,
       });
     };
 
@@ -219,7 +233,7 @@ export default function SkillsRadarChart() {
             wrapperStyle={{
               paddingTop: "20px",
               fontSize: "clamp(11px, 2vw, 14px)",
-              color: themeColors.foreground,
+             // color: themeColors.foreground,
             }}
             iconType="circle"
           />

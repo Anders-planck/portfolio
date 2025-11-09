@@ -2,11 +2,12 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { Linkedin, Github, Mail, FileText, Rss } from 'lucide-react'
+import { FileText, Rss } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { Locale } from '@/i18n/config'
+import { DEFAULT_SOCIAL_LINKS, SocialLinks } from '@/components/social-links'
 
 export default function Footer() {
   const t = useTranslations('footer')
@@ -14,27 +15,6 @@ export default function Footer() {
   const params = useParams()
   const currentLocale = (params.locale as Locale) || 'en'
   const currentYear = new Date().getFullYear()
-
-  const socialLinks = [
-    {
-      name: 'LinkedIn',
-      href: 'https://linkedin.com/in/anders-planck-53184b1b4',
-      icon: Linkedin,
-      label: t('social.linkedin'),
-    },
-    {
-      name: 'GitHub',
-      href: 'https://github.com/Anders-planck',
-      icon: Github,
-      label: t('social.github'),
-    },
-    {
-      name: 'Email',
-      href: 'mailto:anders.jipwouo@gmail.com',
-      icon: Mail,
-      label: t('social.email'),
-    },
-  ]
 
   const footerLinks = {
     content: [
@@ -110,23 +90,14 @@ export default function Footer() {
           </p>
 
           {/* Social Links */}
-          <div className="flex items-center gap-4">
-            {socialLinks.map(({ name, href, icon: Icon, label }) => (
-              <Link
-                key={name}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className={cn(
-                  'text-muted-foreground transition-colors hover:text-foreground',
-                  'rounded-md p-2 hover:bg-accent'
-                )}
-              >
-                <Icon className="h-5 w-5" />
-              </Link>
-            ))}
-          </div>
+          <SocialLinks
+            links={DEFAULT_SOCIAL_LINKS}
+            ariaLabelResolver={(link) => t(`social.${link.id}`)}
+            className="flex items-center gap-4"
+            linkClassName={cn(
+              'rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground'
+            )}
+          />
         </div>
       </div>
     </footer>
