@@ -13,6 +13,8 @@ import HreflangLinks from "@/components/hreflang-links";
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { locales, type Locale } from '@/i18n/config';
+import { siteMetadataBase } from '@/lib/site-metadata';
+import { generateLocaleStaticParams } from '@/lib/static-params';
 
 import "../globals.css";
 import { cn } from "@/lib/utils";
@@ -31,7 +33,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://anders-games.com'),
+  metadataBase: siteMetadataBase,
   title: {
     default: 'Anders Planck | Full-Stack Developer & Software Engineer',
     template: '%s | Anders Planck'
@@ -182,6 +184,4 @@ export default async function LocaleLayout({
   );
 }
 
-export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
-}
+export const generateStaticParams = generateLocaleStaticParams;

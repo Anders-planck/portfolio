@@ -8,7 +8,8 @@ import { formatDate } from '@/lib/utils';
 import MdxContent from '@/components/mdx-content';
 import { getProjectBySlug, getProjects } from '@/lib/projects';
 import type { Locale } from '@/i18n/config';
-import { locales } from '@/i18n/config';
+import { generateLocaleSlugStaticParams } from '@/lib/static-params';
+import { siteMetadataBase } from '@/lib/site-metadata';
 
 type Props = {
   params: Promise<{ locale: Locale; slug: string }>;
@@ -16,19 +17,7 @@ type Props = {
 
 export async function generateStaticParams() {
     const projects = await getProjects();
-    const params = [];
-
-    // Generate params for all locales and all projects
-    for (const locale of locales) {
-        for (const project of projects) {
-            params.push({
-                locale,
-                slug: project.slug,
-            });
-        }
-    }
-
-    return params;
+    return generateLocaleSlugStaticParams(projects.map((project) => project.slug));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -45,6 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { title, summary, image, author, publishedAt, tags } = metadata;
 
     return {
+        metadataBase: siteMetadataBase,
         title,
         description: summary || `Explore ${title} - a project by ${author || 'Anders Planck'}`,
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],

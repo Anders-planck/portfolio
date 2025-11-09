@@ -11,7 +11,8 @@ import { BlogPostingStructuredData, BreadcrumbStructuredData } from '@/component
 import ShareButtons from '@/components/share-buttons';
 import { Separator } from '@/components/ui/separator';
 import type { Locale } from '@/i18n/config';
-import { locales } from '@/i18n/config';
+import { generateLocaleSlugStaticParams } from '@/lib/static-params';
+import { siteMetadataBase } from '@/lib/site-metadata';
 
 type Props = {
   params: Promise<{ locale: Locale; slug: string }>;
@@ -19,19 +20,7 @@ type Props = {
 
 export async function generateStaticParams() {
     const posts = await getPosts();
-    const params = [];
-
-    // Generate params for all locales and all posts
-    for (const locale of locales) {
-        for (const post of posts) {
-            params.push({
-                locale,
-                slug: post.slug,
-            });
-        }
-    }
-
-    return params;
+    return generateLocaleSlugStaticParams(posts.map((post) => post.slug));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -48,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const { title, summary, image, author, publishedAt, tags } = metadata;
 
     return {
+        metadataBase: siteMetadataBase,
         title,
         description: summary || `Read ${title} by ${author || 'Anders Planck'}`,
         authors: author ? [{ name: author }] : [{ name: 'Anders Planck' }],

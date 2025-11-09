@@ -23,6 +23,8 @@ import {
   skills
 } from '@/lib/cv-data';
 import type { Locale } from '@/i18n/config';
+import { generateLocaleStaticParams } from '@/lib/static-params';
+import { siteMetadataBase } from '@/lib/site-metadata';
 
 type Props = {
   params: Promise<{ locale: Locale }>;
@@ -33,6 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'about.meta' });
 
   return {
+    metadataBase: siteMetadataBase,
     title: t('title'),
     description: t('description'),
     alternates: {
@@ -329,3 +332,5 @@ export default async function AboutPage({ params }: Props) {
     </section>
   );
 }
+
+export const generateStaticParams = generateLocaleStaticParams;

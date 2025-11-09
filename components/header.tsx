@@ -105,9 +105,9 @@ export default function Header() {
             return (
               <li key={href} className='transition-colors hover:text-foreground'>
                 {isAnchor ? (
-                  <a href={href} onClick={handleContactClick} className='cursor-pointer'>
+                  <Link href={href} onClick={handleContactClick} className='cursor-pointer'>
                     {t(label as 'about' | 'posts' | 'projects' | 'contact')}
-                  </a>
+                  </Link>
                 ) : (
                   <Link
                     href={href}
@@ -146,9 +146,9 @@ export default function Header() {
                   return (
                     <li key={href} className='text-lg font-light text-muted-foreground transition-colors hover:text-foreground'>
                       {isAnchor ? (
-                        <a href={href} onClick={handleContactClick} className='cursor-pointer block py-2'>
+                        <Link href={href} onClick={handleContactClick} className='cursor-pointer block py-2'>
                           {t(label as 'about' | 'posts' | 'projects' | 'contact')}
-                        </a>
+                        </Link>
                       ) : (
                         <Link
                           href={href}
