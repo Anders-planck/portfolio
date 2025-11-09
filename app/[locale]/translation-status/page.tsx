@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import TranslationStatus from '@/components/translation-status'
 import { getTranslationStatus } from '@/lib/translation-utils'
 import type { Locale } from '@/i18n/config'
+import { generateLocaleStaticParams } from '@/lib/static-params'
+import { siteMetadataBase } from '@/lib/site-metadata'
 
 type Props = {
   params: Promise<{ locale: Locale }>
@@ -11,6 +13,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
 
   return {
+    metadataBase: siteMetadataBase,
     title: 'Translation Status',
     description: 'Track translation progress across all languages',
     alternates: {
@@ -34,3 +37,5 @@ export default async function TranslationStatusPage() {
     </section>
   )
 }
+
+export const generateStaticParams = generateLocaleStaticParams

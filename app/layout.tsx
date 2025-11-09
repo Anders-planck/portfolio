@@ -1,5 +1,7 @@
+import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { locales } from '@/i18n/config';
+import { siteMetadataBase } from '@/lib/site-metadata';
 
 type Props = {
   children: ReactNode;
@@ -10,6 +12,10 @@ type Props = {
 export default function RootLayout({ children }: Props) {
   return children;
 }
+
+export const metadata: Metadata = {
+  metadataBase: siteMetadataBase,
+};
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
