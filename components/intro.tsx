@@ -1,18 +1,18 @@
 import React from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
 import { MapPin, Briefcase, Code2, Share2 } from 'lucide-react'
 import authorImage from '@/public/images/authors/me2.jpg'
 import { getTranslations } from 'next-intl/server'
 import { SocialLinks, DEFAULT_SOCIAL_LINKS } from '@/components/social-links'
+import { Highlighter } from '@/components/ui/highlighter'
 
 export default async function Intro() {
   const [t, footerT] = await Promise.all([
     getTranslations('home.intro'),
     getTranslations('footer'),
   ])
-  const topSkills = ['React', 'Next.js', 'TypeScript', 'PHP', 'Laravel'];
+  const topSkills = ['React', 'Next.js', 'TypeScript', 'Express.js' , 'Symfony'];
 
   return (
     <section className='flex items-center gap-x-10 gap-y-8 flex-col md:flex-row md:gap-y-0'>
@@ -25,8 +25,14 @@ export default async function Intro() {
           <span>{t('role')}</span>
         </div>
 
-        <h1 className='title no-underline mb-4'>
-          {t('greeting')}
+        <h1 className='title text-4xl no-underline mb-4'>
+          {t.rich('greeting', {
+            highlight: (chunks) => (
+              <Highlighter action="highlight" color="var(--color-primary)">
+                {chunks}
+              </Highlighter>
+            ),
+          })}
         </h1>
 
         <p className='text-lg font-light text-foreground mb-3'>
@@ -35,7 +41,11 @@ export default async function Intro() {
 
         <p className='font-light text-muted-foreground mb-6'>
           {t('descriptionBefore')}{' '}
-          <strong className='font-semibold text-accent-foreground'>{t('yearsExperience')}</strong>
+          <strong className='font-semibold text-accent-foreground'>
+            <Highlighter action="box" color="var(--color-primary)">
+              {t('yearsExperience')}
+            </Highlighter>
+            </strong>
           {' '}{t('descriptionAfter')}
         </p>
 
@@ -45,11 +55,11 @@ export default async function Intro() {
             <Code2 className='h-4 w-4' />
             <span>{t('coreTechnologies')}</span>
           </div>
-          <div className='flex flex-wrap gap-2'>
+          <div className='flex flex-wrap gap-4 text-sm'>
             {topSkills.map((skill) => (
-              <Badge key={skill} variant="secondary" className='text-sm'>
+              <Highlighter key={skill} action="underline" color="var(--color-primary)">
                 {skill}
-              </Badge>
+              </Highlighter>
             ))}
           </div>
         </div>
@@ -62,7 +72,7 @@ export default async function Intro() {
           </div>
           <SocialLinks
             links={DEFAULT_SOCIAL_LINKS}
-            showLabels
+            showLabels={false}
             ariaLabelResolver={(link) => footerT(`social.${link.id}`)}
             labelResolver={(link) => footerT(`social.${link.id}`)}
             className='flex flex-wrap gap-2'
@@ -73,14 +83,14 @@ export default async function Intro() {
         {/* CTA */}
         <div className='flex flex-wrap gap-3'>
           <Link
-            href='/about'
-            className='rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90'
-          >
+            href='/about'     
+            className='rounded-md border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-accent'
+            >
             {t('moreAboutMe')}
           </Link>
           <Link
             href='/#contact'
-            className='rounded-md border px-5 py-2.5 text-sm font-semibold transition-colors hover:bg-accent'
+            className='rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90'
           >
             {t('getInTouch')}
           </Link>

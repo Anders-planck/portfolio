@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import type { Locale } from '@/i18n/config'
 import { DEFAULT_SOCIAL_LINKS, SocialLinks } from '@/components/social-links'
+import { AuroraText } from '@/components/ui/aurora-text'
 
 export default function Footer() {
   const t = useTranslations('footer')
@@ -28,14 +29,18 @@ export default function Footer() {
   }
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t">
       <div className="container max-w-4xl py-12 md:py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           {/* Brand Section */}
           <div className="space-y-4 md:col-span-2">
             <Link href={`/${currentLocale}`} className="inline-block">
-              <span className="font-serif text-2xl font-bold">Anders Planck</span>
+            <AuroraText 
+            className='text-3xl font-bold'
+            >
+              Anders Planck
+            </AuroraText>
             </Link>
             <p className="text-sm text-muted-foreground max-w-md">
               {t('description')}

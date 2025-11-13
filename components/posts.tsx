@@ -15,6 +15,7 @@ import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
+import { Highlighter } from '@/components/ui/highlighter'
 
 export default function Posts({ posts }: { posts: PostMetadata[] }) {
   const t = useTranslations('common')
@@ -53,13 +54,9 @@ export default function Posts({ posts }: { posts: PostMetadata[] }) {
                 {post.tags && post.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {post.tags.slice(0, 3).map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="text-xs font-medium px-2.5 py-0.5"
-                      >
+                      <Highlighter action="underline" color="var(--color-primary)" strokeWidth={1.5} animationDuration={600} iterations={2} padding={2} multiline={true} isView={false} key={tag}>
                         {tag}
-                      </Badge>
+                      </Highlighter>
                     ))}
                     {post.tags.length > 3 && (
                       <Badge variant="outline" className="text-xs px-2.5 py-0.5">
@@ -109,7 +106,7 @@ export default function Posts({ posts }: { posts: PostMetadata[] }) {
               </CardContent>
 
               <CardFooter className="pt-2 px-6 pb-6 mt-auto">
-                <div className="flex items-center gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
+                <div className="flex w-full items-center justify-end gap-2 text-sm font-semibold text-primary group-hover:gap-3 transition-all">
                   <span>{t('readArticle')}</span>
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
                 </div>

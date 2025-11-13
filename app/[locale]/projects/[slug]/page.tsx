@@ -10,6 +10,8 @@ import { getProjectBySlug, getProjects } from '@/lib/projects';
 import type { Locale } from '@/i18n/config';
 import { generateLocaleSlugStaticParams } from '@/lib/static-params';
 import { siteMetadataBase } from '@/lib/site-metadata';
+import { generateBlurPlaceholder, generateGradientPlaceholder } from '@/lib/placeholder';
+import { Highlighter } from '@/components/ui/highlighter';
 
 type Props = {
   params: Promise<{ locale: Locale; slug: string }>;
@@ -79,37 +81,49 @@ export default async function Project({ params }: Props) {
     }
 
     const { metadata, content } = project;
-    const { title, image, author, publishedAt, tags, readingTime } = metadata;
+    const { title, author, publishedAt, tags, readingTime } = metadata;
 
   return (
-    <section className="pb-24 pt-44 md:pt-40">
+    <section className="pb-24 pt-44 md:pt-40" id={slug}>
         <div className='container max-w-4xl'>
             <Link href={`/${locale}/projects`} className="mb-8 inline-flex items-center gap-2 text-sm font-light text-muted-foreground hover:text-foreground">
                <ArrowLeftIcon className='h-5 w-5' />
                <span>Back to projects</span>
             </Link>
 
-            {image && (
+            {/* {image && (
                 <div className='relative mb-6 h-96 w-full overflow-hidden rounded-lg'>
                     <Image
-                        src={image}
+                        src={imageSrc}
                         alt={title || 'Project Image'}
                         fill
                         className='object-cover'
+                        placeholder="blur"
+                        blurDataURL={blurDataURL}
                     />
                 </div>
-            )}
+            )} */}
 
             <header>
                 <h1 className='title'>{title}</h1>
                 <p className='mt-3 text-xs text-muted-foreground'>
                     {author} / {formatDate(publishedAt ?? '', locale)} {readingTime && `• ${readingTime}`}
                 </p>
-                <div className='mt-6 flex flex-wrap gap-2'>
+                <div className='mt-6 flex flex-wrap gap-4'>
                     {tags?.map((tag) => (
-                        <span key={tag} className='rounded-full bg-muted px-3 py-1 text-xs font-medium'>
-                            {tag}
-                        </span>
+                        <Highlighter
+                          key={tag}
+                          action="underline"
+                          color='var(--color-primary)'
+                          strokeWidth={1.5}
+                          animationDuration={600}
+                          iterations={2}
+                          padding={2}
+                          multiline={true}
+                          isView={false}
+                        >
+                          {tag}
+                        </Highlighter>
                     ))}
                 </div>
             </header>
