@@ -13,6 +13,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Calendar, Clock, ArrowRight } from 'lucide-react'
 import { ProjectMetadata } from '@/lib/projects'
 import { useTranslations, useLocale } from 'next-intl'
+import { Highlighter } from '@/components/ui/highlighter'
+import { generateBlurPlaceholder, generateGradientPlaceholder } from '@/lib/placeholder'
 
 export default function Projects({ projects }: { projects: ProjectMetadata[] }) {
   const t = useTranslations('common')
@@ -32,6 +34,8 @@ export default function Projects({ projects }: { projects: ProjectMetadata[] }) 
               .toUpperCase()
           : 'AP'
 
+          const imageSrc = generateGradientPlaceholder(800, 600, project.slug)
+          const blurDataURL = generateBlurPlaceholder(project.slug)
         return (
           <Card
             key={project.slug}
@@ -42,11 +46,13 @@ export default function Projects({ projects }: { projects: ProjectMetadata[] }) 
               {project.image && (
                 <div className="absolute inset-0 w-full h-full">
                   <Image
-                    src={project.image}
-                    alt={project.title || 'Project Image'}
-                    fill
-                    className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                  />
+                     src={imageSrc}
+                     alt={project.title || 'Project Image'}
+                     fill
+                     className="object-cover object-center transition-transform duration-500 group-hover:scale-110"
+                     placeholder="blur"
+                     blurDataURL={blurDataURL}
+                    />
                 </div>
               )}
 
@@ -75,13 +81,19 @@ export default function Projects({ projects }: { projects: ProjectMetadata[] }) 
                   {project.tags && project.tags.length > 0 && (
                     <div className="flex flex-wrap gap-2">
                       {project.tags.slice(0, 3).map((tag) => (
-                        <Badge
+                        <Highlighter
                           key={tag}
-                          variant="secondary"
-                          className="text-xs font-medium px-2.5 py-0.5 bg-white/10 text-white border-white/20 hover:bg-white/20"
+                          action="underline"
+                          color='var(--color-primary)'
+                          strokeWidth={1.5}
+                          animationDuration={600}
+                          iterations={2}
+                          padding={2}
+                          multiline={true}
+                          isView={false}
                         >
                           {tag}
-                        </Badge>
+                        </Highlighter>
                       ))}
                       {project.tags.length > 3 && (
                         <Badge

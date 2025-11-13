@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Calendar, TrendingUp, Award, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Highlighter } from "@/components/ui/highlighter";
 
 interface FeaturedProject {
   title: string;
@@ -94,9 +95,9 @@ export default function FeaturedProjects() {
           {/* Ongoing Badge */}
           {project.isOngoing && (
             <div className="absolute right-4 top-4">
-              <Badge variant="default" className="font-semibold">
+              <Highlighter action="highlight" color="var(--color-primary)" strokeWidth={1.5} animationDuration={600} iterations={2} padding={2} multiline={true} isView={false}>
                 {t("ongoing")}
-              </Badge>
+              </Highlighter>
             </div>
           )}
 
@@ -149,15 +150,15 @@ export default function FeaturedProjects() {
             {/* Technologies */}
             <div className="flex flex-wrap gap-2 pt-2">
               {project.technologies.map((tech) => (
-                <Badge key={tech} variant="secondary" className="text-xs">
+                <Highlighter action="underline" color="var(--color-primary)" strokeWidth={1.5} animationDuration={600} iterations={2} padding={2} multiline={true} isView={false} key={tech}>
                   {tech}
-                </Badge>
+                </Highlighter>
               ))}
             </div>
 
             {/* View Details Link (if slug available) */}
             {project.slug && (
-              <div className="pt-2">
+              <div className="pt-2 flex justify-end">
                 <Link
                   href={`/projects/${project.slug}`}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80"

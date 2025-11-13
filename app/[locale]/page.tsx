@@ -3,7 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import Intro from "@/components/intro";
 import FeaturedProjects from "@/components/featured-projects";
 import ContactForm from "@/components/contact-form";
-import StatsOverview from "@/components/stats-overview";
+import {StatsOverview} from "@/components/stats-overview";
 import SkillsRadarChart from "@/components/skills-radar-chart";
 import { Download } from "lucide-react";
 import type { Locale } from "@/i18n/config";

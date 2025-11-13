@@ -17,7 +17,9 @@ import { siteMetadataBase } from '@/lib/site-metadata';
 import { generateLocaleStaticParams } from '@/lib/static-params';
 
 import "../globals.css";
-import { cn } from "@/lib/utils";
+import { cn, generateRandomSquares } from "@/lib/utils";
+import { GridPattern } from "@/components/ui/grid-pattern";
+import { DotPattern } from "@/components/ui/dot-pattern";
 
 const geistSans = Antic({
   variable: "--font-antic",
@@ -163,20 +165,44 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-100 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Skip to main content
           </a>
           <Providers>
-            <SystemBanner dismissible={false} />
-            <Header />
-            <main id="main-content" className="grow md:px-4 lg:px-0">
-              {children}
-            </main>
-            <Footer />
-            <Toaster />
-            <Analytics />
-            <SpeedInsights />
+            <div className="flex min-h-screen flex-col overflow-hidden">
+              <SystemBanner dismissible={false} />
+              <Header />
+              <main id="main-content" className="flex-1 md:px-4 lg:px-0 ">
+                {children}
+              </main>
+              <Footer />
+              <Toaster />
+              <Analytics />
+              <SpeedInsights />
+              {/*   <SmoothCursor /> */}
+              {/* <RetroGrid /> */}
+              {/* <GridPattern
+                squares={generateRandomSquares()}
+                className={cn(
+                  "mask-[radial-gradient(300px_circle_at_center,white,transparent)]",
+                  "pointer-events-none skew-y-12 top-0 left-0 right-0 bottom-0 w-screen h-screen fixed -z-10"
+                )}
+              /> */}
+
+            <DotPattern
+                    className={cn(
+                      "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+                      "skew-y-12 top-0 left-0 right-0 bottom-0 w-screen h-screen fixed -z-10"
+                    )}
+                  />
+           {/*  <InteractiveGridPattern
+              className={cn(
+            "[mask-image:radial-gradient(300px_circle_at_center,white,transparent)]",
+              "skew-y-12 top-0 left-0 right-0 bottom-0 w-screen h-screen fixed z-0"
+            )}
+          />  */}
+            </div>
           </Providers>
         </NextIntlClientProvider>
       </body>

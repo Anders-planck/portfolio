@@ -79,7 +79,7 @@
     "intro": {
       "location": "Ferrare, Italie",
       "role": "Développeur Full-Stack",
-      "greeting": "Bonjour, je suis Anders !",
+      "greeting": "Bonjour, <highlight>je suis Anders</highlight> !",
       "tagline": "Développeur Full-Stack spécialisé dans la création d'expériences numériques exceptionnelles",
       "descriptionBefore": "Je crée des applications web évolutives avec",
       "descriptionAfter": "d'expérience dans les technologies modernes. Passionné par le code propre, l'optimisation des performances et la création d'interfaces utilisateur intuitives qui résolvent des problèmes réels.",
@@ -110,6 +110,16 @@
         "label": "Langues",
         "value": "3",
         "description": "Parlées couramment"
+      },
+      "client": {
+        "label": "Clients Satisfaits",
+        "value": "25+",
+        "description": "Collaborations livrées avec impact"
+      },
+      "growth": {
+        "label": "Croissance",
+        "value": "95%",
+        "description": "Progression moyenne des performances"
       }
     },
     "atAGlance": "En Un Coup d'Œil",

@@ -79,7 +79,7 @@
     "intro": {
       "location": "Ferrara, Italy",
       "role": "Full-Stack Developer",
-      "greeting": "Hello, I'm Anders!",
+      "greeting": "Hello, <highlight>I'm Anders</highlight>!",
       "tagline": "Full-Stack Developer specializing in building exceptional digital experiences",
       "descriptionBefore": "I craft scalable web applications with",
       "descriptionAfter": "of experience in modern technologies. Passionate about clean code, performance optimization, and creating intuitive user interfaces that solve real-world problems.",
@@ -110,6 +110,16 @@
         "label": "Languages",
         "value": "3",
         "description": "Spoken fluently"
+      },
+      "client": {
+        "label": "Happy Clients",
+        "value": "25+",
+        "description": "Collaborations delivered with impact"
+      },
+      "growth": {
+        "label": "Growth Rate",
+        "value": "95%",
+        "description": "Average project performance uplift"
       }
     },
     "atAGlance": "At a Glance",

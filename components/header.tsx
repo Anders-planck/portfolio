@@ -16,6 +16,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer'
+import { AuroraText } from '@/components/ui/aurora-text'
 
 function getHeaderLinks(locale: Locale) {
   return [
@@ -87,15 +88,21 @@ export default function Header() {
 
   return (
     <header
-      className={`fixed inset-x-0 z-50 bg-background/75 py-6 backdrop-blur-sm transition-all duration-300 ${
+      className={`fixed inset-x-0 z-50 bg-background py-6 backdrop-blur-sm transition-all duration-300 ${
         isScrolled ? 'shadow-md' : ''
       }`}
       style={{ top: `${bannerHeight}px` }}
     >
-      <nav className='container mx-auto flex max-w-4xl items-center justify-between px-4 md:px-0'>
+      <nav className='container mx-auto flex max-w-4xl items-center justify-between px-4 md:px-5 lg:px-0'>
         {/* Logo */}
         <div>
-          <Link href={`/${currentLocale}`} className='font-serif title text-2xl font-bold'>AP</Link>
+          <Link href={`/${currentLocale}`} className=''>
+            <AuroraText 
+            className='text-3xl font-bold'
+            >
+              Anders Planck
+            </AuroraText>
+          </Link>
         </div>
 
         {/* Desktop Navigation - hidden on mobile */}
