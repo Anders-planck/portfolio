@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Direction A v3 — Responsive</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0a0a; color:#f5f0e8; font-family:'Plus Jakarta Sans',sans-serif; }
+
+  /* Nav */
+  .nav { display:flex; align-items:center; justify-content:space-between; padding:24px 40px; }
+  .nav-brand { display:flex; align-items:center; gap:12px; }
+  .nav-dot { width:8px; height:8px; background:#c8a45e; border-radius:50%; }
+  .nav-name { font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; letter-spacing:3px; color:#c8a45e; text-transform:uppercase; font-weight:500; }
+  .nav-links { display:flex; gap:28px; }
+  .nav-link { font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; color:#5a5549; letter-spacing:1px; text-decoration:none; transition:color 0.2s; }
+  .nav-link:hover { color:#8a8577; }
+  .nav-link--active { color:#c8a45e; border-bottom:1px solid #c8a45e; padding-bottom:2px; }
+  .nav-mobile { display:none; width:24px; height:24px; flex-direction:column; justify-content:center; gap:5px; cursor:pointer; }
+  .nav-mobile span { display:block; width:100%; height:1px; background:#c8a45e; }
+
+  /* Hero */
+  .hero { padding:40px 40px 0; display:grid; grid-template-columns:1.2fr 1fr; gap:48px; }
+  .hero h1 { font-family:'Cormorant Garamond',serif; font-size:48px; font-weight:400; line-height:1.1; margin-bottom:20px; }
+  .hero h1 em { font-style:italic; color:#c8a45e; }
+  .hero-desc { font-size:13px; color:#8a8577; line-height:1.8; max-width:380px; font-weight:300; }
+  .hero-ctas { margin-top:28px; display:flex; gap:12px; }
+  .btn-primary { padding:10px 24px; border:1px solid #c8a45e; color:#c8a45e; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:500; background:none; cursor:pointer; transition:all 0.2s; }
+  .btn-primary:hover { background:rgba(200,164,94,0.08); }
+  .btn-ghost { padding:10px 24px; border:1px solid rgba(255,255,255,0.12); color:#8a8577; font-size:11px; letter-spacing:2px; text-transform:uppercase; font-weight:400; background:none; cursor:pointer; transition:all 0.2s; }
+  .btn-ghost:hover { border-color:rgba(255,255,255,0.25); color:#f5f0e8; }
+
+  /* Data grid */
+  .data-grid { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:rgba(200,164,94,0.08); }
+  .data-cell { background:#0a0a0a; padding:20px; }
+  .data-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:2px; margin-bottom:10px; font-weight:500; }
+  .data-item { font-family:'Cormorant Garamond',serif; font-size:15px; color:#f5f0e8; line-height:1.6; }
+  .data-item--accent { color:#c8a45e; }
+  .data-big { font-family:'Cormorant Garamond',serif; font-size:36px; line-height:1; }
+  .data-sub { font-size:10px; color:#555; margin-top:4px; }
+
+  /* Selected Work */
+  .work { padding:0 40px 48px; margin-top:48px; border-top:1px solid rgba(200,164,94,0.1); padding-top:32px; }
+  .work-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:3px; margin-bottom:20px; font-weight:500; }
+  .work-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1px; background:rgba(200,164,94,0.06); }
+  .work-card { background:#0a0a0a; padding:24px; }
+  .work-title { font-family:'Cormorant Garamond',serif; font-size:18px; color:#f5f0e8; margin-bottom:8px; }
+  .work-desc { font-size:10px; color:#666; line-height:1.6; }
+  .work-tags { font-size:9px; color:#c8a45e; margin-top:12px; letter-spacing:1px; text-transform:uppercase; }
+
+  /* ---- TABLET (≤ 900px) ---- */
+  @media (max-width:900px) {
+    .nav { padding:20px 24px; }
+    .hero { grid-template-columns:1fr; gap:32px; padding:32px 24px 0; }
+    .hero h1 { font-size:40px; }
+    .work { padding:0 24px 40px; margin-top:40px; padding-top:28px; }
+    .work-grid { grid-template-columns:1fr 1fr; }
+  }
+
+  /* ---- MOBILE (≤ 600px) ---- */
+  @media (max-width:600px) {
+    .nav { padding:16px 20px; }
+    .nav-links { display:none; }
+    .nav-mobile { display:flex; }
+    .nav-name { font-size:10px; letter-spacing:2px; }
+
+    /* Mobile menu */
+    .nav-links--open { display:flex; flex-direction:column; position:absolute; top:56px; left:0; right:0; background:#0a0a0a; border-bottom:1px solid rgba(200,164,94,0.1); padding:20px; gap:16px; z-index:10; }
+
+    .hero { padding:24px 20px 0; gap:28px; }
+    .hero h1 { font-size:32px; }
+    .hero-desc { font-size:12px; }
+    .hero-ctas { flex-direction:column; }
+    .btn-primary, .btn-ghost { text-align:center; }
+
+    .data-grid { grid-template-columns:1fr 1fr; }
+    .data-cell { padding:16px; }
+    .data-item { font-size:14px; }
+    .data-big { font-size:28px; }
+
+    .work { padding:0 20px 32px; margin-top:32px; padding-top:24px; }
+    .work-grid { grid-template-columns:1fr; }
+    .work-card { padding:20px; }
+    .work-title { font-size:16px; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" style="position:relative;">
+    <div class="nav-brand">
+      <div class="nav-dot"></div>
+      <span class="nav-name">Anders Planck</span>
+    </div>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link" href="#">projects</a>
+      <a class="nav-link" href="#">about</a>
+      <a class="nav-link nav-link--active" href="#">résumé</a>
+    </div>
+    <div class="nav-mobile" onclick="document.getElementById('navLinks').classList.toggle('nav-links--open')">
+      <span></span><span></span><span></span>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div>
+      <h1>I build systems<br>that <em>scale.</em></h1>
+      <p class="hero-desc">Full-stack engineer specializing in TypeScript, React ecosystems, PHP/Symfony backends, and mobile with React Native. Currently at A-Cube S.R.L., Perugia.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary">View Projects</button>
+        <button class="btn-ghost">Download CV</button>
+      </div>
+    </div>
+
+    <div class="data-grid">
+      <div class="data-cell">
+        <div class="data-label">Frontend</div>
+        <div class="data-item data-item--accent">React</div>
+        <div class="data-item">React Native</div>
+        <div class="data-item">TypeScript</div>
+        <div class="data-item">TanStack</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Backend</div>
+        <div class="data-item data-item--accent">PHP / Symfony</div>
+        <div class="data-item">Laravel</div>
+        <div class="data-item">Node / Bun</div>
+        <div class="data-item">Elysia.js</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Infra</div>
+        <div class="data-item">PostgreSQL</div>
+        <div class="data-item">Docker / AWS</div>
+        <div class="data-item data-item--accent">CI/CD</div>
+      </div>
+      <div class="data-cell">
+        <div class="data-label">Experience</div>
+        <div class="data-big">3+</div>
+        <div class="data-sub">years · 9 projects</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELECTED WORK -->
+  <section class="work">
+    <div class="work-label">Selected Work</div>
+    <div class="work-grid">
+      <div class="work-card">
+        <div class="work-title">Open Banking UI</div>
+        <div class="work-desc">PSD2-compliant payment interface for financial institutions</div>
+        <div class="work-tags">React · TypeScript</div>
+      </div>
+      <div class="work-card">
+        <div class="work-title">Stripe Extension</div>
+        <div class="work-desc">Custom Stripe App for automated invoice reconciliation</div>
+        <div class="work-tags">Stripe API · Node</div>
+      </div>
+      <div class="work-card">
+        <div class="work-title">Expo mTLS</div>
+        <div class="work-desc">Mutual TLS authentication for React Native mobile apps</div>
+        <div class="work-tags">React Native · Expo</div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

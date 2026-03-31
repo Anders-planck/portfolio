@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pages Design — Projects, About, Project Detail</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0a0a; color:#f5f0e8; font-family:'Plus Jakarta Sans',sans-serif; overflow-x:hidden; }
+
+  .page-section { max-width:1000px; margin:0 auto; padding:48px 32px 64px; border-bottom:1px solid rgba(200,164,94,0.08); }
+  .page-section:last-child { border-bottom:none; }
+  .page-number { font-size:9px; color:#c8a45e; text-transform:uppercase; letter-spacing:3px; font-weight:500; margin-bottom:8px; }
+  .page-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:400; color:#f5f0e8; margin-bottom:8px; }
+  .page-subtitle { font-size:12px; color:#666; margin-bottom:36px; line-height:1.6; }
+
+  /* ===== SHARED ===== */
+  .nav-mini { display:flex; align-items:center; gap:12px; margin-bottom:32px; padding:16px 20px; border:1px solid rgba(200,164,94,0.06); background:rgba(200,164,94,0.02); }
+  .nav-mini .dot { width:6px; height:6px; background:#c8a45e; border-radius:50%; }
+  .nav-mini span { font-size:9px; color:#555; letter-spacing:2px; text-transform:uppercase; }
+  .nav-mini .active { color:#c8a45e; }
+  .label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:2px; font-weight:500; }
+  .accent { color:#c8a45e; }
+  .serif { font-family:'Cormorant Garamond',serif; }
+
+  /* ===== PAGE 1: PROJECTS ===== */
+  .projects-header { margin-bottom:40px; }
+  .projects-header h1 { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:400; margin-bottom:8px; }
+  .projects-header p { font-size:13px; color:#8a8577; font-weight:300; }
+
+  .project-row {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:rgba(200,164,94,0.06);
+    margin-bottom:1px;
+  }
+  .project-row:hover .project-info { background:#0f0e0c; }
+  .project-row:hover .project-meta { background:#0f0e0c; }
+  .project-info {
+    background:#0a0a0a;
+    padding:32px;
+    transition:background 0.2s;
+  }
+  .project-meta {
+    background:#0a0a0a;
+    padding:32px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    transition:background 0.2s;
+  }
+  .project-name { font-family:'Cormorant Garamond',serif; font-size:24px; color:#f5f0e8; margin-bottom:8px; }
+  .project-desc { font-size:12px; color:#666; line-height:1.7; }
+  .project-tags { font-size:9px; color:#c8a45e; letter-spacing:1px; text-transform:uppercase; margin-top:8px; }
+  .project-impact { font-size:11px; color:#8a8577; line-height:1.6; }
+  .project-impact strong { color:#f5f0e8; }
+  .project-arrow { font-family:'Cormorant Garamond',serif; font-size:18px; color:#c8a45e; text-align:right; margin-top:12px; }
+
+  /* ===== PAGE 2: ABOUT ===== */
+  .about-hero {
+    display:grid;
+    grid-template-columns:1fr 1.4fr;
+    gap:40px;
+    margin-bottom:48px;
+    align-items:start;
+  }
+  .about-photo {
+    width:100%;
+    aspect-ratio:3/4;
+    background:linear-gradient(135deg,#1a1815,#12100e);
+    border:1px solid rgba(200,164,94,0.1);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .about-photo-label { font-size:9px; color:#333; letter-spacing:1px; text-transform:uppercase; }
+  .about-photo::after {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to top, rgba(10,10,10,0.4), transparent 40%);
+  }
+  .about-bio h1 { font-family:'Cormorant Garamond',serif; font-size:36px; font-weight:400; margin-bottom:16px; }
+  .about-bio h1 em { font-style:italic; color:#c8a45e; }
+  .about-bio p { font-size:13px; color:#8a8577; line-height:1.9; margin-bottom:16px; font-weight:300; }
+  .about-links { display:flex; gap:20px; margin-top:20px; }
+  .about-links a { font-size:10px; color:#c8a45e; letter-spacing:1px; text-transform:uppercase; text-decoration:none; border-bottom:1px solid rgba(200,164,94,0.3); padding-bottom:2px; }
+
+  /* Timeline */
+  .timeline { position:relative; padding-left:24px; }
+  .timeline::before { content:''; position:absolute; left:0; top:8px; bottom:8px; width:1px; background:rgba(200,164,94,0.12); }
+  .timeline-label { margin-bottom:20px; }
+  .timeline-item { position:relative; margin-bottom:28px; padding-left:20px; }
+  .timeline-item::before { content:''; position:absolute; left:-24px; top:8px; width:7px; height:7px; border-radius:50%; border:1px solid #c8a45e; background:#0a0a0a; }
+  .timeline-item.current::before { background:#c8a45e; }
+  .timeline-role { font-family:'Cormorant Garamond',serif; font-size:18px; color:#f5f0e8; margin-bottom:2px; }
+  .timeline-company { font-size:12px; color:#c8a45e; margin-bottom:4px; }
+  .timeline-period { font-size:10px; color:#555; letter-spacing:1px; }
+  .timeline-desc { font-size:11px; color:#666; line-height:1.7; margin-top:8px; }
+
+  /* ===== PAGE 3: PROJECT DETAIL ===== */
+  .detail-header { margin-bottom:40px; }
+  .detail-back { font-size:10px; color:#555; letter-spacing:1px; text-transform:uppercase; text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-bottom:24px; }
+  .detail-back:hover { color:#8a8577; }
+  .detail-title { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:400; margin-bottom:12px; }
+  .detail-summary { font-size:14px; color:#8a8577; line-height:1.8; font-weight:300; max-width:640px; }
+  .detail-tags { margin-top:16px; display:flex; gap:8px; flex-wrap:wrap; }
+  .detail-tag { font-size:9px; padding:6px 14px; border:1px solid rgba(200,164,94,0.15); color:#c8a45e; letter-spacing:1px; text-transform:uppercase; }
+
+  .detail-meta-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:1px;
+    background:rgba(200,164,94,0.06);
+    margin-bottom:48px;
+  }
+  .detail-meta-cell { background:#0a0a0a; padding:20px; }
+
+  .detail-content { max-width:680px; }
+  .detail-content h2 {
+    font-family:'Cormorant Garamond',serif;
+    font-size:24px; font-weight:400; color:#f5f0e8;
+    margin:40px 0 16px;
+    padding-top:24px;
+    border-top:1px solid rgba(200,164,94,0.06);
+  }
+  .detail-content h2:first-child { margin-top:0; border-top:none; padding-top:0; }
+  .detail-content p { font-size:13px; color:#8a8577; line-height:1.9; margin-bottom:16px; font-weight:300; }
+  .detail-content ul { list-style:none; padding:0; margin-bottom:16px; }
+  .detail-content li { font-size:12px; color:#8a8577; line-height:1.8; padding-left:16px; position:relative; }
+  .detail-content li::before { content:''; position:absolute; left:0; top:9px; width:5px; height:5px; border-radius:50%; background:#c8a45e; }
+
+  .detail-results {
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:1px;
+    background:rgba(200,164,94,0.06);
+    margin:32px 0;
+  }
+  .detail-result { background:#0a0a0a; padding:24px; text-align:center; }
+  .detail-result-value { font-family:'Cormorant Garamond',serif; font-size:32px; color:#c8a45e; }
+  .detail-result-label { font-size:9px; color:#555; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+  @media (max-width:768px) {
+    .project-row { grid-template-columns:1fr; }
+    .about-hero { grid-template-columns:1fr; }
+    .about-photo { max-width:240px; }
+    .detail-meta-grid { grid-template-columns:1fr; }
+    .detail-results { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- PAGE 1: PROJECTS                             -->
+<!-- ============================================ -->
+<div class="page-section">
+  <div class="page-number">Page 1 of 3</div>
+  <div class="page-title">Projects Page</div>
+  <div class="page-subtitle">Lista dei case study. Ogni riga = un progetto. Hover per evidenziare, click per dettaglio. Zero filtri, zero search — sono 4 progetti, non un catalogo.</div>
+
+  <div class="nav-mini">
+    <div class="dot"></div>
+    <span>Anders Planck</span>
+    <span style="margin-left:auto;" class="active">projects</span>
+    <span>about</span>
+    <span>résumé</span>
+  </div>
+
+  <div class="projects-header">
+    <h1>Selected <em class="serif" style="font-style:italic;color:#c8a45e;">Work</em></h1>
+    <p>Production systems I've built and shipped.</p>
+  </div>
+
+  <!-- Project row 1 -->
+  <div class="project-row">
+    <div class="project-info">
+      <div class="project-name">Open Banking UI</div>
+      <div class="project-desc">PSD2-compliant payment interface for financial institutions. Multi-bank aggregation with real-time transaction flows.</div>
+      <div class="project-tags">React · TypeScript · REST API</div>
+    </div>
+    <div class="project-meta">
+      <div class="project-impact"><strong>Impact:</strong> Processed 50K+ transactions in first quarter. Reduced onboarding time by 60%.</div>
+      <div class="project-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Project row 2 -->
+  <div class="project-row">
+    <div class="project-info">
+      <div class="project-name">Stripe App Extension</div>
+      <div class="project-desc">Custom Stripe marketplace app for automated invoice reconciliation and payment matching.</div>
+      <div class="project-tags">Stripe API · Node.js · TypeScript</div>
+    </div>
+    <div class="project-meta">
+      <div class="project-impact"><strong>Impact:</strong> Automated 85% of manual reconciliation. Adopted by 3 enterprise clients.</div>
+      <div class="project-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Project row 3 -->
+  <div class="project-row">
+    <div class="project-info">
+      <div class="project-name">Expo Mutual TLS</div>
+      <div class="project-desc">mTLS authentication module for React Native mobile apps. Certificate pinning and secure handshake.</div>
+      <div class="project-tags">React Native · Expo · Security</div>
+    </div>
+    <div class="project-meta">
+      <div class="project-impact"><strong>Impact:</strong> Open-source module. Used in production by enterprise banking apps.</div>
+      <div class="project-arrow">→</div>
+    </div>
+  </div>
+
+  <!-- Project row 4 -->
+  <div class="project-row">
+    <div class="project-info">
+      <div class="project-name">Dashboard V2</div>
+      <div class="project-desc">Invoice and PA management dashboard. Multi-tenant SaaS with role-based access and real-time updates.</div>
+      <div class="project-tags">Next.js · PostgreSQL · Symfony API</div>
+    </div>
+    <div class="project-meta">
+      <div class="project-impact"><strong>Impact:</strong> Serves 200+ daily active users. Reduced support tickets by 40%.</div>
+      <div class="project-arrow">→</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE 2: ABOUT                                -->
+<!-- ============================================ -->
+<div class="page-section">
+  <div class="page-number">Page 2 of 3</div>
+  <div class="page-title">About Page</div>
+  <div class="page-subtitle">Bio + foto (qui ha senso) + timeline lavoro/educazione. La foto è in un riquadro con trattamento leggero, non nel background.</div>
+
+  <div class="nav-mini">
+    <div class="dot"></div>
+    <span>Anders Planck</span>
+    <span style="margin-left:auto;">projects</span>
+    <span class="active">about</span>
+    <span>résumé</span>
+  </div>
+
+  <div class="about-hero">
+    <div class="about-photo">
+      <span class="about-photo-label">me2.jpg — B&W treatment</span>
+    </div>
+    <div class="about-bio">
+      <h1>Anders <em>Planck</em></h1>
+      <p>Full-stack engineer based in Perugia, Italy. I build production systems that handle real traffic and solve real problems — from PSD2-compliant banking interfaces to mobile security modules used in enterprise apps.</p>
+      <p>My stack spans both sides: React and React Native on the front, PHP/Symfony and Node/Bun on the back, PostgreSQL underneath, Docker and AWS around it. I care about architecture that lasts, not code that impresses on a whiteboard.</p>
+      <p>Currently completing a Master's in Computer Engineering while shipping production code at A-Cube S.R.L.</p>
+      <div class="about-links">
+        <a href="#">GitHub</a>
+        <a href="#">LinkedIn</a>
+        <a href="#">Email</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="label" style="margin-bottom:20px;">Experience</div>
+  <div class="timeline">
+    <div class="timeline-item current">
+      <div class="timeline-role">Full Stack Developer</div>
+      <div class="timeline-company">A-Cube S.R.L.</div>
+      <div class="timeline-period">JAN 2023 — PRESENT</div>
+      <div class="timeline-desc">Building and maintaining 9+ production systems. Leading frontend architecture with React/TypeScript and backend services with PHP/Symfony.</div>
+    </div>
+  </div>
+
+  <div class="label" style="margin:32px 0 20px;">Education</div>
+  <div class="timeline">
+    <div class="timeline-item current">
+      <div class="timeline-role">M.Sc. Computer Engineering & Automation</div>
+      <div class="timeline-company">Università degli Studi di Perugia</div>
+      <div class="timeline-period">2023 — 2025</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-role">B.Sc. Computer Science & Electronics</div>
+      <div class="timeline-company">Università degli Studi di Perugia</div>
+      <div class="timeline-period">2020 — 2023</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- PAGE 3: PROJECT DETAIL                       -->
+<!-- ============================================ -->
+<div class="page-section">
+  <div class="page-number">Page 3 of 3</div>
+  <div class="page-title">Project Detail Page</div>
+  <div class="page-subtitle">Case study singolo. Header con meta, poi contenuto long-form con sezioni: challenge, solution, results. Niente MDX — contenuto da cv-data o JSON statico.</div>
+
+  <div class="nav-mini">
+    <div class="dot"></div>
+    <span>Anders Planck</span>
+    <span style="margin-left:auto;" class="active">projects</span>
+    <span>about</span>
+    <span>résumé</span>
+  </div>
+
+  <div class="detail-header">
+    <a class="detail-back" href="#">← Back to projects</a>
+    <div class="detail-title">Open Banking UI</div>
+    <div class="detail-summary">PSD2-compliant payment interface enabling multi-bank aggregation with real-time transaction flows for financial institutions across Europe.</div>
+    <div class="detail-tags">
+      <span class="detail-tag">React</span>
+      <span class="detail-tag">TypeScript</span>
+      <span class="detail-tag">REST API</span>
+      <span class="detail-tag">PSD2</span>
+    </div>
+  </div>
+
+  <div class="detail-meta-grid">
+    <div class="detail-meta-cell">
+      <div class="label" style="margin-bottom:8px;">Role</div>
+      <div class="serif" style="font-size:16px;">Frontend Lead</div>
+    </div>
+    <div class="detail-meta-cell">
+      <div class="label" style="margin-bottom:8px;">Company</div>
+      <div class="serif" style="font-size:16px;">A-Cube S.R.L.</div>
+    </div>
+    <div class="detail-meta-cell">
+      <div class="label" style="margin-bottom:8px;">Year</div>
+      <div class="serif" style="font-size:16px;">2024</div>
+    </div>
+  </div>
+
+  <div class="detail-content">
+    <h2>The Challenge</h2>
+    <p>Financial institutions needed a unified interface to comply with PSD2 regulations while aggregating data from multiple banking providers. The existing solution was fragmented, slow, and couldn't handle the transaction volume required by enterprise clients.</p>
+
+    <h2>The Solution</h2>
+    <p>Built a React/TypeScript frontend with a real-time transaction processing pipeline. Key architectural decisions:</p>
+    <ul>
+      <li>Component library with strict typing for financial data handling</li>
+      <li>Optimistic UI updates with rollback for transaction reliability</li>
+      <li>Multi-bank API abstraction layer for provider-agnostic integration</li>
+      <li>Real-time WebSocket feeds for live transaction monitoring</li>
+    </ul>
+
+    <h2>Results</h2>
+    <div class="detail-results">
+      <div class="detail-result">
+        <div class="detail-result-value">50K+</div>
+        <div class="detail-result-label">Transactions Q1</div>
+      </div>
+      <div class="detail-result">
+        <div class="detail-result-value">-60%</div>
+        <div class="detail-result-label">Onboarding time</div>
+      </div>
+      <div class="detail-result">
+        <div class="detail-result-value">99.7%</div>
+        <div class="detail-result-label">Uptime</div>
+      </div>
+    </div>
+
+    <h2>Learnings</h2>
+    <p>Working with financial data at scale taught me that type safety isn't a luxury — it's infrastructure. Every loosely typed boundary became a production incident waiting to happen. This project cemented my commitment to TypeScript-first architecture.</p>
+  </div>
+</div>
+
+</body>
+</html>

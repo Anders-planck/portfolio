@@ -1,0 +1,159 @@
+<h2>3 Visual Directions — Portfolio V2</h2>
+<p class="subtitle">Each direction is a complete aesthetic system: typography, color, layout, mood. Click to select, then tell me in the terminal.</p>
+
+<div class="cards" style="display:grid;grid-template-columns:1fr;gap:32px;margin-top:24px;">
+
+  <!-- DIRECTION A: THE DOSSIER -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)" style="padding:0;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+    <div style="background:#0a0a0a;padding:48px 40px 40px;">
+      <!-- Mini mockup -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:32px;">
+        <div style="width:8px;height:8px;background:#c8a45e;border-radius:50%;"></div>
+        <span style="font-family:'Courier New',monospace;font-size:11px;letter-spacing:3px;color:#c8a45e;text-transform:uppercase;">Anders Planck — Full Stack Engineer</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+        <div>
+          <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:42px;font-weight:400;color:#f5f0e8;line-height:1.1;margin:0 0 16px;">I build systems<br>that <em style="font-style:italic;color:#c8a45e;">scale.</em></h1>
+          <p style="font-family:'Helvetica Neue',sans-serif;font-size:13px;color:#8a8577;line-height:1.7;max-width:340px;">Full-stack engineer specializing in TypeScript, React ecosystems, and distributed backend architecture. Currently at A-Cube S.R.L.</p>
+          <div style="margin-top:24px;display:flex;gap:12px;">
+            <div style="padding:8px 20px;border:1px solid #c8a45e;color:#c8a45e;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Helvetica Neue',sans-serif;">View Projects</div>
+            <div style="padding:8px 20px;border:1px solid rgba(255,255,255,0.15);color:#8a8577;font-size:11px;letter-spacing:2px;text-transform:uppercase;font-family:'Helvetica Neue',sans-serif;">Download CV</div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,0.04);">
+          <div style="background:#0a0a0a;padding:20px;">
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Stack</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#f5f0e8;">TypeScript</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#c8a45e;">React / Next</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#f5f0e8;">Node / Bun</div>
+          </div>
+          <div style="background:#0a0a0a;padding:20px;">
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Infra</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#f5f0e8;">PostgreSQL</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#f5f0e8;">Docker / AWS</div>
+            <div style="font-family:Georgia,serif;font-size:14px;color:#c8a45e;">CI/CD</div>
+          </div>
+          <div style="background:#0a0a0a;padding:20px;">
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Years</div>
+            <div style="font-family:Georgia,serif;font-size:28px;color:#f5f0e8;">3+</div>
+          </div>
+          <div style="background:#0a0a0a;padding:20px;">
+            <div style="font-family:'Courier New',monospace;font-size:10px;color:#555;text-transform:uppercase;letter-spacing:2px;margin-bottom:8px;">Projects</div>
+            <div style="font-family:Georgia,serif;font-size:28px;color:#f5f0e8;">9</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body" style="background:#111;padding:24px 40px;border-top:1px solid rgba(200,164,94,0.15);">
+      <h3 style="margin:0 0 8px;color:#c8a45e;font-size:16px;">A — "The Dossier"</h3>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#999;">
+        <strong>Mood:</strong> Intelligence briefing. Editorial authority.<br>
+        <strong>Fonts:</strong> Instrument Serif + Geist Sans<br>
+        <strong>Palette:</strong> Near-black + aged gold (#c8a45e) + warm paper (#f5f0e8)<br>
+        <strong>Layout:</strong> Structured grids, data-forward, monospace labels, serif headlines.<br>
+        <strong>Vibe:</strong> Like opening a classified file. Information-dense but hierarchical. The recruiter's eye goes exactly where you want it.
+      </p>
+    </div>
+  </div>
+
+  <!-- DIRECTION B: THE SIGNAL -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)" style="padding:0;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+    <div style="background:#fafaf8;padding:48px 40px 40px;">
+      <!-- Mini mockup -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;">
+        <span style="font-family:'Courier New',monospace;font-size:12px;letter-spacing:0;color:#1a1a1a;font-weight:700;">AP<span style="color:#e63622;">_</span></span>
+        <div style="display:flex;gap:24px;">
+          <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Projects</span>
+          <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">About</span>
+          <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:11px;color:#1a1a1a;text-transform:uppercase;letter-spacing:1px;border-bottom:2px solid #e63622;padding-bottom:2px;">CV ↓</span>
+        </div>
+      </div>
+
+      <div style="max-width:600px;">
+        <div style="font-family:'Courier New',monospace;font-size:10px;color:#e63622;text-transform:uppercase;letter-spacing:3px;margin-bottom:12px;">Full Stack Engineer</div>
+        <h1 style="font-family:'Arial Black',sans-serif;font-size:52px;font-weight:900;color:#1a1a1a;line-height:0.95;margin:0 0 20px;letter-spacing:-2px;">ANDERS<br>PLANCK</h1>
+        <p style="font-family:'Helvetica Neue',sans-serif;font-size:14px;color:#666;line-height:1.7;border-left:3px solid #e63622;padding-left:16px;">TypeScript architect. React & Node ecosystems.<br>Building production systems at A-Cube S.R.L., Perugia.</p>
+      </div>
+
+      <div style="margin-top:36px;display:flex;gap:8px;flex-wrap:wrap;">
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #ddd;color:#1a1a1a;">TypeScript</span>
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #ddd;color:#1a1a1a;">React</span>
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #e63622;color:#e63622;">TanStack</span>
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #ddd;color:#1a1a1a;">PostgreSQL</span>
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #ddd;color:#1a1a1a;">Docker</span>
+        <span style="font-family:'Courier New',monospace;font-size:10px;padding:6px 12px;border:1px solid #ddd;color:#1a1a1a;">AWS</span>
+      </div>
+    </div>
+    <div class="card-body" style="background:#111;padding:24px 40px;border-top:1px solid rgba(230,54,34,0.2);">
+      <h3 style="margin:0 0 8px;color:#e63622;font-size:16px;">B — "The Signal"</h3>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#999;">
+        <strong>Mood:</strong> Brutalist confidence. Swiss poster meets terminal.<br>
+        <strong>Fonts:</strong> Clash Display (900) + IBM Plex Mono<br>
+        <strong>Palette:</strong> Warm white (#fafaf8) + true black + vermillion red (#e63622)<br>
+        <strong>Layout:</strong> Aggressive typography, lots of whitespace, red as a scalpel accent.<br>
+        <strong>Vibe:</strong> No decoration. The name IS the design. Brutally confident — like a developer who doesn't need to prove anything with fancy animations.
+      </p>
+    </div>
+  </div>
+
+  <!-- DIRECTION C: THE ATELIER -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)" style="padding:0;overflow:hidden;border:1px solid rgba(255,255,255,0.08);">
+    <div style="background:linear-gradient(165deg, #1c1917 0%, #1a1512 50%, #1c1917 100%);padding:48px 40px 40px;">
+      <!-- Mini mockup -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:48px;">
+        <span style="font-family:Georgia,serif;font-size:14px;color:#d4a574;font-style:italic;">anders planck</span>
+        <div style="display:flex;gap:28px;">
+          <span style="font-family:'Helvetica Neue',sans-serif;font-size:11px;color:#7a6f63;letter-spacing:1px;">work</span>
+          <span style="font-family:'Helvetica Neue',sans-serif;font-size:11px;color:#7a6f63;letter-spacing:1px;">about</span>
+          <span style="font-family:'Helvetica Neue',sans-serif;font-size:11px;color:#d4a574;letter-spacing:1px;">résumé</span>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:end;">
+        <div>
+          <div style="width:40px;height:1px;background:#d4a574;margin-bottom:24px;"></div>
+          <h1 style="font-family:Georgia,'Times New Roman',serif;font-size:36px;font-weight:400;color:#ede6db;line-height:1.25;margin:0 0 20px;">Crafting robust<br>digital systems<br><span style="color:#d4a574;font-style:italic;">with intention</span></h1>
+          <p style="font-family:'Helvetica Neue',sans-serif;font-size:12px;color:#7a6f63;line-height:1.8;letter-spacing:0.3px;">Full-stack engineer focused on TypeScript ecosystems, scalable architecture, and developer experience. Based in Perugia, Italy.</p>
+        </div>
+        <div>
+          <div style="border:1px solid rgba(212,165,116,0.15);padding:28px;background:rgba(212,165,116,0.03);">
+            <div style="font-family:'Helvetica Neue',sans-serif;font-size:9px;color:#7a6f63;text-transform:uppercase;letter-spacing:3px;margin-bottom:16px;">Selected Work</div>
+            <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;">
+              <span style="font-family:Georgia,serif;font-size:15px;color:#ede6db;">Open Banking UI</span>
+              <span style="font-family:'Helvetica Neue',sans-serif;font-size:10px;color:#7a6f63;float:right;margin-top:4px;">React · TypeScript</span>
+            </div>
+            <div style="border-bottom:1px solid rgba(255,255,255,0.06);padding:12px 0;">
+              <span style="font-family:Georgia,serif;font-size:15px;color:#ede6db;">Dashboard V2</span>
+              <span style="font-family:'Helvetica Neue',sans-serif;font-size:10px;color:#7a6f63;float:right;margin-top:4px;">Next.js · PostgreSQL</span>
+            </div>
+            <div style="padding:12px 0;">
+              <span style="font-family:Georgia,serif;font-size:15px;color:#d4a574;">Stripe Extension</span>
+              <span style="font-family:'Helvetica Neue',sans-serif;font-size:10px;color:#7a6f63;float:right;margin-top:4px;">Stripe API · Node</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body" style="background:#111;padding:24px 40px;border-top:1px solid rgba(212,165,116,0.15);">
+      <h3 style="margin:0 0 8px;color:#d4a574;font-size:16px;">C — "The Atelier"</h3>
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#999;">
+        <strong>Mood:</strong> Refined craft. Architecture studio portfolio.<br>
+        <strong>Fonts:</strong> Cormorant Garamond + Plus Jakarta Sans<br>
+        <strong>Palette:</strong> Warm dark (#1c1917) + copper (#d4a574) + parchment (#ede6db)<br>
+        <strong>Layout:</strong> Generous whitespace, elegant serif/sans pairing, subtle borders, warm warmth.<br>
+        <strong>Vibe:</strong> Feels handcrafted, not generated. Like a physical portfolio you'd flip through in a design studio. Warm, human, intentional.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<div style="margin-top:32px;padding:20px;border:1px solid rgba(255,255,255,0.08);border-radius:8px;background:rgba(255,255,255,0.02);">
+  <p style="margin:0;font-size:13px;color:#888;line-height:1.6;">
+    <strong style="color:#ccc;">Quick summary:</strong><br>
+    <strong>A "The Dossier"</strong> — Dark, data-forward, editorial authority. Gold accent. For the recruiter who appreciates information density.<br>
+    <strong>B "The Signal"</strong> — Light, brutalist, aggressive type. Red scalpel. For the recruiter who respects confidence and clarity.<br>
+    <strong>C "The Atelier"</strong> — Warm dark, refined craft. Copper accent. For the recruiter who values taste and attention to detail.
+  </p>
+</div>

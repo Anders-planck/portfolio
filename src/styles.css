@@ -1,0 +1,139 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
+
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+	--bg: #f5f0e8;
+	--fg: #1a1815;
+	--fg-muted: #666666;
+	--fg-subtle: #999999;
+	--accent: #9a7b3a;
+	--border: rgba(0, 0, 0, 0.08);
+	--surface: #ffffff;
+
+	--font-display: "Cormorant Garamond", Georgia, serif;
+	--font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+.dark {
+	--bg: #0a0a0a;
+	--fg: #f5f0e8;
+	--fg-muted: #8a8577;
+	--fg-subtle: #555555;
+	--accent: #c8a45e;
+	--border: rgba(200, 164, 94, 0.08);
+	--surface: #0a0a0a;
+}
+
+@theme inline {
+	--font-display: var(--font-display);
+	--font-body: var(--font-body);
+	--color-bg: var(--bg);
+	--color-fg: var(--fg);
+	--color-fg-muted: var(--fg-muted);
+	--color-fg-subtle: var(--fg-subtle);
+	--color-accent: var(--accent);
+	--color-border: var(--border);
+	--color-surface: var(--surface);
+}
+
+@layer base {
+	* {
+		border-color: var(--border);
+	}
+	html {
+		scroll-behavior: smooth;
+	}
+	body {
+		background-color: var(--bg);
+		color: var(--fg);
+		font-family: var(--font-body);
+	}
+}
+
+/* View Transition: circle expand for theme toggle */
+::view-transition-old(root),
+::view-transition-new(root) {
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+	z-index: 1;
+}
+
+::view-transition-new(root) {
+	z-index: 9999;
+}
+
+/* Label utility */
+.label {
+	font-size: 9px;
+	color: var(--fg-subtle);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	font-weight: 500;
+}
+
+/* Serif display text */
+.display {
+	font-family: var(--font-display);
+}
+
+/* Hero grid: 2-col on desktop, stacks at 900px like mockup */
+.hero-grid {
+	display: grid;
+	grid-template-columns: 1.2fr 1fr;
+	gap: 48px;
+}
+
+@media (max-width: 900px) {
+	.hero-grid {
+		grid-template-columns: 1fr;
+		gap: 32px;
+	}
+}
+
+/* Work grid: 3-col, 2-col tablet, 1-col mobile */
+.work-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 1px;
+	background: rgba(200, 164, 94, 0.06);
+}
+
+@media (max-width: 900px) {
+	.work-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 600px) {
+	.work-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* Page container */
+.page-wrap {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding-left: 48px;
+	padding-right: 48px;
+}
+
+@media (max-width: 900px) {
+	.page-wrap {
+		padding-left: 28px;
+		padding-right: 28px;
+	}
+}
+
+@media (max-width: 600px) {
+	.page-wrap {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}
