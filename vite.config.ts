@@ -12,7 +12,7 @@ const config = defineConfig({
     tsconfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
-    nitro(),
+    nitro({ preset: "vercel" }),
     viteReact(),
   ],
 });
