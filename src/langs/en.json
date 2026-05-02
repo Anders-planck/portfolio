@@ -1,0 +1,110 @@
+{
+	"common": {
+		"language": {
+			"select": "Select language",
+			"en": "English",
+			"fr": "Français",
+			"it": "Italiano",
+			"de": "Deutsch"
+		},
+		"nav": {
+			"projects": "projects",
+			"about": "about",
+			"resume": "résumé"
+		},
+		"time": {
+			"present": "Present"
+		},
+		"footer": {
+			"email": "Email"
+		}
+	},
+	"home": {
+		"hero": {
+			"headline": {
+				"before": "I build software that ships, scales, and makes complex systems feel simple at ",
+				"emphasis": "scale."
+			},
+			"description": "Software engineer specializing in TypeScript, React, PHP/Symfony, and React Native. Building production systems that scale.",
+			"projects": "View Projects",
+			"cv": "Download CV"
+		},
+		"selectedWork": "Selected Work",
+		"about": "About",
+		"experience": "Experience",
+		"education": "Education",
+		"cta": {
+			"before": "Let's build something ",
+			"emphasis": "together.",
+			"description": "Looking for a software engineer who ships? I'm open to new opportunities, freelance projects, and interesting collaborations.",
+			"contact": "Get in Touch"
+		},
+		"data": {
+			"experience": "Experience",
+			"github": "GitHub",
+			"loading": "Loading...",
+			"yearsProjects": "years · {{count}} projects",
+			"contributions": "contributions",
+			"active": "Active"
+		},
+		"bio": {
+			"about": [
+				"Software engineer based in Ferrara, Italy. I build production systems that handle real traffic and solve real problems — from PSD2-compliant banking interfaces to mobile security modules used in enterprise apps.",
+				"My stack spans both sides: React and React Native on the front, PHP/Symfony and Node/Bun on the back, PostgreSQL underneath, Docker and AWS around it. I care about architecture that lasts, not code that impresses on a whiteboard.",
+				"Master’s in Computer Engineering from Università degli Studi di Ferrara. French native, fluent in Italian and English."
+			]
+		},
+		"work": [
+			{
+				"role": "Software Engineer",
+				"location": "Ferrara, Italy",
+				"description": "Building scalable education technology solutions."
+			},
+			{
+				"role": "Full Stack Developer",
+				"location": "Ferrara, Italy",
+				"description": "Full-stack development across 9+ major projects. Led frontend architecture with React/TypeScript and backend services with PHP/Symfony. Built enterprise SDKs, Stripe integrations, and open-source React Native modules."
+			}
+		],
+		"educationItems": [
+			{
+				"degree": "M.Sc. Computer Engineering & Automation",
+				"institution": "Università degli Studi di Ferrara"
+			},
+			{
+				"degree": "B.Sc. Computer Science & Electronics",
+				"institution": "Università degli Studi di Ferrara"
+			}
+		]
+	},
+	"contact": {
+		"options": "Contact options",
+		"close": "Close",
+		"title": {
+			"before": "Get in ",
+			"emphasis": "Touch"
+		},
+		"intro": "Choose how you'd like to connect.",
+		"linkedin": {
+			"label": "LinkedIn",
+			"description": "Let's connect professionally"
+		},
+		"email": {
+			"label": "Email",
+			"description": "Drop me a message directly"
+		}
+	},
+	"project": {
+		"back": "Back to projects",
+		"role": "Role",
+		"company": "Company",
+		"year": "Year",
+		"visual": "Project visual",
+		"challenge": "The Challenge",
+		"solution": "The Solution",
+		"results": "Results",
+		"learnings": "Learnings",
+		"github": "View on GitHub",
+		"impact": "Impact"
+	}
+}
