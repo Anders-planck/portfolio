@@ -1,0 +1,110 @@
+{
+	"common": {
+		"language": {
+			"select": "Choisir la langue",
+			"en": "English",
+			"fr": "Français",
+			"it": "Italiano",
+			"de": "Deutsch"
+		},
+		"nav": {
+			"projects": "projets",
+			"about": "à propos",
+			"resume": "CV"
+		},
+		"time": {
+			"present": "Présent"
+		},
+		"footer": {
+			"email": "E-mail"
+		}
+	},
+	"home": {
+		"hero": {
+			"headline": {
+				"before": "Je construis des logiciels livrés, robustes, et simples à grande ",
+				"emphasis": "échelle."
+			},
+			"description": "Ingénieur logiciel spécialisé en TypeScript, React, PHP/Symfony et React Native. Je construis des systèmes de production scalables.",
+			"projects": "Voir les projets",
+			"cv": "Télécharger le CV"
+		},
+		"selectedWork": "Projets sélectionnés",
+		"about": "À propos",
+		"experience": "Expérience",
+		"education": "Formation",
+		"cta": {
+			"before": "Construisons quelque chose ",
+			"emphasis": "ensemble.",
+			"description": "Vous cherchez un ingénieur logiciel qui livre ? Je suis ouvert aux opportunités, missions freelance et collaborations intéressantes.",
+			"contact": "Me contacter"
+		},
+		"data": {
+			"experience": "Expérience",
+			"github": "GitHub",
+			"loading": "Chargement...",
+			"yearsProjects": "ans · {{count}} projets",
+			"contributions": "contributions",
+			"active": "Actif"
+		},
+		"bio": {
+			"about": [
+				"Ingénieur logiciel basé à Ferrare, en Italie. Je construis des systèmes de production qui supportent du vrai trafic et résolvent de vrais problèmes, des interfaces bancaires conformes PSD2 aux modules de sécurité mobile utilisés dans des apps d’entreprise.",
+				"Ma stack couvre les deux côtés : React et React Native côté interface, PHP/Symfony et Node/Bun côté backend, PostgreSQL dessous, Docker et AWS autour. Je privilégie une architecture durable plutôt qu’un code fait pour impressionner au tableau blanc.",
+				"Master en Computer Engineering à l’Università degli Studi di Ferrara. Langue maternelle française, courant en italien et en anglais."
+			]
+		},
+		"work": [
+			{
+				"role": "Ingénieur logiciel",
+				"location": "Ferrare, Italie",
+				"description": "Construction de solutions edtech scalables pour la production."
+			},
+			{
+				"role": "Développeur full stack",
+				"location": "Ferrare, Italie",
+				"description": "Développement full-stack sur plus de 9 projets majeurs. Architecture frontend avec React/TypeScript et services backend avec PHP/Symfony. Création de SDK d’entreprise, intégrations Stripe et modules React Native open source."
+			}
+		],
+		"educationItems": [
+			{
+				"degree": "Master en informatique industrielle et automatisation",
+				"institution": "Università degli Studi di Ferrara"
+			},
+			{
+				"degree": "Licence en informatique et électronique",
+				"institution": "Università degli Studi di Ferrara"
+			}
+		]
+	},
+	"contact": {
+		"options": "Options de contact",
+		"close": "Fermer",
+		"title": {
+			"before": "Prendre ",
+			"emphasis": "contact"
+		},
+		"intro": "Choisissez comment me contacter.",
+		"linkedin": {
+			"label": "LinkedIn",
+			"description": "Connectons-nous professionnellement"
+		},
+		"email": {
+			"label": "E-mail",
+			"description": "Envoyez-moi un message directement"
+		}
+	},
+	"project": {
+		"back": "Retour aux projets",
+		"role": "Rôle",
+		"company": "Entreprise",
+		"year": "Année",
+		"visual": "Visuel du projet",
+		"challenge": "Le défi",
+		"solution": "La solution",
+		"results": "Résultats",
+		"learnings": "Apprentissages",
+		"github": "Voir sur GitHub",
+		"impact": "Impact"
+	}
+}

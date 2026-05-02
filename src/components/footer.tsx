@@ -1,7 +1,9 @@
+import { useTranslation } from "react-i18next";
 import { social } from "#/data/cv-data";
 
 export function Footer() {
 	const year = new Date().getFullYear();
+	const { t } = useTranslation("common");
 
 	return (
 		<footer className="page-wrap border-border border-t py-12">
@@ -30,7 +32,7 @@ export function Footer() {
 						href={social.email}
 						className="text-fg-subtle hover:text-accent text-[10px] tracking-[1px] uppercase transition-colors"
 					>
-						Email
+						{t("footer.email")}
 					</a>
 				</div>
 			</div>

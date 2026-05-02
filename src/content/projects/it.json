@@ -1,0 +1,156 @@
+{
+	"open-banking-ui": {
+		"title": "Interfaccia Open Banking",
+		"summary": "Interfaccia di pagamento SEPA conforme PSD2 per aggregazione multi-banca e flussi di transazioni in tempo reale per istituzioni finanziarie.",
+		"role": "Frontend Lead",
+		"company": "A-Cube S.R.L.",
+		"impact": "50K+ transazioni elaborate nel primo trimestre. Onboarding ridotto del 60%.",
+		"challenge": "Gli istituti finanziari avevano bisogno di un’interfaccia unica per rispettare PSD2 e aggregare dati da più provider bancari. La soluzione precedente era frammentata, lenta e non scalava sui volumi enterprise.",
+		"solution": [
+			"Libreria di componenti tipizzata per dati finanziari",
+			"Aggiornamenti ottimistici con rollback per affidabilità transazionale",
+			"Layer multi-banca indipendente dal provider",
+			"Feed WebSocket in tempo reale per monitorare le transazioni",
+			"Supporto multilingua con React Intl per il deploy europeo"
+		],
+		"results": [
+			{
+				"label": "Transazioni Q1"
+			},
+			{
+				"label": "Tempo onboarding"
+			},
+			{
+				"label": "Uptime"
+			}
+		],
+		"learnings": "Lavorare con dati finanziari su larga scala mi ha insegnato che il type safety non è un lusso: è infrastruttura. Ogni confine poco tipizzato può diventare un incidente in produzione.",
+		"media": {
+			"label": "Cruscotto transazioni",
+			"detail": "Pagamenti PSD2, aggregazione conti e stati di riconciliazione"
+		}
+	},
+	"stripe-app-extension": {
+		"title": "Estensione app Stripe",
+		"summary": "App Stripe Marketplace enterprise per fatturazione elettronica con gestione avanzata dello stato e validazione form.",
+		"role": "Frontend Developer",
+		"company": "A-Cube S.R.L.",
+		"impact": "Automatizzato l’85% della riconciliazione manuale. Adottata da 3 clienti enterprise.",
+		"challenge": "I clienti enterprise avevano bisogno di una soluzione nativa Stripe per la fatturazione elettronica italiana. La sfida era gestire stato complesso su 8 viste senza Redux dentro i vincoli delle estensioni Stripe.",
+		"solution": [
+			"Architettura React Context a 6 livelli al posto di Redux",
+			"8 viste principali con validazione avanzata e logica condizionale",
+			"173 memoizzazioni per ottimizzare il rendering in runtime vincolato",
+			"Error boundary custom per il sandbox delle estensioni Stripe"
+		],
+		"results": [
+			{
+				"label": "Automazione"
+			},
+			{
+				"label": "Clienti enterprise"
+			},
+			{
+				"label": "Componenti memoizzati"
+			}
+		],
+		"learnings": "Sviluppare dentro il sandbox Stripe impone soluzioni creative. Niente Redux, bundle limitato, API ristrette: i vincoli hanno portato a un’architettura migliore.",
+		"media": {
+			"label": "Flusso estensione Stripe",
+			"detail": "Workflow di fatturazione in otto viste dentro un runtime vincolato"
+		}
+	},
+	"expo-mutual-tls": {
+		"title": "Expo Mutual TLS",
+		"summary": "Modulo React Native/Expo open source per autenticazione mTLS su iOS e Android, con supporto biometrico.",
+		"role": "Mobile Developer",
+		"company": "A-Cube S.R.L.",
+		"impact": "Modulo open source usato in produzione da app bancarie enterprise.",
+		"challenge": "Le app bancarie enterprise richiedevano autenticazione con certificato mTLS su mobile. Non esisteva un modulo Expo con API React Native unificata.",
+		"solution": [
+			"Implementazione nativa iOS in Swift con integrazione Keychain",
+			"Implementazione nativa Android in Kotlin con KeyStore",
+			"API TypeScript unificata per uso cross-platform",
+			"Supporto biometrico per accesso ai certificati",
+			"Sistema eventi completo per il ciclo di vita della connessione"
+		],
+		"results": [
+			{
+				"label": "Piattaforme"
+			},
+			{
+				"label": "Parità API"
+			},
+			{
+				"label": "Open source"
+			}
+		],
+		"learnings": "Collegare mondo nativo e JavaScript mi ha insegnato a ragionare in due paradigmi insieme. La chiave: progettare prima l’API TypeScript, poi implementare il nativo.",
+		"media": {
+			"label": "Bridge certificati",
+			"detail": "API Expo unificata sopra moduli mTLS nativi iOS e Android"
+		}
+	},
+	"wortschatz": {
+		"title": "Wortschatz",
+		"summary": "App per imparare vocabolario tedesco da italiano, con arricchimento AI, ripetizione dilazionata FSRS e pratica conversazionale.",
+		"role": "Creator & Developer",
+		"company": "Personale",
+		"impact": "Progetto personale che combina mobile, AI e scienza dell’apprendimento.",
+		"challenge": "Le app di lingue sono spesso generiche e sfruttano poco l’AI per arricchire il contesto. Volevo combinare FSRS con esempi generati da AI e pratica conversazionale.",
+		"solution": [
+			"Algoritmo FSRS per programmare le revisioni nel momento giusto",
+			"Integrazione Gemini per arricchimento vocabolario ed esempi",
+			"Modalità conversazionale con dialoghi AI",
+			"Letture graduate adattate al livello dell’utente",
+			"Architettura offline-first con sincronizzazione"
+		],
+		"results": [
+			{
+				"label": "Algoritmo"
+			},
+			{
+				"label": "Motore AI"
+			},
+			{
+				"label": "Offline-first"
+			}
+		],
+		"learnings": "Costruire un’app di apprendimento mi ha costretto a capire FSRS a fondo e a integrare LLM senza rovinare l’UX. La chiave: pre-generare e mettere in cache.",
+		"media": {
+			"label": "Ciclo di apprendimento",
+			"detail": "Arricchimento lessicale, revisioni FSRS e pratica offline-first"
+		}
+	},
+	"parseur": {
+		"title": "Parseur",
+		"summary": "Piattaforma intelligente di parsing documentale che estrae, valida e auto-corregge dati strutturati da PDF e immagini con approccio solo LLM.",
+		"role": "Creator & Developer",
+		"company": "Personale",
+		"impact": "Piattaforma AI full-stack con pipeline multi-LLM per document intelligence.",
+		"challenge": "Estrarre dati strutturati da documenti non strutturati è difficile. Le pipeline OCR tradizionali sono fragili e richiedono regole manuali per ogni layout.",
+		"solution": [
+			"Pipeline multi-LLM con OpenAI GPT-4o e Anthropic Claude 3.5 Sonnet",
+			"Estrazione intelligente con auto-correzione e validazione Zod",
+			"Storage S3-compatible con MinIO per sviluppo locale",
+			"Job in background con Inngest per pipeline asincrone",
+			"App Next.js 16 con Prisma ORM e PostgreSQL"
+		],
+		"results": [
+			{
+				"label": "Provider LLM"
+			},
+			{
+				"label": "Correzione"
+			},
+			{
+				"label": "parseur.vercel.app"
+			}
+		],
+		"learnings": "L’orchestrazione multi-LLM mi ha insegnato che nessun modello eccelle ovunque. GPT-4o capisce meglio il layout visivo, Claude ragiona meglio sulla struttura.",
+		"media": {
+			"label": "Pipeline documentale",
+			"detail": "Estrazione visuale, validazione schema e coda di auto-correzione"
+		}
+	}
+}
