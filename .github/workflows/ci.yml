@@ -22,7 +22,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Check formatting and lint
-        run: bun run check
+        run: bunx biome check
 
       - name: Typecheck
         run: bunx tsc --noEmit
