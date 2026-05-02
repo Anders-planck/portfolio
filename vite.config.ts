@@ -10,9 +10,16 @@ function splitVendorChunk(id: string): string | undefined {
 	const normalizedId = id.replaceAll("\\", "/");
 
 	if (!normalizedId.includes("/node_modules/")) return undefined;
-	if (normalizedId.includes("/node_modules/react-dom/")) return "vendor-react";
-	if (normalizedId.includes("/node_modules/react/")) return "vendor-react";
-	if (normalizedId.includes("@tanstack")) return "vendor-tanstack";
+	if (
+		normalizedId.includes("/node_modules/react-dom/") ||
+		normalizedId.includes("/node_modules/react/") ||
+		normalizedId.includes("/node_modules/scheduler/") ||
+		normalizedId.includes("/node_modules/lucide-react/")
+	) {
+		return "vendor-react";
+	}
+	if (normalizedId.includes("/node_modules/@tanstack/"))
+		return "vendor-tanstack";
 	if (
 		normalizedId.includes("/node_modules/i18next/") ||
 		normalizedId.includes("/node_modules/react-i18next/")

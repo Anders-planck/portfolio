@@ -38,6 +38,15 @@ function readMainChunks(): ClientChunk[] {
 	return readClientChunks().filter((chunk) => chunk.file.startsWith("main-"));
 }
 
+function readChunkImports(chunk: ClientChunk): string[] {
+	return Array.from(
+		chunk.text.matchAll(
+			/import(?:[\s\S]*?)from"\.\/([^"]+\.js)"|import\("\.\/([^"]+\.js)"\)/g,
+		),
+		(match) => match[1] ?? match[2],
+	);
+}
+
 describe("bundle budget", () => {
 	it("keeps localized project CMS content out of the main client chunk", () => {
 		const mainChunks = readMainChunks();
@@ -94,6 +103,20 @@ describe("bundle budget", () => {
 			expect(chunk.text, `${chunk.source}/${chunk.file}`).not.toContain(
 				"data:image/svg+xml",
 			);
+		}
+	});
+
+	it("keeps the React vendor chunk self-contained", () => {
+		const reactChunks = readClientChunks().filter((chunk) =>
+			chunk.file.startsWith("vendor-react-"),
+		);
+		if (reactChunks.length === 0) return;
+
+		for (const chunk of reactChunks) {
+			expect(
+				readChunkImports(chunk),
+				`${chunk.source}/${chunk.file}`,
+			).toHaveLength(0);
 		}
 	});
 });
