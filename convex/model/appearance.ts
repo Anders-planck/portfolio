@@ -160,3 +160,16 @@ export function findAppearanceProblems({
       .map(({ field }) => ({ kind: 'not-a-font-name' as const, field })),
   ]
 }
+
+/**
+ * What the site is served for the stored params: them if they keep every
+ * rule, else the defaults. The table takes any string its validator allows
+ * and only `publish` checks the rules, so a row written another way
+ * (dashboard, import, migration) is checked again before it reaches the CSS.
+ */
+export function toServedAppearance(stored: Appearance | null): Appearance {
+  if (stored === null || findAppearanceProblems(stored).length > 0) {
+    return DEFAULT_APPEARANCE
+  }
+  return stored
+}

@@ -4,28 +4,22 @@ import { internalMutation, query } from './_generated/server'
 import {
   appearanceProblemValidator,
   appearanceValidator,
-  DEFAULT_APPEARANCE,
   findAppearanceProblems,
+  toServedAppearance,
 } from './model/appearance'
 
 /**
- * The published theme and motion params the site renders with (ADR 0010),
- * or the defaults when nothing is published yet. The table takes any string
- * its validator allows, and only `publish` checks the rules; a row written
- * another way (dashboard, import, migration) is checked again here, and one
- * that breaks a rule never reaches the CSS: the defaults are served instead.
+ * The published theme and motion params the site renders with (ADR 0010):
+ * the stored row if it keeps every rule, the defaults otherwise.
  */
 export const getPublished = query({
   args: {},
   returns: appearanceValidator,
   handler: async (ctx) => {
     const row = await ctx.db.query('appearance').first()
-    if (row === null) {
-      return DEFAULT_APPEARANCE
-    }
-    const appearance = { theme: row.theme, motion: row.motion }
-    const isPublishable = findAppearanceProblems(appearance).length === 0
-    return isPublishable ? appearance : DEFAULT_APPEARANCE
+    return toServedAppearance(
+      row === null ? null : { theme: row.theme, motion: row.motion },
+    )
   },
 })
 

@@ -4,6 +4,7 @@ import {
   type Appearance,
   DEFAULT_APPEARANCE,
   findAppearanceProblems,
+  toServedAppearance,
 } from './appearance'
 
 function withTheme(theme: Partial<Appearance['theme']>): Appearance {
@@ -94,4 +95,26 @@ test('a CSS-wide keyword is not a font name, in any case', () => {
       ),
     ).toEqual([{ kind: 'not-a-font-name', field: 'theme.fonts.body' }])
   }
+})
+
+test('nothing stored serves the defaults', () => {
+  expect(toServedAppearance(null)).toEqual(DEFAULT_APPEARANCE)
+})
+
+test('stored params that keep every rule are served as they are', () => {
+  const stored = withTheme({ basePx: 18, mode: 'dark' })
+  expect(toServedAppearance(stored)).toEqual(stored)
+})
+
+test('stored params that break a rule serve the defaults', () => {
+  expect(
+    toServedAppearance(
+      withTheme({
+        fonts: { body: 'x</style>', heading: 'Figtree', code: 'ui-monospace' },
+      }),
+    ),
+  ).toEqual(DEFAULT_APPEARANCE)
+  expect(toServedAppearance(withTheme({ basePx: 99 }))).toEqual(
+    DEFAULT_APPEARANCE,
+  )
 })
