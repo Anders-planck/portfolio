@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "convex dev --start 'vite dev'",
+    "dev": "convex dev --run seed:profile --start 'vite dev'",
     "dev:convex": "convex dev",
     "dev:web": "vite dev",
     "build": "vite build",

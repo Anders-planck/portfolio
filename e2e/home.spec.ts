@@ -1,10 +1,16 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
-test('hello page is server-rendered from Convex', async ({ request }) => {
+// The Convex webServer runs `seed:profile`, which publishes the profile once.
+
+test('Home is server-rendered from the published profile', async ({
+  request,
+}) => {
   const response = await request.get('/')
   expect(response.ok()).toBe(true)
-  expect(await response.text()).toContain('Ciao da Convex')
+  const html = await response.text()
+  expect(html).toContain('Software Engineer @ Madisoft · Ferrara')
+  expect(html).toContain('Frontend e full-stack in TypeScript.')
 })
 
 test('SSR head links globals.css first, then the portfolio theme', async ({
@@ -28,13 +34,17 @@ test('SSR head links globals.css first, then the portfolio theme', async ({
   expect(themeIndex).toBeGreaterThan(0)
 })
 
-test('hello page shows the greeting and has no axe violations', async ({
+test('Home shows the published profile and has no axe violations', async ({
   page,
 }) => {
   await page.goto('/')
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Ciao da Convex' }),
+    page.getByRole('heading', { level: 1, name: 'Software Engineer.' }),
   ).toBeVisible()
+  await expect(page.getByRole('link', { name: 'GitHub' })).toHaveAttribute(
+    'href',
+    'https://github.com/Anders-planck',
+  )
 
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])

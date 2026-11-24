@@ -15,8 +15,8 @@ import type * as content_profile from "../content/profile.js";
 import type * as content_rules from "../content/rules.js";
 import type * as content_snapshot from "../content/snapshot.js";
 import type * as content_store from "../content/store.js";
-import type * as hello from "../hello.js";
 import type * as lib_requireOwner from "../lib/requireOwner.js";
+import type * as seed from "../seed.js";
 
 import type {
   ApiFromModules,
@@ -32,8 +32,8 @@ declare const fullApi: ApiFromModules<{
   "content/rules": typeof content_rules;
   "content/snapshot": typeof content_snapshot;
   "content/store": typeof content_store;
-  hello: typeof hello;
   "lib/requireOwner": typeof lib_requireOwner;
+  seed: typeof seed;
 }>;
 
 /**
