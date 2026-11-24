@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master, redesign/v3, "v3/**"]
+    branches: [master, redesign/v3, 'v3/**']
   pull_request:
 
 concurrency:
@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint, typecheck, unit
+    name: Format, lint, typecheck, unit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +19,7 @@ jobs:
         with:
           bun-version: 1.4.0
       - run: bun install --frozen-lockfile
+      - run: bun run format:check
       - run: bun run lint
       - run: bun run typecheck
       - run: bun run test

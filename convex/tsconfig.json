@@ -12,6 +12,18 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
 
+    /* Owner standards, TS-02 (CODING_STANDARDS.md). */
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noImplicitOverride": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "noUncheckedSideEffectImports": true,
+
     /* These compiler options are required by Convex */
     "target": "ESNext",
     "lib": ["ES2023", "dom"],

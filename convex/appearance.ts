@@ -1,0 +1,83 @@
+import { v } from 'convex/values'
+
+import { internalMutation, internalQuery, query } from './_generated/server'
+import {
+  appearanceProblemValidator,
+  appearanceValidator,
+  findAppearanceProblems,
+  toServedAppearanceFromStored,
+} from './model/appearance'
+
+/**
+ * The published theme and motion params the site renders with (ADR 0010):
+ * the stored row if it keeps every rule, the defaults otherwise.
+ */
+export const getPublished = query({
+  args: {},
+  returns: appearanceValidator,
+  handler: async (ctx) => {
+    const row = await ctx.db.query('appearance').first()
+    return toServedAppearanceFromStored(
+      row === null ? null : { theme: row.theme, motion: row.motion },
+    )
+  },
+})
+
+/**
+ * Why the stored row is not what the site shows, when it breaks a rule (it was
+ * written past `publish`): the site then serves the defaults, and this is what
+ * the CMS overview reports. Empty when the row is fine or there is none.
+ * Internal until owner auth exists (ticket 05).
+ */
+export const findStoredProblems = internalQuery({
+  args: {},
+  returns: v.array(appearanceProblemValidator),
+  handler: async (ctx) => {
+    const row = await ctx.db.query('appearance').first()
+    if (row === null) {
+      return []
+    }
+    return findAppearanceProblems({ theme: row.theme, motion: row.motion })
+  },
+})
+
+/**
+ * Publishes new params; open pages restyle at once. Params that break a rule
+ * are a result the owner sees, not an error. Internal until the CMS and owner
+ * auth exist (tickets 03 and 05); the e2e test calls it with `convex run`.
+ */
+export const publish = internalMutation({
+  args: appearanceValidator,
+  returns: v.union(
+    v.object({ kind: v.literal('published') }),
+    v.object({
+      kind: v.literal('rejected'),
+      problems: v.array(appearanceProblemValidator),
+    }),
+  ),
+  handler: async (ctx, appearance) => {
+    const problems = findAppearanceProblems(appearance)
+    if (problems.length > 0) {
+      return { kind: 'rejected' as const, problems }
+    }
+    const row = await ctx.db.query('appearance').first()
+    if (row === null) {
+      await ctx.db.insert('appearance', appearance)
+    } else {
+      await ctx.db.replace(row._id, appearance)
+    }
+    return { kind: 'published' as const }
+  },
+})
+
+/** Withdraws the published params, so the site renders the defaults again. */
+export const unpublish = internalMutation({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    // The table holds one row; take() bounds the read regardless.
+    const rows = await ctx.db.query('appearance').take(10)
+    await Promise.all(rows.map((row) => ctx.db.delete(row._id)))
+    return null
+  },
+})

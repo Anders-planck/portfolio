@@ -53,17 +53,22 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+## Coding standards (binding)
+
+Read `CODING_STANDARDS.md` before writing or reviewing code in `src/`, `convex/` or `e2e/`; the `coding-standards` skill is its checklist. Every implementer runs the `standards-reviewer` agent on their diff (with its base ref) and fixes what it reports before reporting done.
+
 ## Project
 
 Portfolio v3: TanStack Start (React 19) + Convex + Astryx, served by Cloudflare Workers. Before any work read `GLOSSARY.md`, `docs/adr/`, then `docs/redesign/PLAN.md`; its "Design resolutions" override the mockups in `docs/redesign/design/`. Numbers never appear as free text (ADR 0004).
 
-Layout: `src/routes/` (file routes; `routeTree.gen.ts` is generated), `src/router.tsx` (Convex + React Query wiring), `src/styles/globals.css` (cascade-layer order; must stay the first stylesheet), `convex/` (backend; `_generated/` is generated, commit it), `themes/portfolio/` (Astryx theme source; change it only through `bunx astryx experimental theme editor`), `src/themes/portfolio/` and `src/astryx-themes.js` (app copy the editor generates; never hand-edit), `e2e/` (Playwright), `scripts/wizard/` (owner-only steps).
+Layout: `src/routes/` (file routes, wiring only; `routeTree.gen.ts` is generated), `src/pages/`, `src/widgets/`, `src/features/`, `src/entities/`, `src/shared/` (the layers of ARC-01; the folder map is in the `coding-standards` skill), `src/shared/config/env.ts` (the only reader of environment values), `src/router.tsx` (Convex + React Query wiring), `src/styles/globals.css` (cascade-layer order; must stay the first stylesheet), `convex/` (backend; `_generated/` is generated, commit it), `themes/portfolio/` (Astryx theme source; change it only through `bunx astryx experimental theme editor`), `src/themes/portfolio/` and `src/astryx-themes.js` (app copy the editor generates; never hand-edit), `e2e/` (Playwright), `scripts/wizard/` (owner-only steps).
 
 Commands (bun only):
 - `bun run dev` runs Convex and Vite. Without a Convex login use `CONVEX_AGENT_MODE=anonymous bun run dev:convex` plus `bun run dev:web`.
 - `bun run typecheck` runs TypeScript 7 (`@typescript/native`); the `typescript` package is TS 6 for tools that need its API.
-- Before pushing, all must pass: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run e2e`, then `bun run build && bun run doctor`.
+- `bun run format` (Prettier, the only formatter; Markdown and generated files are excluded).
+- Before pushing, all must pass: `bun run format:check`, `bun run lint`, `bun run typecheck`, `bun run test`, `bun run e2e`, then `bun run build && bun run doctor`.
 
-Data in routes: `convexQuery` + `context.queryClient.ensureQueryData` in the loader (server render), `useSuspenseQuery` in the component (live updates). Test Convex functions with `convex-test` next to them (`convex/*.test.ts`).
+Data in routes: options from `convexQueryOptions` (`src/shared/convex/`), `context.queryClient.query({ ...options, staleTime: 'static' })` in the loader (server render), `useSuspenseQuery` in the page (live updates). Test Convex functions with `convex-test` next to them (`convex/*.test.ts`).
 
 Owner-only steps (accounts, logins, secrets, DNS): write a `wizard` script under `scripts/wizard/` and list it in `docs/redesign/OWNER-STEPS.md`. Never ask for, print or commit secrets.

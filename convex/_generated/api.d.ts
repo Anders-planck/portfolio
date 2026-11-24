@@ -8,14 +8,18 @@
  * @module
  */
 
-import type * as content_drafts from "../content/drafts.js";
-import type * as content_locales from "../content/locales.js";
-import type * as content_previewToken from "../content/previewToken.js";
-import type * as content_profile from "../content/profile.js";
-import type * as content_rules from "../content/rules.js";
-import type * as content_snapshot from "../content/snapshot.js";
-import type * as content_store from "../content/store.js";
-import type * as lib_requireOwner from "../lib/requireOwner.js";
+import type * as appearance from "../appearance.js";
+import type * as content from "../content.js";
+import type * as model_appearance from "../model/appearance.js";
+import type * as model_content_drafts from "../model/content/drafts.js";
+import type * as model_content_locales from "../model/content/locales.js";
+import type * as model_content_preview from "../model/content/preview.js";
+import type * as model_content_profile from "../model/content/profile.js";
+import type * as model_content_releases from "../model/content/releases.js";
+import type * as model_content_rules from "../model/content/rules.js";
+import type * as model_content_snapshot from "../model/content/snapshot.js";
+import type * as model_env from "../model/env.js";
+import type * as model_owner from "../model/owner.js";
 import type * as seed from "../seed.js";
 
 import type {
@@ -25,14 +29,18 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "content/drafts": typeof content_drafts;
-  "content/locales": typeof content_locales;
-  "content/previewToken": typeof content_previewToken;
-  "content/profile": typeof content_profile;
-  "content/rules": typeof content_rules;
-  "content/snapshot": typeof content_snapshot;
-  "content/store": typeof content_store;
-  "lib/requireOwner": typeof lib_requireOwner;
+  appearance: typeof appearance;
+  content: typeof content;
+  "model/appearance": typeof model_appearance;
+  "model/content/drafts": typeof model_content_drafts;
+  "model/content/locales": typeof model_content_locales;
+  "model/content/preview": typeof model_content_preview;
+  "model/content/profile": typeof model_content_profile;
+  "model/content/releases": typeof model_content_releases;
+  "model/content/rules": typeof model_content_rules;
+  "model/content/snapshot": typeof model_content_snapshot;
+  "model/env": typeof model_env;
+  "model/owner": typeof model_owner;
   seed: typeof seed;
 }>;
 

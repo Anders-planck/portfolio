@@ -18,12 +18,6 @@ Until then, development and CI use the anonymous local Convex backend (`CONVEX_A
 
 Preview URL: https://portfolio.anders-jipwouo.workers.dev
 
-## Pending
-
-### Ticket 03 · Preview token secret
-
-Preview links are signed with `PREVIEW_TOKEN_SECRET` (Convex env). Not needed until the CMS preview screen exists; set it on each deployment that serves preview with `bunx convex env set PREVIEW_TOKEN_SECRET "$(openssl rand -base64 32)"` (it never leaves the deployment). Unit tests use a fixed test value.
-
 ## Later tickets
 
 - Convex production deployment and deploy key; GitHub OAuth app; R2 bucket and keys; Convex env vars (`docs/redesign/PLAN.md` → Environments and secrets); DNS cutover. Each gets its wizard in the ticket that needs it.
