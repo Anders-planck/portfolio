@@ -90,12 +90,12 @@ export async function publishSelection(
     return { status: 'blocked', findings }
   }
   const versionIds = await writeVersions(ctx, snapshots, now)
-  const base = { versionIds, note, requestId, findings }
+  const releaseFields = { versionIds, note, requestId, findings }
   if (scheduledAt !== undefined && scheduledAt > now) {
     // Versions are frozen now; edits made after scheduling wait for the next
     // publish. The rules run again when the release comes due.
     const releaseId = await ctx.db.insert('releases', {
-      ...base,
+      ...releaseFields,
       status: 'scheduled',
       scheduledAt,
     })
@@ -105,7 +105,7 @@ export async function publishSelection(
     return { status: 'scheduled', releaseId, findings }
   }
   const releaseId = await ctx.db.insert('releases', {
-    ...base,
+    ...releaseFields,
     status: 'published',
     publishedAt: now,
   })
@@ -126,17 +126,17 @@ export async function publishScheduledRelease(
   const { versionIds, note, requestId, scheduledAt } = release
   const versions = await readVersions(ctx, versionIds)
   const findings = runPublishRules(versions.map(({ snapshot }) => snapshot))
-  const base = { versionIds, note, requestId, findings, scheduledAt }
+  const releaseFields = { versionIds, note, requestId, findings, scheduledAt }
   if (hasBlockingFinding(findings)) {
     await ctx.db.replace(releaseId, {
-      ...base,
+      ...releaseFields,
       status: 'failed',
       failedAt: now,
     })
     return
   }
   await ctx.db.replace(releaseId, {
-    ...base,
+    ...releaseFields,
     status: 'published',
     publishedAt: now,
   })

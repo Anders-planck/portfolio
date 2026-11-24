@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { api, internal } from './_generated/api'
 import type { Locale } from './model/content/locales'
+import { PREVIEW_TOKEN_TTL_MS } from './model/content/preview'
 import { type Finding, PUBLISH_RULES, type Rule } from './model/content/rules'
 import schema from './schema'
 
@@ -376,7 +377,7 @@ describe('preview', () => {
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
 
-    vi.advanceTimersByTime(60 * 60 * 1000 + 1)
+    vi.advanceTimersByTime(PREVIEW_TOKEN_TTL_MS + 1)
 
     expect(await backend.query(api.content.getDraft, { token })).toBeNull()
   })
