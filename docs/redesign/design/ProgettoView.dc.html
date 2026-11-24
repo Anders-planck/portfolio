@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Progetto · Anders Planck</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f1f1f1}
+:root{
+--color-accent:light-dark(#1b1b1b,#f1f1f1);--color-accent-muted:light-dark(#d4d4d4,#474747);--color-on-accent:light-dark(#ffffff,#111111);
+--color-neutral:light-dark(#0000000F,#ffffff1A);--color-background-body:light-dark(#f1f1f1,#1b1b1b);--color-background-surface:light-dark(#ffffff,#262626);--color-background-gray:light-dark(#e2e2e2,#303030);
+--color-text-primary:light-dark(#000000,#ffffff);--color-text-secondary:light-dark(#474747,#9e9e9e);
+--color-border:light-dark(#00000014,#ffffff1A);--color-border-emphasized:light-dark(#d4d4d4,#525252);--color-track:light-dark(#CCD3DB,#5A5E66);
+--color-background-teal:light-dark(#a9e2d6,#28413c);--color-text-teal:light-dark(#00463d,#90d7c8);
+--color-background-orange:light-dark(#ffc7a1,#503424);--color-text-orange:light-dark(#622700,#ffb37e);
+--color-background-yellow:light-dark(#fae19e,#453a1c);--color-text-yellow:light-dark(#4b3900,#eec448);
+--color-background-blue:light-dark(#b9d7ff,#253c5a);--color-text-blue:light-dark(#003978,#a1caff);
+--spacing-1:0.25rem;--spacing-2:0.5rem;--spacing-3:0.75rem;--spacing-4:1rem;--spacing-5:1.25rem;--spacing-6:1.5rem;--spacing-8:2rem;--spacing-12:3rem;
+--radius-inner:8px;--radius-element:12px;--radius-container:16px;--radius-full:9999px;
+--duration-fast:175ms;--duration-medium:410ms;--duration-medium-max:550ms;--ease-entrance:cubic-bezier(0.24,1,0.4,1);--ease-move:cubic-bezier(0.24,1,0.4,1);
+--font-family-body:Figtree,system-ui,sans-serif;--font-family-code:"SF Mono",ui-monospace,monospace;
+--font-size-sm:0.8rem;--font-size-base:1rem;--font-size-lg:1.25rem;--font-size-xl:1.563rem;--font-size-2xl:1.953rem;--font-size-3xl:2.441rem;--font-size-4xl:3.052rem;--font-size-5xl:3.815rem;
+}
+a{color:var(--color-text-primary)}a:hover{color:var(--color-text-secondary)}
+.scroller{scrollbar-width:none}.scroller::-webkit-scrollbar{display:none}
+@keyframes rise{from{transform:translateY(110%)}to{transform:translateY(0)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.line{display:block;overflow:hidden;padding-bottom:0.06em}.line>span{display:block;animation:rise var(--duration-medium-max) var(--ease-entrance) both}
+.d1>span{animation-delay:70ms}
+.fade{animation:fade var(--duration-medium) var(--ease-entrance) both;animation-delay:200ms}
+.up{animation:up var(--duration-medium-max) var(--ease-entrance) both}
+.face,.stage{transition:transform var(--duration-medium-max) var(--ease-move),opacity var(--duration-medium) var(--ease-move),box-shadow var(--duration-medium) var(--ease-move)}
+.chap{all:unset;cursor:none;display:flex;align-items:center;gap:var(--spacing-3);min-height:30px;font-size:var(--font-size-sm);font-weight:600}
+.dial{all:unset;cursor:none;width:40px;height:40px;display:grid;place-items:center;border-radius:var(--radius-full);background:var(--color-neutral)}
+.chap:focus-visible,.dial:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.line>span,.fade,.up{animation:none}.face,.stage{transition:opacity var(--duration-fast)}}
+</style>
+</helmet>
+<div onMouseMove="{{onMove}}" onMouseLeave="{{onOut}}" style="color-scheme: light; position: relative; width: 1440px; height: 900px; overflow: hidden; cursor: none; background: var(--color-background-body); color: var(--color-text-primary); font-family: var(--font-family-body); font-size: var(--font-size-base); line-height: 1.55">
+  <div class="scroller" ref="{{scRef}}" onScroll="{{onScroll}}" style="position: absolute; inset: 0; overflow-y: auto">
+    <div style="height: 5400px">
+      <div style="position: sticky; top: 0; height: 900px; overflow: hidden">
+
+        <div class="stage" style="position: absolute; inset: 0; display: grid; place-items: center; transform: {{stageT}}">
+          <div onPointerDown="{{pDown}}" onPointerMove="{{pMove}}" onPointerUp="{{pUp}}" onPointerCancel="{{pUp}}" onMouseEnter="{{cubeIn}}" onMouseLeave="{{cubeOut}}" style="padding: 3rem 4rem 0; perspective: 1400px; touch-action: pan-y; user-select: none; display: flex; flex-direction: column; align-items: center; gap: var(--spacing-8)">
+            <div style="position: relative; width: 11rem; height: 17rem; transform-style: preserve-3d; transform: {{cubeT}}; transition: {{cubeTr}}">
+              <sc-for list="{{faces}}" as="f" hint-placeholder-count="4">
+                <div class="face" style="position: absolute; inset: 0; box-sizing: border-box; padding: var(--spacing-5); border-radius: var(--radius-inner); display: flex; flex-direction: column; justify-content: space-between; background: {{f.bg}}; color: {{f.fg}}; border: 1px solid var(--color-border); box-shadow: {{f.glow}}; transform: {{f.t}}">
+                  <span style="display: flex; justify-content: space-between; font-family: var(--font-family-code); font-size: var(--font-size-sm)"><span>{{f.num}}</span><span>{{f.code}}</span></span>
+                  <strong style="font-size: var(--font-size-xl); line-height: 1.1">{{f.label}}</strong>
+                </div>
+              </sc-for>
+              <div class="face" style="position: absolute; left: 0; top: 3rem; width: 11rem; height: 11rem; border-radius: var(--radius-inner); background: var(--color-background-gray); transform: rotateX(90deg) translateZ(8.5rem)"></div>
+              <div class="face" style="position: absolute; left: 0; top: 3rem; width: 11rem; height: 11rem; border-radius: var(--radius-inner); background: var(--color-accent-muted); transform: rotateX(-90deg) translateZ(8.5rem)"></div>
+            </div>
+            <div class="fade" style="display: flex; flex-direction: column; align-items: center; gap: var(--spacing-2)">
+              <div role="group" aria-label="Capitolo" style="display: flex; align-items: center; gap: var(--spacing-3); padding: var(--spacing-1); border-radius: var(--radius-full); background: var(--color-background-surface); border: 1px solid var(--color-border); font-size: var(--font-size-sm)">
+                <button type="button" class="dial" onPointerDown="{{stop}}" onClick="{{prev}}" onMouseEnter="{{linkIn}}" onMouseLeave="{{cubeIn}}" aria-label="Capitolo precedente"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+                <span aria-live="polite" style="min-width: 13rem; text-align: center"><strong>{{chapNum}} / 06 · {{chapName}}</strong></span>
+                <button type="button" class="dial" onPointerDown="{{stop}}" onClick="{{next}}" onMouseEnter="{{linkIn}}" onMouseLeave="{{cubeIn}}" aria-label="Capitolo successivo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+              </div>
+              <span style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">Trascina il blocco per girarlo · scorri per cambiare capitolo</span>
+            </div>
+          </div>
+        </div>
+
+        <header style="position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: var(--spacing-6); padding: var(--spacing-6) 6rem">
+          <a href="Home.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-size: var(--font-size-lg); font-weight: 800; letter-spacing: -0.02em; text-decoration: none; cursor: none">anders/planck</a>
+          <nav aria-label="Percorso di navigazione" style="flex-grow: 1; display: flex; gap: var(--spacing-2); font-size: var(--font-size-sm); color: var(--color-text-secondary)"><a href="Lavori.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="color: var(--color-text-secondary); cursor: none">Lavori</a><span>/</span><span style="color: var(--color-text-primary)">{{p.title}}</span></nav>
+          <a href="Note.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: none">Note</a><a href="Percorso.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-size: var(--font-size-sm); color: var(--color-text-secondary); cursor: none">Percorso</a><a href="NotFound.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-size: var(--font-size-sm); font-weight: 700; cursor: none">IT</a>
+          <span style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">{{pct}} / 100</span>
+        </header>
+
+        <div style="position: absolute; left: 6rem; top: 8rem; width: 32rem; transform: {{textT}}; transition: transform var(--duration-medium-max) var(--ease-move)">
+          <sc-if value="{{c0}}" hint-placeholder-val="{{ true }}">
+            <span class="fade" style="display: inline-flex; gap: var(--spacing-2); font-size: var(--font-size-sm); font-weight: 600"><span style="padding: 2px var(--spacing-2); border-radius: var(--radius-inner); background: {{p.tagBg}}; color: {{p.tagFg}}">{{p.kind}}</span><span style="color: var(--color-text-secondary)">{{p.when}}</span></span>
+            <h1 style="margin: var(--spacing-4) 0 0; font-size: var(--font-size-5xl); line-height: 0.98; font-weight: 800; letter-spacing: -0.035em"><span class="line"><span>{{p.title}}</span></span></h1>
+            <p class="fade" style="margin: var(--spacing-5) 0 0; font-size: var(--font-size-lg); color: var(--color-text-secondary)">{{p.sub}}</p>
+            <dl style="margin: var(--spacing-6) 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--spacing-4)">
+              <sc-for list="{{p.stats}}" as="s" hint-placeholder-count="4">
+                <div class="up" style="animation-delay: {{s.delay}}; padding: var(--spacing-4); border-radius: var(--radius-container); background: var(--color-background-surface)"><dt style="font-size: var(--font-size-sm); color: var(--color-text-secondary)">{{s.label}}</dt><dd style="margin: 0; font-size: var(--font-size-xl); font-weight: 700">{{s.value}}</dd></div>
+              </sc-for>
+            </dl>
+            <span class="fade" style="display: block; margin-top: var(--spacing-3); font-size: var(--font-size-sm); color: var(--color-text-secondary)">{{p.source}}</span>
+          </sc-if>
+          <sc-if value="{{c1}}" hint-placeholder-val="{{ false }}">
+            <span class="fade" style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">01 · Il problema</span>
+            <h2 style="margin: var(--spacing-3) 0 0; font-size: var(--font-size-3xl); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em"><span class="line"><span>{{p.problemTitle}}</span></span></h2>
+            <p class="fade" style="margin: var(--spacing-5) 0 0; font-size: var(--font-size-lg); color: var(--color-text-secondary)">{{p.problem}}</p>
+          </sc-if>
+          <sc-if value="{{c2}}" hint-placeholder-val="{{ false }}">
+            <span class="fade" style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">02 · Architettura</span>
+            <h2 style="margin: var(--spacing-3) 0 var(--spacing-5); font-size: var(--font-size-3xl); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em"><span class="line"><span>Come è fatto</span></span></h2>
+            <ol style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--spacing-2)">
+              <sc-for list="{{p.arch}}" as="a" hint-placeholder-count="4">
+                <li class="up" style="animation-delay: {{a.delay}}; display: flex; align-items: center; gap: var(--spacing-3)">
+                  <span aria-hidden="true" style="width: 1.5rem; text-align: center; color: var(--color-text-secondary)">{{a.arrow}}</span>
+                  <div style="flex-grow: 1; padding: var(--spacing-3) var(--spacing-4); border-radius: var(--radius-element); background: {{a.bg}}; color: {{a.fg}}"><strong>{{a.t}}</strong> <span style="font-size: var(--font-size-sm)">{{a.d}}</span></div>
+                </li>
+              </sc-for>
+            </ol>
+            <p class="fade" style="margin: var(--spacing-4) 0 0; font-size: var(--font-size-sm); color: var(--color-text-secondary)">{{p.archNote}}</p>
+          </sc-if>
+          <sc-if value="{{c3}}" hint-placeholder-val="{{ false }}">
+            <span class="fade" style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">03 · AI</span>
+            <h2 style="margin: var(--spacing-3) 0 var(--spacing-5); font-size: var(--font-size-3xl); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em"><span class="line"><span>Dove c'è l'AI, e dove no</span></span></h2>
+            <div class="up" style="animation-delay: 120ms; padding: var(--spacing-5); border-radius: var(--radius-container); background: var(--color-background-surface); margin-bottom: var(--spacing-3)"><strong style="display: block">Nel prodotto</strong><span style="color: var(--color-text-secondary)">{{p.aiProduct}}</span></div>
+            <div class="up" style="animation-delay: 220ms; padding: var(--spacing-5); border-radius: var(--radius-container); background: var(--color-background-surface)"><strong style="display: block">Nello sviluppo</strong><span style="color: var(--color-text-secondary)">{{p.aiDev}}</span></div>
+          </sc-if>
+          <sc-if value="{{c4}}" hint-placeholder-val="{{ false }}">
+            <span class="fade" style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">04 · Limiti e lezioni</span>
+            <h2 style="margin: var(--spacing-3) 0 var(--spacing-5); font-size: var(--font-size-3xl); line-height: 1.05; font-weight: 800; letter-spacing: -0.02em"><span class="line"><span>Detto chiaro</span></span></h2>
+            <ul class="up" style="animation-delay: 120ms; margin: 0; padding: var(--spacing-5) var(--spacing-5) var(--spacing-5) var(--spacing-8); border-radius: var(--radius-container); background: var(--color-background-yellow); color: var(--color-text-yellow); display: flex; flex-direction: column; gap: var(--spacing-2)">
+              <sc-for list="{{p.limits}}" as="l" hint-placeholder-count="2"><li>{{l.t}}</li></sc-for>
+            </ul>
+            <div class="up" style="animation-delay: 220ms; margin-top: var(--spacing-4)"><strong style="display: block">Cosa ho imparato</strong><span style="color: var(--color-text-secondary)">{{p.learned}}</span></div>
+          </sc-if>
+          <sc-if value="{{c5}}" hint-placeholder-val="{{ false }}">
+            <span class="fade" style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">05 · Prossimo progetto</span>
+            <h2 style="margin: var(--spacing-3) 0 0; font-size: var(--font-size-5xl); line-height: 0.98; font-weight: 800; letter-spacing: -0.035em"><span class="line"><span>{{n.title}}</span></span></h2>
+            <p class="fade" style="margin: var(--spacing-5) 0 var(--spacing-8); font-size: var(--font-size-lg); color: var(--color-text-secondary)">{{n.sub}}</p>
+            <a href="{{n.href}}" ref="{{btnRef}}" onMouseEnter="{{nextIn}}" onMouseLeave="{{clearHover}}" class="fade" style="cursor: none; min-height: 56px; box-sizing: border-box; padding: var(--spacing-4) var(--spacing-8); display: inline-flex; align-items: center; gap: var(--spacing-3); border-radius: var(--radius-full); background: var(--color-accent); color: var(--color-on-accent); text-decoration: none; font-weight: 700; font-size: var(--font-size-lg); transform: {{magT}}; transition: transform var(--duration-medium) var(--ease-move)"><span style="display: inline-block; transform: {{magInnerT}}; transition: transform var(--duration-medium) var(--ease-move)">Apri {{n.title}} →</span></a> <a href="Lavori.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" class="fade" style="cursor: none; margin-left: var(--spacing-4); font-weight: 600">Tutti i lavori</a>
+          </sc-if>
+        </div>
+
+        <nav aria-label="Capitoli" style="position: absolute; right: 6rem; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: var(--spacing-2); align-items: flex-end">
+          <sc-for list="{{chapters}}" as="c" hint-placeholder-count="6">
+            <button type="button" class="chap" onClick="{{c.go}}" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" aria-current="{{c.current}}" style="color: {{c.color}}">{{c.label}}<span style="height: 2px; border-radius: var(--radius-full); background: currentColor; width: {{c.w}}; transition: width var(--duration-medium) var(--ease-move)"></span></button>
+          </sc-for>
+        </nav>
+
+        <div aria-hidden="true" style="position: absolute; left: 6rem; right: 6rem; bottom: var(--spacing-12); display: flex; justify-content: flex-end">
+          <span style="width: 12rem; height: 2px; border-radius: var(--radius-full); background: var(--color-track); overflow: hidden"><span style="display: block; height: 100%; width: {{barW}}; background: var(--color-accent)"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div aria-hidden="true" style="position: absolute; left: {{rx}}px; top: {{ry}}px; width: {{rs}}px; height: {{rs}}px; transform: translate(-50%, -50%); box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--color-accent); background: {{rbg}}; color: var(--color-on-accent); display: grid; place-items: center; font-size: var(--font-size-sm); font-weight: 700; pointer-events: none; opacity: {{curOp}}; transition: width var(--duration-fast) var(--ease-move), height var(--duration-fast) var(--ease-move), background var(--duration-fast) var(--ease-move), opacity var(--duration-fast); z-index: 10">{{cursorLabel}}</div>
+  <div aria-hidden="true" style="position: absolute; left: {{cx}}px; top: {{cy}}px; width: 6px; height: 6px; transform: translate(-50%, -50%); border-radius: var(--radius-full); background: var(--color-accent); pointer-events: none; opacity: {{dotOp}}; z-index: 11"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"slug":{"editor":"enum","options":["madisoft","sdk","expo","pizzeria","leco","parseur","wortschatz","bussola","comanda"],"default":"expo"},"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mx: 0, my: 0, cx: 1100, cy: 640, rx: 1100, ry: 640, p: 0, hk: '', inside: false, yaw: 0, pitch: 0, drag: false, used: false };
+    this.next = null; this.raf = null; this.loop = null; this.sc = null; this.btn = null;
+    this.scale = 1; this.dragStart = null; this.baseNow = 30; this.chapNow = 0;
+  }
+  componentWillUnmount() { if (this.raf) cancelAnimationFrame(this.raf); if (this.loop) cancelAnimationFrame(this.loop); }
+  follow() {
+    if (this.loop) return;
+    const tick = () => {
+      const s = this.state; const nx = s.rx + (s.cx - s.rx) * 0.18, ny = s.ry + (s.cy - s.ry) * 0.18;
+      if (Math.abs(s.cx - nx) < 0.4 && Math.abs(s.cy - ny) < 0.4) { this.loop = null; this.setState({ rx: s.cx, ry: s.cy }); return; }
+      this.setState({ rx: nx, ry: ny }); this.loop = requestAnimationFrame(tick);
+    };
+    this.loop = requestAnimationFrame(tick);
+  }
+  goTo(i) { if (this.sc) this.sc.scrollTo({ top: ((i + 0.5) / 6) * (this.sc.scrollHeight - this.sc.clientHeight), behavior: 'smooth' }); }
+  data() {
+    const st = (arr, src) => arr.map((x, i) => ({ label: x[0], value: x[1], delay: `${200 + i * 80}ms` }));
+    const S = 'var(--color-background-surface)', T = 'var(--color-text-primary)', A = 'var(--color-accent)', OA = 'var(--color-on-accent)';
+    const ar = (arr) => arr.map((x, i) => ({ t: x[0], d: x[1], bg: x[2] || S, fg: x[3] || T, arrow: i === 0 ? '' : '↓', delay: `${120 + i * 110}ms` }));
+    const L = (arr) => arr.map((x) => ({ t: x }));
+    const mk = (o) => o;
+    return {
+      madisoft: mk({ title: 'Gestionale per le scuole', kind: 'Lavoro · Madisoft', when: 'mar–nov 2026 · repo privato', tagBg: A, tagFg: OA, next: 'sdk',
+        sub: 'Responsabile del frontend: impianto, regole, test. Il prodotto resta riservato: racconto come lo costruisco, non cosa fa.',
+        stats: st([['PR mergiati', '270'], ['PR con test', '218'], ['Copertura righe', '95,6%'], ['Review su PR backend', '25']]), source: 'Fonte: GitHub (repo privato), al 23 nov 2026.',
+        problemTitle: 'Un frontend che regge un team e gli agenti', problem: 'Il frontend doveva crescere in fretta senza perdere coerenza, con persone e agenti AI che ci lavorano insieme ogni giorno.',
+        arch: ar([['React 19 + Vite', 'moduli per feature, design system aziendale'], ['Confini nel lint', 'tra moduli e accessibilità, bloccanti', A, OA], ['RTK Query + MSW', 'contratti frontend/backend documentati'], ['API Symfony', 'backend del team']]),
+        archNote: 'Guardie al commit e al push con husky e lint-staged; CI in parallelo a blocchi; copertura su ogni PR.',
+        aiProduct: 'Non ne parlo: riguarda il prodotto, che è riservato.', aiDev: 'Ho scritto AGENTS.md, un CODING_STANDARDS di 89 regole e una skill con 13 documenti; gli hook limitano cosa possono fare gli agenti. Copilot co-firma 6 dei miei 270 PR.',
+        limits: L(['I dettagli del prodotto sono riservati.', 'Il titolo è Software Engineer: «responsabile del frontend» descrive il lavoro, non un titolo formale.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-surface)', T, A, OA] }),
+      sdk: mk({ title: 'SDK e-receipts', kind: 'Open source · A-Cube', when: '2025–2026', tagBg: 'var(--color-background-blue)', tagFg: 'var(--color-text-blue)', next: 'expo',
+        sub: 'Una libreria TypeScript per Node e React Native: stessa logica, adapter per piattaforma, mTLS su mobile.',
+        stats: st([['Download npm/anno', '8.489'], ['Commit miei', '157/157'], ['File di test', '21'], ['Versioni mie su npm', '21']]), source: 'Fonti: npm e GitHub, al 23 nov 2026.',
+        problemTitle: 'Un solo SDK, server e mobile', problem: 'A-Cube aveva bisogno di un unico SDK per gli scontrini elettronici, usabile sia da server Node sia da app React Native.',
+        arch: ar([['domain', 'regole e modelli'], ['application', 'servizi e porte', A, OA], ['adapters', 'node | react-native'], ['mTLS su mobile', 'tramite expo-mutual-tls', 'var(--color-background-blue)', 'var(--color-text-blue)']]),
+        archNote: 'Architettura esagonale; Zod 4, RxJS, axios, idb.',
+        aiProduct: 'Nessuna.', aiDev: '9 commit su 157 fatti con Claude Code; il resto senza agenti.',
+        limits: L(['Nessuna CI nel repo pubblico.', 'Le versioni npm dopo la 2.1.1 sono uscite dopo la mia uscita da A-Cube: non sono mie.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-blue)', 'var(--color-text-blue)', A, OA] }),
+      expo: mk({ title: 'Expo Mutual TLS', kind: 'Open source · A-Cube', when: 'ago–ott 2025', tagBg: 'var(--color-background-teal)', tagFg: 'var(--color-text-teal)', next: 'pizzeria',
+        sub: "Un modulo Expo che autentica l'app con un certificato client, con un'unica API TypeScript per iOS e Android.",
+        stats: st([['Download npm/anno', '2.150'], ['Commit miei', '31/31'], ['Ultima versione', 'v1.0.5'], ['Stelle GitHub', '6']]), source: 'Fonti: npm e GitHub, al 23 nov 2026.',
+        problemTitle: 'Un certificato client, anche da React Native', problem: "L'SDK e-receipts doveva parlare con un server che chiede un certificato client. Non c'era un modulo Expo con la stessa API su iOS e Android.",
+        arch: ar([['API TypeScript', 'ExpoMutualTlsModule.ts'], ['Expo Modules', 'ponte unico verso il nativo'], ['iOS · Swift', 'SSLContextManager + Keychain', A, OA], ['Android · Kotlin', 'Keystore + PemCertificateParser', 'var(--color-background-teal)', 'var(--color-text-teal)']]),
+        archNote: 'Eventi comuni alle due piattaforme: onCertificateExpiry, onError, onDebugLog.',
+        aiProduct: 'Nessuna: è un modulo di rete e sicurezza.', aiDev: 'Nessun commit co-firmato da agenti: Swift e Kotlin scritti senza agenti.',
+        limits: L(['La biometria (o il PIN) è richiesta solo su Android; su iOS non ancora.', 'Il repo non ha test automatici né CI.']),
+        learned: '[Due o tre righe tue.]', faces: [A, OA, 'var(--color-background-teal)', 'var(--color-text-teal)'] }),
+      pizzeria: mk({ title: 'Ordini da QR', kind: 'Cliente reale · pizzeria', when: '2026 · in produzione', tagBg: 'var(--color-background-orange)', tagFg: 'var(--color-text-orange)', next: 'leco',
+        sub: 'Ordini dal tavolo con il QR, schermi della cucina aggiornati in tempo reale e approvazione degli orari.',
+        stats: st([['Commit miei', '241'], ['File di test', '148'], ['Co-firmati con Claude', '183'], ['CI', 'su ogni PR']]), source: 'Fonte: GitHub (repo del cliente), al 23 nov 2026.',
+        problemTitle: 'Dal tavolo alla cucina, senza passaggi a voce', problem: '[Una riga tua sul bisogno del cliente.]',
+        arch: ar([['Next 16', 'sito, tavolo e banco'], ['Drizzle + Neon', 'Postgres serverless'], ['SSE', 'schermi cucina in tempo reale', A, OA], ['next-auth v5', 'accesso dello staff']]),
+        archNote: 'Regole vincolanti in CODING_STANDARDS, confini tra cartelle nel lint, knip nel check pre-commit e in CI.',
+        aiProduct: 'Nessuna.', aiDev: '183 commit su 259 co-firmati con Claude, dentro regole e CI obbligatorie. Caso reale: una risposta del cliente poteva cambiare un ordine già deciso; chiuso con condizioni nella stessa transazione (commit b496ec2).',
+        limits: L(["Nessuna metrica d'uso pubblicata.", 'Il nome del cliente non è pubblico.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-orange)', 'var(--color-text-orange)', A, OA] }),
+      leco: mk({ title: 'LECO', kind: 'Progetto mio', when: 'apr–ago 2026 · sere e weekend · leco.app', tagBg: 'var(--color-neutral)', tagFg: T, next: 'parseur',
+        sub: 'Una piattaforma di apprendimento con feed, domande e risposte e corsi, costruita da solo: API, frontend, back-office e infrastruttura.',
+        stats: st([['Commit miei', '1.072'], ['PR', '572'], ['File di test', '750+'], ['ADR', '13']]), source: 'Fonte: GitHub (repo privati), al 23 nov 2026. Utenti: [da dichiarare].',
+        problemTitle: 'Studiare senza saltare tra dieci strumenti', problem: "Volevo una piattaforma in cui chi studia trova insieme feed, domande con risposte e corsi. È il primo dei miei progetti con l'obiettivo di diventare una startup.",
+        arch: ar([['App e back-office', 'TanStack Start'], ['API Laravel 13', 'domini e azioni separati, API versionata, OpenAPI', A, OA], ['Postgres + Redis', 'dati e code'], ['GCP + Cloudflare', 'Terraform, 13 ADR, Sentry', 'var(--color-background-orange)', 'var(--color-text-orange)']]),
+        archNote: 'Deploy da CI, con un controllo che blocca modifiche manuali all’infrastruttura.',
+        aiProduct: 'Embedding del feed con Gemini, Anthropic come riserva. Calcolati in background, mai durante la richiesta; se il provider cade, il ranking torna neutro.', aiDev: 'AGENTS.md e CLAUDE.md in ogni repo, CI obbligatoria; 213 commit su 1.198 co-firmati con Claude.',
+        limits: L(["Non ci sono ancora metriche d'uso pubbliche.", 'Costruito in cinque mesi fuori orario: volume alto, una persona sola.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-yellow)', 'var(--color-text-yellow)', A, OA] }),
+      parseur: mk({ title: 'Parseur', kind: 'Prototipo personale', when: 'ott 2025 · 4 giorni · parseur.vercel.app', tagBg: 'var(--color-background-teal)', tagFg: 'var(--color-text-teal)', next: 'wortschatz',
+        sub: 'Estrae dati strutturati da PDF e immagini con OpenAI e Claude, e chiede una revisione umana quando non è sicuro.',
+        stats: st([['Giorni di lavoro', '4'], ['Commit', '8'], ['Provider LLM', '2'], ['File di test', '3']]), source: 'Fonte: GitHub pubblico, al 23 nov 2026.',
+        problemTitle: 'Documenti senza regole per ogni layout', problem: 'Le pipeline OCR tradizionali sono fragili e chiedono regole manuali per ogni layout.',
+        arch: ar([['Next 16', 'upload e revisione'], ['Inngest', 'scarica → classifica → estrai → valida → correggi', A, OA], ['OpenAI + Anthropic', 'output Zod, strategie multi-provider'], ['Prisma + Neon · S3/MinIO', 'dati e file']]),
+        archNote: 'Tre retry su ogni passo della pipeline.',
+        aiProduct: 'È il cuore del prodotto: output validato con Zod, regole deterministiche che pesano più del modello, stato «da rivedere» se la confidenza è bassa.', aiDev: 'Nessun commit co-firmato da agenti.',
+        limits: L(['Prototipo di 4 giorni.', 'Il costo per chiamata non è tracciato; nessun confronto misurato tra i modelli.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-teal)', 'var(--color-text-teal)', A, OA] }),
+      wortschatz: mk({ title: 'Wortschatz', kind: 'App personale', when: '2026 · repo pubblico', tagBg: 'var(--color-background-purple)', tagFg: 'var(--color-text-purple)', next: 'bussola',
+        sub: 'Tedesco per italiani: vocabolario, ripetizione dilazionata, conversazione e letture graduate.',
+        stats: st([['Commit', '167'], ['Giorni', '5'], ['Ripetizione', 'FSRS'], ['Test', '0']]), source: 'Fonte: GitHub pubblico, al 23 nov 2026.',
+        problemTitle: 'Parole con un contesto', problem: "Le app di lingue sono generiche e usano poco l'AI per dare contesto alle parole.",
+        arch: ar([['Expo Router', 'schermate per funzione'], ['Moduli per feature', 'ripasso, chat, letture'], ['expo-sqlite', 'dati in locale', A, OA], ['Gemini', 'chiamato dal client']]),
+        archNote: 'ts-fsrs per la ripetizione dilazionata.',
+        aiProduct: 'Gemini con output tipizzato Zod; ogni chiamata registra token e costo in una tabella dedicata.', aiDev: 'Specifiche e piani scritti in docs/ prima del codice.',
+        limits: L(["La chiave API sta nell'app: va spostata su un backend.", 'Nessun test né CI; nessuna sincronizzazione.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-purple)', 'var(--color-text-purple)', A, OA] }),
+      bussola: mk({ title: 'Bussola', kind: 'In sviluppo · progetto mio', when: 'dal 31 ott 2026 · repo privato', tagBg: 'var(--color-background-yellow)', tagFg: 'var(--color-text-yellow)', next: 'comanda',
+        sub: 'Finanza personale con al centro la chat «Chiedi ai tuoi soldi…»: quanto puoi spendere, quanto ti resta, sempre con le fonti.',
+        stats: st([['Commit', '650'], ['File di test', '678'], ['ADR', '9'], ['Skill per agenti', '28']]), source: 'Fonte: GitHub (repo privato), al 23 nov 2026.',
+        problemTitle: 'Risposte sui soldi che non inventano', problem: 'Volevo gestire le mie finanze senza fogli di calcolo, con risposte che non inventano numeri.',
+        arch: ar([['Expo', 'solo interfaccia'], ['FastAPI', "l'unico che calcola", A, OA], ['Postgres + Supabase', 'auth, storage, code'], ['Fly.io', 'deploy']]),
+        archNote: "Ogni modifica proposta dall'assistente resta una bozza finché la persona non conferma.",
+        aiProduct: 'Agente Anthropic con una regola fissa: ogni numero di una risposta deve venire da un tool o da un dato, altrimenti la frase si toglie.', aiDev: '541 commit su 650 co-firmati con Claude: un agente a contesto vuoto per ticket, review su due assi. Caso: PR #104, tre buchi trovati dopo il merge e chiusi con 112 righe di test.',
+        limits: L(['Scheletro funzionante, nessun utente esterno.', 'Le eval sul modello reale stanno fuori dalla CI delle PR.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-gray)', T, A, OA] }),
+      comanda: mk({ title: 'Comanda', kind: 'Specifica e design', when: 'nov 2026', tagBg: 'var(--color-neutral)', tagFg: T, next: 'madisoft',
+        sub: 'SaaS per ristoranti: vetrina con ordine diretto, cucina, sala, CRM e back-office. Abbonamento fisso, nessuna commissione nel piano base.',
+        stats: st([['Schermate disegnate', '300+'], ['Codice di prodotto', '0'], ['Commit', '33'], ['UI', 'Astryx']]), source: 'Fonte: GitHub e canvas di design, al 23 nov 2026.',
+        problemTitle: 'Un sistema unico per locali di ogni tipo', problem: 'È nata da una richiesta di un cliente attuale: pizzerie, trattorie, sushi, bar con lo stesso strumento.',
+        arch: ar([['TanStack Start', 'vetrina, cucina, sala'], ['Convex', 'dati in tempo reale', A, OA], ['Stripe Connect', 'pagamenti dei locali'], ['Astryx', 'design system, tema cucina']]),
+        archNote: 'Lo sviluppo parte quando arriva il riscontro del cliente sul design.',
+        aiProduct: 'Nel design: suggerimenti e revisione AI durante l’import del menu.', aiDev: 'Specifica, user story, flussi e oltre 300 schermate fatte con Claude; 33 commit su 33 co-firmati.',
+        limits: L(['Nessun codice di prodotto.', 'Nessun utente.']),
+        learned: '[Due o tre righe tue.]', faces: ['var(--color-background-surface)', T, A, OA] })
+    };
+  }
+  renderVals() {
+    const s = this.state; const all = this.data(); const p = all[this.props.slug] || all.expo; const nx = all[p.next];
+    const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+    const ease = (t) => 1 - Math.pow(1 - t, 3);
+    const chap = Math.min(5, Math.floor(s.p * 6)); const t = clamp(s.p * 6 - chap);
+    let baseY;
+    if (chap === 0) baseY = 40 - ease(t) * 40;
+    else if (chap <= 4) baseY = -(chap - 1) * 90 - (t - 0.5) * 12;
+    else baseY = -270 - ease(t) * 70;
+    this.baseNow = baseY; this.chapNow = chap;
+    const kY = s.used ? 6 : 24, kX = s.used ? 4 : 8;
+    const scale = chap === 5 ? 0.72 : 1;
+    const cubeT = `rotateX(${-12 - s.my * kX + s.pitch}deg) rotateY(${baseY + s.mx * kY + s.yaw}deg) scale(${scale})`;
+    const stageT = chap === 5 ? 'translateX(20rem)' : 'translateX(17rem)';
+    const front = ((Math.round(-(baseY + s.yaw) / 90) % 4) + 4) % 4;
+    const names = ['Problema', 'Architettura', 'AI', 'Limiti'];
+    const faceStyles = [[p.faces[0], p.faces[1]], ['var(--color-background-surface)', 'var(--color-text-primary)'], [p.faces[2], p.faces[3]], ['var(--color-background-yellow)', 'var(--color-text-yellow)']];
+    const faces = names.map((n, i) => ({
+      num: `0${i + 1}`, code: p.title.split(' ')[0].toUpperCase(), label: n, bg: faceStyles[i][0], fg: faceStyles[i][1],
+      t: `rotateY(${i * 90}deg) translateZ(5.5rem)`,
+      glow: chap === i + 1 && front === i ? '0 0 0 3px var(--color-accent)' : 'none'
+    }));
+    let magT = 'translate(0px, 0px)', magInnerT = 'translate(0px, 0px)';
+    if (chap === 5 && this.btn) {
+      const bx = 96 + this.btn.offsetLeft + this.btn.offsetWidth / 2, by = 128 + this.btn.offsetTop + this.btn.offsetHeight / 2;
+      const dx = s.cx - bx, dy = s.cy - by;
+      if (Math.hypot(dx, dy) < 200) { magT = `translate(${dx * 0.35}px, ${dy * 0.35}px)`; magInnerT = `translate(${dx * 0.12}px, ${dy * 0.12}px)`; }
+    }
+    const labels = ['Apertura', 'Problema', 'Architettura', 'AI', 'Limiti', 'Prossimo'];
+    const onCube = s.hk === 'cube' || s.drag; const big = s.hk === 'next' || onCube; const link = s.hk === 'link';
+    return {
+      p, n: { title: nx.title, sub: nx.sub, href: `p-${p.next}.dc.html` },
+      scRef: (el) => { this.sc = el; }, btnRef: (el) => { this.btn = el; },
+      onMove: (e) => {
+        const r = e.currentTarget.getBoundingClientRect(); this.scale = r.width / 1440 || 1;
+        const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+        this.next = { mx: x * 2 - 1, my: y * 2 - 1, cx: x * 1440, cy: y * 900, inside: true };
+        if (!this.raf) this.raf = requestAnimationFrame(() => { this.raf = null; this.setState(this.next); this.follow(); });
+      },
+      onOut: () => this.setState({ inside: false, hk: '' }),
+      onScroll: (e) => { const el = e.currentTarget; this.setState({ p: el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight) }); },
+      pDown: (e) => { if (e.button > 0) return; if (e.currentTarget.setPointerCapture) e.currentTarget.setPointerCapture(e.pointerId); this.dragStart = { x: e.clientX, y: e.clientY, yaw: this.state.yaw, pitch: this.state.pitch }; this.setState({ drag: true, used: true }); },
+      pMove: (e) => { const d = this.dragStart; if (!d) return; const dx = (e.clientX - d.x) / this.scale, dy = (e.clientY - d.y) / this.scale; this.setState({ yaw: d.yaw + dx * 0.45, pitch: clamp(d.pitch - dy * 0.25, -20, 20) }); },
+      pUp: () => { if (!this.dragStart) return; this.dragStart = null; const total = this.baseNow + this.state.yaw; this.setState({ drag: false, yaw: Math.round(total / 90) * 90 - this.baseNow, pitch: 0 }); },
+      stop: (e) => e.stopPropagation(),
+      prev: () => this.goTo(Math.max(0, this.chapNow - 1)),
+      next: () => this.goTo(Math.min(5, this.chapNow + 1)),
+      cubeIn: () => this.setState({ hk: 'cube' }), cubeOut: () => { if (!this.state.drag) this.setState({ hk: '' }); },
+      linkIn: () => this.setState({ hk: 'link' }), nextIn: () => this.setState({ hk: 'next' }), clearHover: () => this.setState({ hk: '' }),
+      cubeTr: s.drag ? 'none' : 'transform var(--duration-medium-max) var(--ease-move)', cubeT, stageT, faces, magT, magInnerT,
+      textT: chap === 0 ? `translate(${s.mx * -8}px, ${s.my * -5}px)` : 'translate(0px, 0px)',
+      c0: chap === 0, c1: chap === 1, c2: chap === 2, c3: chap === 3, c4: chap === 4, c5: chap === 5,
+      chapNum: `0${chap + 1}`, chapName: labels[chap],
+      pct: String(Math.round(s.p * 100)).padStart(3, '0'), barW: `${Math.round(s.p * 100)}%`,
+      chapters: labels.map((l, i) => ({ label: l, current: i === chap ? 'step' : 'false', color: i === chap ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', w: i === chap ? '48px' : '16px', go: () => this.goTo(i) })),
+      cx: s.cx, cy: s.cy, rx: s.rx, ry: s.ry,
+      rs: s.drag ? 24 : big ? 88 : link ? 56 : 32, rbg: big ? 'var(--color-accent)' : 'transparent',
+      cursorLabel: s.drag ? '' : s.hk === 'next' ? 'Apri' : onCube ? 'Trascina' : '',
+      curOp: s.inside ? 1 : 0, dotOp: s.inside && !big ? 1 : 0
+    };
+  }
+}
+</script>
+</body>
+</html>

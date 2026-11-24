@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Lavori · Anders Planck</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f1f1f1}
+:root{
+--color-accent:light-dark(#1b1b1b,#f1f1f1);--color-on-accent:light-dark(#ffffff,#111111);
+--color-neutral:light-dark(#0000000F,#ffffff1A);--color-background-body:light-dark(#f1f1f1,#1b1b1b);--color-background-surface:light-dark(#ffffff,#262626);
+--color-text-primary:light-dark(#000000,#ffffff);--color-text-secondary:light-dark(#474747,#9e9e9e);
+--color-border:light-dark(#00000014,#ffffff1A);--color-track:light-dark(#CCD3DB,#5A5E66);
+--color-background-blue:light-dark(#b9d7ff,#253c5a);--color-text-blue:light-dark(#003978,#a1caff);
+--color-background-orange:light-dark(#ffc7a1,#503424);--color-text-orange:light-dark(#622700,#ffb37e);
+--color-background-yellow:light-dark(#fae19e,#453a1c);--color-text-yellow:light-dark(#4b3900,#eec448);
+--color-background-teal:light-dark(#a9e2d6,#28413c);--color-text-teal:light-dark(#00463d,#90d7c8);
+--color-background-purple:light-dark(#f7d5ff,#4a2f51);--color-text-purple:light-dark(#5c0e6c,#eaacf8);
+--color-background-gray:light-dark(#e2e2e2,#303030);
+--spacing-1:0.25rem;--spacing-2:0.5rem;--spacing-3:0.75rem;--spacing-4:1rem;--spacing-5:1.25rem;--spacing-6:1.5rem;--spacing-8:2rem;--spacing-12:3rem;
+--radius-inner:8px;--radius-element:12px;--radius-container:16px;--radius-full:9999px;
+--duration-fast:175ms;--duration-medium:410ms;--duration-medium-max:550ms;--ease-entrance:cubic-bezier(0.24,1,0.4,1);--ease-move:cubic-bezier(0.24,1,0.4,1);
+--font-family-body:Figtree,system-ui,sans-serif;--font-family-code:"SF Mono",ui-monospace,monospace;
+--font-size-sm:0.8rem;--font-size-base:1rem;--font-size-lg:1.25rem;--font-size-xl:1.563rem;--font-size-3xl:2.441rem;--font-size-5xl:3.815rem;
+}
+a{color:var(--color-text-primary)}a:hover{color:var(--color-text-secondary)}
+.scroller{scrollbar-width:none}.scroller::-webkit-scrollbar{display:none}
+@keyframes rise{from{transform:translateY(110%)}to{transform:translateY(0)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.line{display:block;overflow:hidden;padding-bottom:0.06em}.line>span{display:block;animation:rise var(--duration-medium-max) var(--ease-entrance) both}
+.fade{animation:fade var(--duration-medium) var(--ease-entrance) both;animation-delay:200ms}
+.slab{transition:transform var(--duration-medium-max) var(--ease-move),opacity var(--duration-medium) var(--ease-move),filter var(--duration-medium) var(--ease-move)}
+.chip{all:unset;cursor:none;min-height:36px;padding:0 var(--spacing-4);display:inline-flex;align-items:center;border-radius:var(--radius-full);font-size:var(--font-size-sm);font-weight:600}
+.nav a{cursor:none;text-decoration:none}
+.chip:focus-visible,.nav a:focus-visible{outline:2px solid var(--color-accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.line>span,.fade{animation:none}.slab{transition:opacity var(--duration-fast)}}
+</style>
+</helmet>
+<div onMouseMove="{{onMove}}" onMouseLeave="{{onOut}}" style="color-scheme: light; position: relative; width: 1440px; height: 900px; overflow: hidden; cursor: none; background: var(--color-background-body); color: var(--color-text-primary); font-family: var(--font-family-body); font-size: var(--font-size-base); line-height: 1.5">
+  <div class="scroller" ref="{{scRef}}" onScroll="{{onScroll}}" style="position: absolute; inset: 0; overflow-y: auto">
+    <div style="height: 4600px">
+      <div style="position: sticky; top: 0; height: 900px; overflow: hidden">
+        <header class="nav" style="position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; gap: var(--spacing-6); padding: var(--spacing-6) 6rem">
+          <a href="Home.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-size: var(--font-size-lg); font-weight: 800; letter-spacing: -0.02em">anders/planck</a>
+          <nav aria-label="Principale" style="flex-grow: 1; display: flex; justify-content: center; gap: var(--spacing-6)">
+            <a href="Lavori.dc.html" aria-current="page" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="font-weight: 700">Lavori</a>
+            <a href="Note.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="color: var(--color-text-secondary)">Note</a>
+            <a href="Percorso.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="color: var(--color-text-secondary)">Percorso</a>
+          </nav>
+          <a href="NotFound.dc.html" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="min-height: 40px; padding: 0 var(--spacing-4); display: inline-flex; align-items: center; border-radius: var(--radius-full); background: var(--color-neutral); font-size: var(--font-size-sm); font-weight: 700">IT</a>
+        </header>
+
+        <div style="position: absolute; left: 6rem; top: 7.5rem; right: 6rem; z-index: 2; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--spacing-6)">
+          <div>
+            <h1 style="margin: 0; font-size: var(--font-size-5xl); line-height: 0.98; font-weight: 800; letter-spacing: -0.035em"><span class="line"><span>Lavori</span></span></h1>
+            <p class="fade" style="margin: var(--spacing-3) 0 0; color: var(--color-text-secondary)">{{countLabel}} · scorri per far passare le lastre, clicca per aprire</p>
+          </div>
+          <div role="group" aria-label="Filtra per tipo" class="fade" style="display: flex; gap: var(--spacing-1); padding: 3px; border-radius: var(--radius-full); background: var(--color-neutral)">
+            <sc-for list="{{filters}}" as="fl" hint-placeholder-count="5">
+              <button type="button" class="chip" aria-pressed="{{fl.on}}" onClick="{{fl.pick}}" onMouseEnter="{{linkIn}}" onMouseLeave="{{clearHover}}" style="background: {{fl.bg}}; color: {{fl.fg}}">{{fl.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="position: absolute; inset: 0; display: grid; place-items: center; perspective: 1500px; padding-top: 6rem">
+          <div style="position: relative; width: 14rem; height: 21rem; transform-style: preserve-3d; transform: rotateX({{tiltX}}deg) rotateY({{tiltY}}deg)">
+            <sc-for list="{{slabs}}" as="s" hint-placeholder-count="9">
+              <a href="{{s.href}}" class="slab" onMouseEnter="{{s.enter}}" onMouseLeave="{{clearHover}}" aria-label="{{s.title}}" style="position: absolute; inset: 0; box-sizing: border-box; padding: var(--spacing-6); border-radius: var(--radius-container); text-decoration: none; cursor: none; display: flex; flex-direction: column; justify-content: space-between; background: {{s.bg}}; color: {{s.fg}}; border: 1px solid var(--color-border); transform: {{s.t}}; opacity: {{s.op}}; filter: {{s.filter}}; z-index: {{s.z}}">
+                <span style="display: flex; justify-content: space-between; font-family: var(--font-family-code); font-size: var(--font-size-sm)"><span>{{s.num}}</span><span>{{s.year}}</span></span>
+                <span style="display: flex; flex-direction: column; gap: var(--spacing-2)">
+                  <span style="font-size: var(--font-size-sm); font-weight: 700">{{s.kind}}</span>
+                  <strong style="font-size: var(--font-size-xl); line-height: 1.1">{{s.title}}</strong>
+                  <span style="font-size: var(--font-size-sm); opacity: {{s.detailOp}}">{{s.line}}</span>
+                  <span style="font-family: var(--font-family-code); font-size: var(--font-size-sm); opacity: {{s.detailOp}}">{{s.proof}}</span>
+                </span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="position: absolute; left: 6rem; right: 6rem; bottom: var(--spacing-12); z-index: 2; display: flex; align-items: center; gap: var(--spacing-6)">
+          <div aria-live="polite" style="flex-grow: 1; display: flex; flex-direction: column"><span style="font-family: var(--font-family-code); font-size: var(--font-size-sm); color: var(--color-text-secondary)">{{centerNum}} / {{total}}</span><strong style="font-size: var(--font-size-lg)">{{centerTitle}}</strong></div>
+          <span aria-hidden="true" style="width: 16rem; height: 2px; border-radius: var(--radius-full); background: var(--color-track); overflow: hidden"><span style="display: block; height: 100%; width: {{barW}}; background: var(--color-accent)"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div aria-hidden="true" style="position: absolute; left: {{rx}}px; top: {{ry}}px; width: {{rs}}px; height: {{rs}}px; transform: translate(-50%, -50%); box-sizing: border-box; border-radius: var(--radius-full); border: 1.5px solid var(--color-accent); background: {{rbg}}; color: var(--color-on-accent); display: grid; place-items: center; font-size: var(--font-size-sm); font-weight: 700; pointer-events: none; opacity: {{curOp}}; transition: width var(--duration-fast) var(--ease-move), height var(--duration-fast) var(--ease-move), background var(--duration-fast) var(--ease-move), opacity var(--duration-fast); z-index: 10">{{cursorLabel}}</div>
+  <div aria-hidden="true" style="position: absolute; left: {{cx}}px; top: {{cy}}px; width: 6px; height: 6px; transform: translate(-50%, -50%); border-radius: var(--radius-full); background: var(--color-accent); pointer-events: none; opacity: {{dotOp}}; z-index: 11"></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mx: 0, my: 0, cx: 1100, cy: 640, rx: 1100, ry: 640, p: 0, hover: -1, hk: '', inside: false, filter: 'all' };
+    this.next = null; this.raf = null; this.loop = null; this.sc = null;
+  }
+  componentWillUnmount() { if (this.raf) cancelAnimationFrame(this.raf); if (this.loop) cancelAnimationFrame(this.loop); }
+  follow() {
+    if (this.loop) return;
+    const tick = () => { const s = this.state; const nx = s.rx + (s.cx - s.rx) * 0.18, ny = s.ry + (s.cy - s.ry) * 0.18; if (Math.abs(s.cx - nx) < 0.4 && Math.abs(s.cy - ny) < 0.4) { this.loop = null; this.setState({ rx: s.cx, ry: s.cy }); return; } this.setState({ rx: nx, ry: ny }); this.loop = requestAnimationFrame(tick); };
+    this.loop = requestAnimationFrame(tick);
+  }
+  renderVals() {
+    const s = this.state;
+    const all = [
+      { slug: 'madisoft', type: 'lavoro', kind: 'Lavoro · Madisoft', title: 'Gestionale per le scuole', year: '2026', line: 'Responsabile del frontend', proof: '270 PR · copertura 95,6%', bg: 'var(--color-background-surface)', fg: 'var(--color-text-primary)' },
+      { slug: 'sdk', type: 'oss', kind: 'Open source · A-Cube', title: 'SDK e-receipts', year: '2025', line: 'TypeScript per Node e React Native', proof: '8.489 download/anno', bg: 'var(--color-background-blue)', fg: 'var(--color-text-blue)' },
+      { slug: 'expo', type: 'oss', kind: 'Open source · A-Cube', title: 'Expo Mutual TLS', year: '2025', line: 'Swift + Kotlin, un’API sola', proof: '2.150 download · 31/31', bg: 'var(--color-accent)', fg: 'var(--color-on-accent)' },
+      { slug: 'pizzeria', type: 'lavoro', kind: 'Cliente reale', title: 'Ordini da QR per una pizzeria', year: '2026', line: 'Next 16 · cucina in tempo reale', proof: '241 commit · 148 test', bg: 'var(--color-background-orange)', fg: 'var(--color-text-orange)' },
+      { slug: 'leco', type: 'mio', kind: 'Progetto mio', title: 'LECO', year: '2026', line: 'Laravel · TanStack · GCP', proof: '1.072 commit · Sentry', bg: 'var(--color-background-yellow)', fg: 'var(--color-text-yellow)' },
+      { slug: 'parseur', type: 'mio', kind: 'Prototipo', title: 'Parseur', year: '2025', line: 'OpenAI + Claude, output Zod', proof: '4 giorni · live', bg: 'var(--color-background-teal)', fg: 'var(--color-text-teal)' },
+      { slug: 'wortschatz', type: 'mio', kind: 'App personale', title: 'Wortschatz', year: '2026', line: 'FSRS · Gemini con costo', proof: '167 commit · repo pubblico', bg: 'var(--color-background-purple)', fg: 'var(--color-text-purple)' },
+      { slug: 'bussola', type: 'dev', kind: 'In sviluppo', title: 'Bussola', year: '2026', line: 'Chat finanziaria con fonti', proof: '650 commit · 678 test', bg: 'var(--color-background-gray)', fg: 'var(--color-text-primary)' },
+      { slug: 'comanda', type: 'dev', kind: 'Specifica e design', title: 'Comanda', year: '2026', line: 'SaaS per ristoranti', proof: '300+ schermate', bg: 'var(--color-background-surface)', fg: 'var(--color-text-primary)' }
+    ];
+    const list = s.filter === 'all' ? all : all.filter((x) => x.type === s.filter);
+    const n = list.length; const pos = s.p * Math.max(0, n - 1); const center = Math.round(pos);
+    const slabs = list.map((x, i) => {
+      const d = i - pos; const ad = Math.abs(d); const h = s.hover === i;
+      const tx = d * 13 + (d > 0 ? 3 : d < 0 ? -3 : 0); const rot = Math.max(-55, Math.min(55, -d * 32)); const tz = -ad * 9 + (h ? 4 : 0) + (ad < 0.5 ? 3 : 0);
+      return { ...x, href: `p-${x.slug}.dc.html`, num: String(all.indexOf(x) + 1).padStart(2, '0'),
+        t: `translateX(${tx}rem) translateZ(${tz}rem) rotateY(${h ? rot * 0.3 : rot}deg) translateY(${h ? -0.8 : 0}rem)`,
+        op: ad > 3.2 ? 0 : 1, filter: ad < 0.5 || h ? 'none' : `saturate(${Math.max(0.3, 1 - ad * 0.25)})`, z: 100 - Math.round(ad * 10),
+        detailOp: ad < 0.5 || h ? 1 : 0,
+        enter: () => this.setState({ hover: i, hk: 'slab' }) };
+    });
+    const F = [['all', 'Tutti'], ['lavoro', 'Lavoro'], ['oss', 'Open source'], ['mio', 'Personali'], ['dev', 'In sviluppo']];
+    const slab = s.hk === 'slab' && s.hover >= 0; const link = s.hk === 'link';
+    return {
+      scRef: (el) => { this.sc = el; },
+      onMove: (e) => { const r = e.currentTarget.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height; this.next = { mx: x * 2 - 1, my: y * 2 - 1, cx: x * 1440, cy: y * 900, inside: true }; if (!this.raf) this.raf = requestAnimationFrame(() => { this.raf = null; this.setState(this.next); this.follow(); }); },
+      onOut: () => this.setState({ inside: false, hk: '', hover: -1 }),
+      onScroll: (e) => { const el = e.currentTarget; this.setState({ p: el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight), hover: -1 }); },
+      linkIn: () => this.setState({ hk: 'link' }), clearHover: () => this.setState({ hk: '', hover: -1 }),
+      filters: F.map(([k, l]) => ({ label: l, on: s.filter === k ? 'true' : 'false', bg: s.filter === k ? 'var(--color-background-surface)' : 'transparent', fg: s.filter === k ? 'var(--color-text-primary)' : 'var(--color-text-secondary)', pick: () => { this.setState({ filter: k }); if (this.sc) this.sc.scrollTo({ top: 0, behavior: 'smooth' }); } })),
+      slabs, total: String(n).padStart(2, '0'), centerNum: String(Math.min(n, center + 1)).padStart(2, '0'), centerTitle: list[Math.min(n - 1, center)] ? list[Math.min(n - 1, center)].title : '',
+      countLabel: `${n} ${n === 1 ? 'progetto' : 'progetti'}`,
+      tiltX: -s.my * 5, tiltY: s.mx * 8,
+      barW: `${Math.round(s.p * 100)}%`,
+      cx: s.cx, cy: s.cy, rx: s.rx, ry: s.ry,
+      rs: slab ? 92 : link ? 56 : 32, rbg: slab ? 'var(--color-accent)' : 'transparent', cursorLabel: slab ? 'Apri' : '',
+      curOp: s.inside ? 1 : 0, dotOp: s.inside && !slab ? 1 : 0
+    };
+  }
+}
+</script>
+</body>
+</html>

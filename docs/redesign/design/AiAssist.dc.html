@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Assistente AI del CMS</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+@keyframes aiShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes aiCaret{0%,100%{opacity:.2}50%{opacity:1}}
+@keyframes aiIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes aiPulse{0%,100%{transform:scale(.85);opacity:.55}50%{transform:scale(1);opacity:1}}
+@keyframes aiToast{0%{opacity:0;transform:translateY(6px)}15%,85%{opacity:1;transform:none}100%{opacity:0}}
+.ai-in{animation:aiIn 410ms cubic-bezier(0.24,1,0.4,1) both}
+.ai-step{animation:aiIn 410ms cubic-bezier(0.24,1,0.4,1) both}
+.ai-orb{animation:aiPulse 1200ms ease-in-out infinite}
+.ai-skel{height:10px;border-radius:9999px;background:linear-gradient(90deg,#0000000F 0%,#00000026 50%,#0000000F 100%);background-size:200% 100%;animation:aiShimmer 1.4s linear infinite}
+.ai-caret{display:inline-block;width:7px;height:1em;vertical-align:-2px;margin-left:2px;border-radius:2px;background:#1b1b1b;animation:aiCaret 900ms ease-in-out infinite}
+.ai-btn{all:unset;cursor:pointer;min-height:32px;box-sizing:border-box;padding:4px 12px;display:inline-flex;align-items:center;gap:6px;border-radius:12px;background:#0000000F;font:600 13px Figtree,system-ui,sans-serif;color:#000000}
+.ai-btn:hover{background:#0000001A}
+.ai-btn:focus-visible{outline:2px solid #1b1b1b;outline-offset:2px}
+.ai-btn[aria-pressed="true"]{background:#1b1b1b;color:#ffffff}
+.ai-p{background:#1b1b1b;color:#ffffff}.ai-p:hover{background:#000000}
+.ai-toast{animation:aiToast 2400ms cubic-bezier(0.24,1,0.4,1) both}
+@media (prefers-reduced-motion:reduce){.ai-in,.ai-step,.ai-orb,.ai-skel,.ai-caret,.ai-toast{animation:none}}
+</style>
+</helmet>
+<section aria-label="Assistente AI" style="box-sizing: border-box; width: 100%; padding: 20px; border-radius: 16px; background: #ffffff; border: 1px solid #00000014; font-family: Figtree, system-ui, sans-serif; font-size: 14px; line-height: 1.5; color: #000000; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 8px">
+    <span aria-hidden="true" class="{{orbCls}}" style="width: 14px; height: 14px; border-radius: 9999px; background: radial-gradient(circle at 35% 30%, #b9d7ff 0%, #6d9cfe 45%, #1b1b1b 100%)"></span>
+    <strong style="flex-grow: 1">Assistente AI</strong>
+    <span style="padding: 1px 8px; border-radius: 9999px; background: #0000000F; font-size: 12px; font-weight: 600">propone · decidi tu</span>
+  </div>
+  <div role="group" aria-label="Azioni dell'assistente" style="display: flex; gap: 6px; flex-wrap: wrap">
+    <sc-for list="{{actions}}" as="a" hint-placeholder-count="3">
+      <button type="button" class="ai-btn" aria-pressed="{{a.on}}" onClick="{{a.run}}">✦ {{a.label}}</button>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{idle}}" hint-placeholder-val="{{ true }}">
+    <p style="margin: 0; color: #474747; font-size: 13px">{{hint}}</p>
+  </sc-if>
+
+  <sc-if value="{{busy}}" hint-placeholder-val="{{ false }}">
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <sc-for list="{{steps}}" as="s" hint-placeholder-count="2">
+        <div class="ai-step" style="display: flex; flex-direction: column; gap: 2px">
+          <span style="display: flex; align-items: center; gap: 8px; font-size: 13px"><span aria-hidden="true" class="{{s.cls}}" style="width: 10px; height: 10px; border-radius: 9999px; background: {{s.color}}"></span>{{s.t}}</span>
+          <sc-if value="{{s.done}}" hint-placeholder-val="{{ true }}"><span style="padding-left: 18px; font-size: 12px; color: #474747">⎿  {{s.r}}</span></sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{skel}}" hint-placeholder-val="{{ true }}">
+        <div aria-hidden="true" style="display: flex; flex-direction: column; gap: 6px; padding-top: 4px"><div class="ai-skel" style="width: 92%"></div><div class="ai-skel" style="width: 78%"></div><div class="ai-skel" style="width: 55%"></div></div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{showOut}}" hint-placeholder-val="{{ false }}">
+    <div class="ai-in" aria-live="polite" style="display: flex; flex-direction: column; gap: 8px">
+      <sc-if value="{{hasOld}}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 10px 12px; border-radius: 12px; background: #ffc4be66; color: #76000c; text-decoration: line-through; text-decoration-color: #c9303a80; font-size: 13px">{{old}}</div>
+      </sc-if>
+      <div style="padding: 10px 12px; border-radius: 12px; background: {{outBg}}; color: {{outFg}}; font-size: 13px; white-space: pre-line">{{shown}}<sc-if value="{{typing}}" hint-placeholder-val="{{ true }}"><span class="ai-caret" aria-hidden="true"></span></sc-if></div>
+      <sc-if value="{{done}}" hint-placeholder-val="{{ false }}">
+        <div class="ai-in" style="display: flex; flex-direction: column; gap: 8px">
+          <span style="font-size: 12px; color: #474747">{{why}}</span>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap">
+            <button type="button" class="ai-btn ai-p" onClick="{{accept}}">{{acceptLabel}}</button>
+            <button type="button" class="ai-btn" onClick="{{reject}}">Rifiuta</button>
+            <button type="button" class="ai-btn" onClick="{{again}}">Rigenera</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{toast}}" hint-placeholder-val="{{ false }}">
+    <div class="ai-toast" role="status" style="align-self: flex-start; padding: 6px 12px; border-radius: 9999px; background: #bce0bb; color: #2f7d33; font-size: 12px; font-weight: 700">{{toastText}}</div>
+  </sc-if>
+  <span style="font-size: 12px; color: #474747; border-top: 1px solid #00000014; padding-top: 10px">Non aggiunge numeri: se servono, li prende dalle Fonti. Ogni modifica resta in bozza finché non pubblichi.</span>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["progetto","nota","traduzione","media","seo"],"default":"progetto"},"$preview":{"width":420,"height":460}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { act: -1, t: 0, phase: 'idle', toast: '' }; this.timer = null; }
+  componentWillUnmount() { clearInterval(this.timer); clearTimeout(this.tt); }
+  scenarios() {
+    return {
+      progetto: { hint: 'Scegli un’azione: lavora sul sottotitolo e sulle frasi della scheda.', items: [
+        { label: 'Rendi più concreto', steps: [['Leggo la scheda e il README del repo', '4 sezioni · 2 moduli nativi'], ['Controllo i numeri con le Fonti', 'nessun numero nuovo da aggiungere']], old: "Un modulo Expo che autentica l'app con un certificato client, con un'unica API TypeScript per iOS e Android.", out: "Modulo Expo open source per mTLS: un'unica API TypeScript, Keychain su iOS e Keystore su Android. Lo usa in produzione l'SDK e-receipts.", why: 'Più concreto: nomina le due piattaforme e chi lo usa. Nessun numero aggiunto.', accept: 'Accetta in bozza' },
+        { label: 'Accorcia a una riga', steps: [['Misuro la lunghezza', '117 caratteri → obiettivo 80']], old: "Un modulo Expo che autentica l'app con un certificato client, con un'unica API TypeScript per iOS e Android.", out: "Autenticazione mTLS per app Expo, con una sola API su iOS e Android.", why: '69 caratteri: entra in una riga anche nella lastra della galleria.', accept: 'Accetta in bozza' },
+        { label: 'Trova affermazioni non verificabili', steps: [['Leggo tutte le frasi della scheda', '11 frasi'], ['Cerco una prova per ognuna', 'repo, npm, git log']], old: '', out: "✓ «Lo usa l'SDK e-receipts»: verificabile, è una dipendenza nel repo.\n✓ «Nessun commit co-firmato da agenti»: verificabile con git log.\n! «Supporto biometrico»: vale solo su Android, va scritto.", why: '1 frase da precisare. L’assistente non la cambia da solo.', accept: 'Apri la frase' }
+      ] },
+      nota: { hint: 'Lavora sul paragrafo selezionato o sull’intera nota.', items: [
+        { label: 'Migliora la chiarezza', steps: [['Leggo il paragrafo', '3 frasi · 52 parole'], ['Controllo il coding standard del testo', 'frasi brevi, nessun gergo inutile']], old: 'Quando non viene controllato, l’agente introduce errori di architettura: una modifica piccola che attraversa livelli che non dovrebbe toccare.', out: 'Se nessuno controlla, l’agente sbaglia l’architettura: per una modifica piccola attraversa livelli che non dovrebbe toccare.', why: 'Stesso significato, 6 parole in meno. Il tono resta il tuo.', accept: 'Accetta in bozza' },
+        { label: 'Proponi un titolo', steps: [['Leggo la nota intera', '8 sezioni · 1.180 parole']], old: '', out: '1. Cosa cerco quando rivedo il codice di un agente\n2. Cinque errori che gli agenti fanno quando nessuno guarda\n3. Leggere il diff: perché la UI non basta', why: 'Tre proposte; il titolo attuale resta finché non ne scegli uno.', accept: 'Usa la prima' },
+        { label: 'Trova ripetizioni', steps: [['Cerco parole e concetti ripetuti', '2 ripetizioni']], old: '', out: '«contesto» compare 4 volte nelle sezioni 3 e 6.\n«a schermo» compare 2 volte nell’introduzione.', why: 'Ti mostro dove sono; le correzioni restano tue.', accept: 'Vai alla prima' }
+      ] },
+      traduzione: { hint: 'Prepara la bozza in un’altra lingua. Resta «da rivedere» finché non la controlli.', items: [
+        { label: 'Traduci in EN', steps: [['Leggo il glossario del sito', 'diff, worktree, commit restano invariati'], ['Traduco mantenendo il tono', 'registro diretto, frasi brevi']], old: '', out: 'When nobody checks, the agent gets the architecture wrong: for a small change it crosses layers it should not touch.', why: 'Bozza EN · stato «da rivedere». I termini del glossario non sono stati tradotti.', accept: 'Salva come bozza EN' },
+        { label: 'Traduci in FR', steps: [['Leggo il glossario del sito', 'diff, worktree, commit restano invariati']], old: '', out: "Si personne ne vérifie, l'agent se trompe d'architecture : pour une petite modification, il traverse des couches qu'il ne devrait pas toucher.", why: 'Bozza FR · stato «da rivedere».', accept: 'Salva come bozza FR' },
+        { label: 'Traduci in DE', steps: [['Leggo il glossario del sito', 'diff, worktree, commit restano invariati']], old: '', out: 'Wenn niemand prüft, macht der Agent Architekturfehler: Für eine kleine Änderung durchquert er Schichten, die er nicht anfassen sollte.', why: 'Bozza DE · stato «da rivedere».', accept: 'Salva come bozza DE' }
+      ] },
+      media: { hint: 'Genera il testo alternativo guardando l’immagine e la pagina che la usa.', items: [
+        { label: 'Genera testo alternativo', steps: [['Guardo l’immagine', 'schermata di una chat su telefono'], ['Leggo dove è usata', 'Progetti · Bussola']], old: '', out: 'Schermata della chat di Bussola mentre calcola se una vacanza da 1.200 € a dicembre è sostenibile.', why: 'Il numero viene dall’immagine stessa, non è inventato.', accept: 'Usa come testo alternativo' }
+      ] },
+      seo: { hint: 'Scrive titolo e descrizione per Google partendo dal contenuto della pagina.', items: [
+        { label: 'Scrivi la descrizione', steps: [['Leggo la pagina Note', '5 note · 1 pubblicata'], ['Controllo la lunghezza', 'massimo 155 caratteri']], old: '', out: 'Note di Anders Planck su come costruisce software con gli agenti AI senza perdere il controllo: review, regole nel repo, casi reali.', why: '137 / 155 caratteri.', accept: 'Usa questa descrizione' }
+      ] }
+    };
+  }
+  run(i) {
+    clearInterval(this.timer); clearTimeout(this.tt);
+    const start = Date.now();
+    this.setState({ act: i, t: 0, phase: 'busy', toast: '' });
+    this.timer = setInterval(() => {
+      const t = Date.now() - start;
+      const sc = this.scenarios()[this.props.mode || 'progetto'].items[i];
+      const stepEnd = sc.steps.length * 900 + 300;
+      const total = stepEnd + sc.out.length * 18;
+      this.setState({ t, phase: t < stepEnd ? 'busy' : t < total ? 'typing' : 'done' });
+      if (t > total + 100) clearInterval(this.timer);
+    }, 40);
+  }
+  finish(text) { clearInterval(this.timer); this.setState({ phase: 'idle', act: -1, toast: text }); clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: '' }), 2500); }
+  renderVals() {
+    const sc = this.scenarios()[this.props.mode || 'progetto'];
+    const s = this.state; const it = s.act >= 0 ? sc.items[s.act] : null;
+    const stepEnd = it ? it.steps.length * 900 + 300 : 0;
+    const steps = it ? it.steps.filter((x, k) => s.t >= k * 900 || s.phase !== 'busy').map((x, k) => { const done = s.t >= (k + 1) * 900 || s.phase !== 'busy'; return { t: x[0], r: x[1], done, cls: done ? '' : 'ai-orb', color: done ? '#64af4c' : '#6d9cfe' }; }) : [];
+    const n = it ? Math.max(0, Math.min(it.out.length, Math.floor((s.t - stepEnd) / 18))) : 0;
+    return {
+      actions: sc.items.map((x, i) => ({ label: x.label, on: s.act === i ? 'true' : 'false', run: () => this.run(i) })),
+      hint: sc.hint, idle: s.phase === 'idle' && !s.toast,
+      busy: !!it && s.phase !== 'idle', steps, skel: !!it && s.phase === 'busy',
+      showOut: !!it && (s.phase === 'typing' || s.phase === 'done'),
+      hasOld: !!(it && it.old), old: it ? it.old : '',
+      shown: it ? (s.phase === 'done' ? it.out : it.out.slice(0, n)) : '', typing: s.phase === 'typing',
+      outBg: it && it.old ? '#bce0bb66' : '#f1f1f1', outFg: it && it.old ? '#00490b' : '#000000',
+      done: s.phase === 'done', why: it ? it.why : '', acceptLabel: it ? it.accept : 'Accetta',
+      accept: () => this.finish('Applicato in bozza ✓'), reject: () => this.finish('Proposta scartata'), again: () => this.run(s.act),
+      orbCls: s.phase === 'busy' || s.phase === 'typing' ? 'ai-orb' : '',
+      toast: !!s.toast, toastText: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

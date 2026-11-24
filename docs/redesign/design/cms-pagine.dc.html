@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>CMS · Pagine e capitoli</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f1f1f1}
+:root{
+--color-accent:light-dark(#1b1b1b,#f1f1f1);--color-accent-muted:light-dark(#d4d4d4,#474747);--color-on-accent:light-dark(#ffffff,#111111);
+--color-neutral:light-dark(#0000000F,#ffffff1A);--color-background-body:light-dark(#f1f1f1,#1b1b1b);--color-background-surface:light-dark(#ffffff,#262626);--color-background-gray:light-dark(#e2e2e2,#303030);
+--color-overlay-hover:light-dark(#0000000D,#ffffff0D);
+--color-text-primary:light-dark(#000000,#ffffff);--color-text-secondary:light-dark(#474747,#9e9e9e);
+--color-border:light-dark(#00000014,#ffffff1A);--color-border-emphasized:light-dark(#d4d4d4,#525252);
+--color-success:light-dark(#198100,#64af4c);--color-text-success:light-dark(#2f7d33,#90ca90);--color-background-green:light-dark(#bce0bb,#2b422b);
+--color-warning:#ffce2f;--color-text-warning:light-dark(#836700,#eec448);--color-background-yellow:light-dark(#fae19e,#453a1c);--color-text-yellow:light-dark(#4b3900,#eec448);
+--color-error:light-dark(#c9303a,#ff705d);--color-text-error:light-dark(#c0262c,#ffaea7);--color-background-red:light-dark(#ffc4be,#5b2b28);
+--color-info:light-dark(#0074e2,#6d9cfe);--color-background-blue:light-dark(#b9d7ff,#253c5a);--color-text-blue:light-dark(#003978,#a1caff);
+--color-background-orange:light-dark(#ffc7a1,#503424);--color-text-orange:light-dark(#622700,#ffb37e);
+--color-background-teal:light-dark(#a9e2d6,#28413c);--color-text-teal:light-dark(#00463d,#90d7c8);
+--color-background-purple:light-dark(#f7d5ff,#4a2f51);--color-text-purple:light-dark(#5c0e6c,#eaacf8);
+--color-syntax-keyword:light-dark(#6b187c,#efa8ff);--color-syntax-property:light-dark(#005348,#90d7c8);--color-syntax-string:light-dark(#0b5615,#a4d6a3);--color-syntax-comment:light-dark(#525252,#b9b9b9);--color-syntax-added:light-dark(#bce0bb66,#2b422b99);--color-syntax-removed:light-dark(#ffc4be66,#5b2b2899);
+--spacing-0-5:0.125rem;--spacing-1:0.25rem;--spacing-1-5:0.375rem;--spacing-2:0.5rem;--spacing-3:0.75rem;--spacing-4:1rem;--spacing-5:1.25rem;--spacing-6:1.5rem;--spacing-8:2rem;--spacing-10:2.5rem;--spacing-12:3rem;
+--radius-inner:8px;--radius-element:12px;--radius-container:16px;--radius-full:9999px;
+--font-family-body:Figtree,system-ui,sans-serif;--font-family-code:"SF Mono",ui-monospace,monospace;
+--font-size-xs:0.625rem;--font-size-sm:0.75rem;--font-size-base:0.875rem;--font-size-lg:1.0625rem;--font-size-xl:1.25rem;--font-size-2xl:1.5rem;--font-size-3xl:1.8125rem;
+}
+a{color:var(--color-text-primary)}a:hover{color:var(--color-text-secondary)}
+.app{color-scheme:light;min-height:100vh;display:flex;flex-wrap:wrap;background:var(--color-background-body);color:var(--color-text-primary);font-family:var(--font-family-body);font-size:var(--font-size-base);line-height:1.5}
+.side{flex:1 1 15rem;max-width:100%;box-sizing:border-box;padding:var(--spacing-4);border-right:1px solid var(--color-border);background:var(--color-background-surface);display:flex;flex-direction:column;gap:var(--spacing-0-5)}
+.grp{padding:var(--spacing-4) var(--spacing-3) var(--spacing-1);font-size:var(--font-size-sm);font-weight:600;color:var(--color-text-secondary)}
+.item{min-height:36px;box-sizing:border-box;display:flex;align-items:center;gap:var(--spacing-2);padding:var(--spacing-1-5) var(--spacing-3);border-radius:var(--radius-element);text-decoration:none;color:var(--color-text-secondary)}
+.item:hover{background:var(--color-overlay-hover);color:var(--color-text-primary)}
+.item.on{background:var(--color-neutral);color:var(--color-text-primary);font-weight:600}
+.item .n{margin-left:auto;font-size:var(--font-size-sm)}
+.main{flex:999 1 560px;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:var(--spacing-3);flex-wrap:wrap;padding:var(--spacing-3) var(--spacing-6);border-bottom:1px solid var(--color-border);background:var(--color-background-surface)}
+.crumbs{flex-grow:1;display:flex;gap:var(--spacing-1-5);color:var(--color-text-secondary);font-size:var(--font-size-sm)}
+.crumbs b{color:var(--color-text-primary)}
+.body{padding:var(--spacing-6);display:flex;flex-direction:column;gap:var(--spacing-5)}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--spacing-4);flex-wrap:wrap}
+.head h1{margin:0;font-size:var(--font-size-2xl);line-height:1.15}
+.head p{margin:var(--spacing-1) 0 0;color:var(--color-text-secondary);max-width:44rem}
+.btn{min-height:36px;box-sizing:border-box;padding:var(--spacing-1-5) var(--spacing-4);display:inline-flex;align-items:center;gap:var(--spacing-2);border-radius:var(--radius-element);border:0;background:var(--color-neutral);color:var(--color-text-primary);font:600 var(--font-size-base) var(--font-family-body);text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn-p{background:var(--color-accent);color:var(--color-on-accent)}
+.btn-g{background:transparent}
+.grid{display:grid;gap:var(--spacing-4)}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:var(--spacing-5);align-items:start}
+.card{padding:var(--spacing-5);border-radius:var(--radius-container);background:var(--color-background-surface);display:flex;flex-direction:column;gap:var(--spacing-3);min-width:0}
+.card h2{margin:0;font-size:var(--font-size-lg)}
+.card h3{margin:0;font-size:var(--font-size-base)}
+.muted{color:var(--color-text-secondary)}.sm{font-size:var(--font-size-sm)}
+.mono{font-family:var(--font-family-code);font-size:var(--font-size-sm)}
+.field{display:flex;flex-direction:column;gap:var(--spacing-1);font-weight:600;min-width:0}
+.field .help{font-weight:400;font-size:var(--font-size-sm);color:var(--color-text-secondary)}
+.input{font:400 var(--font-size-base) var(--font-family-body);min-height:36px;box-sizing:border-box;padding:var(--spacing-1-5) var(--spacing-3);border-radius:var(--radius-element);border:1px solid var(--color-border-emphasized);background:var(--color-background-surface);color:var(--color-text-primary);width:100%}
+textarea.input{resize:vertical;line-height:1.5}
+.badge{display:inline-flex;align-items:center;gap:var(--spacing-1);padding:1px var(--spacing-2);border-radius:var(--radius-full);font-size:var(--font-size-sm);font-weight:600;white-space:nowrap;background:var(--color-neutral)}
+.ok{background:var(--color-background-green);color:var(--color-text-success)}.warn{background:var(--color-background-yellow);color:var(--color-text-yellow)}.err{background:var(--color-background-red);color:var(--color-text-error)}.info{background:var(--color-background-blue);color:var(--color-text-blue)}
+.dot{width:8px;height:8px;border-radius:var(--radius-full);display:inline-block;flex-shrink:0}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{text-align:left;font-size:var(--font-size-sm);font-weight:600;color:var(--color-text-secondary);padding:var(--spacing-2) var(--spacing-3);border-bottom:1px solid var(--color-border)}
+.tbl td{padding:var(--spacing-3);border-bottom:1px solid var(--color-border);vertical-align:middle}
+.tbl tr:hover td{background:var(--color-overlay-hover)}
+.sw{display:flex;align-items:center;gap:var(--spacing-3);min-height:36px}
+.sw input{appearance:none;width:36px;height:20px;border-radius:var(--radius-full);background:var(--color-accent-muted);position:relative;flex-shrink:0;margin:0;cursor:pointer}
+.sw input::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:var(--radius-full);background:#ffffff}
+.sw input:checked{background:var(--color-accent)}.sw input:checked::after{left:18px}
+.sw span{display:flex;flex-direction:column}
+.seg{display:inline-flex;padding:2px;border-radius:var(--radius-element);background:var(--color-neutral);font-size:var(--font-size-sm);font-weight:600}
+.seg span{padding:var(--spacing-1) var(--spacing-3);border-radius:var(--radius-inner);color:var(--color-text-secondary)}
+.seg span.on{background:var(--color-background-surface);color:var(--color-text-primary)}
+.range{display:flex;flex-direction:column;gap:var(--spacing-1)}
+.range .row{display:flex;justify-content:space-between;font-weight:600}
+.range input{width:100%;accent-color:var(--color-accent)}
+.sw-c{width:28px;height:28px;border-radius:var(--radius-full);display:inline-block;border:1px solid var(--color-border)}
+.kbd{font-family:var(--font-family-code);font-size:var(--font-size-sm);padding:0 var(--spacing-1-5);border-radius:var(--radius-inner);border:1px solid var(--color-border-emphasized)}
+.handle{color:var(--color-text-secondary);cursor:grab;font-size:var(--font-size-lg);line-height:1}
+.tabs{display:flex;gap:var(--spacing-1);border-bottom:1px solid var(--color-border)}
+.tabs a{padding:var(--spacing-2) var(--spacing-3);text-decoration:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs a.on{color:var(--color-text-primary);border-bottom-color:var(--color-accent);font-weight:600}
+@media (max-width:900px){.split,.g2,.g3,.g4{grid-template-columns:1fr}}
+</style>
+</helmet>
+<div class="app">
+<aside class="side" aria-label="Menu del CMS"><a href="cms-panoramica.dc.html" style="display:flex;align-items:center;gap:var(--spacing-2);padding:var(--spacing-2) var(--spacing-3);text-decoration:none;font-weight:800;font-size:var(--font-size-lg)">anders/planck <span class="badge">CMS</span></a><span class="grp">Contenuti</span><a class="item" href="cms-panoramica.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7v9H3z"></path></svg>Panoramica</a><a class="item" href="cms-progetti.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>Progetti<span class="n">9</span></a><a class="item" href="cms-note.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"></path><path d="M9 12h6M9 16h4"></path></svg>Note<span class="n">5</span></a><a class="item" href="cms-profilo.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"></path></svg>Profilo e percorso</a><span class="grp">Esperienza</span><a class="item on" href="cms-pagine.dc.html" aria-current="page"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 8h8M8 12h8M8 16h5"></path></svg>Pagine e capitoli</a><a class="item" href="cms-scena.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 3 8l9 5 9-5-9-5z"></path><path d="M3 8v8l9 5 9-5V8"></path><path d="M12 13v8"></path></svg>Scena 3D</a><a class="item" href="cms-animazioni.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h4l3-7 4 14 3-7h2"></path></svg>Animazioni e cursore</a><a class="item" href="cms-tema.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18z"></path></svg>Tema e tipografia</a><a class="item" href="cms-navigazione.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"></path></svg>Navigazione e SEO</a><span class="grp">Qualità</span><a class="item" href="cms-traduzioni.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"></path></svg>Traduzioni<span class="n">3</span></a><a class="item" href="cms-media.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="m21 16-5-5-9 9"></path></svg>Media</a><a class="item" href="cms-fonti.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"></path><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg>Fonti dei numeri</a><a class="item" href="cms-regole.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg>Regole di pubblicazione</a><span style="flex-grow:1;min-height:var(--spacing-6)"></span><a class="item" href="cms-pubblica.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12 20 4l-6 16-3-7z"></path></svg>Pubblica<span class="n badge warn">3</span></a><a class="item" href="Home.dc.html"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v6H4V6h6"></path></svg>Vedi il sito</a><div style="display:flex;align-items:center;gap:var(--spacing-2);padding:var(--spacing-3);margin-top:var(--spacing-2);border-top:1px solid var(--color-border)"><span style="width:28px;height:28px;border-radius:var(--radius-full);background:var(--color-accent);color:var(--color-on-accent);display:grid;place-items:center;font-size:var(--font-size-sm);font-weight:700">AP</span><span style="display:flex;flex-direction:column;line-height:1.2"><b>Anders-planck</b><span class="sm muted">proprietario del repo</span></span></div></aside>
+<div class="main">
+<header class="top"><nav class="crumbs" aria-label="Percorso"><span>CMS</span><span>/</span><span>Esperienza</span><span>/</span><b>Pagine e capitoli</b></nav>
+<button type="button" class="btn btn-g" style="color:var(--color-text-secondary)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>Cerca<span class="kbd">⌘K</span></button>
+<div class="seg" role="group" aria-label="Lingua dei contenuti"><span class="on">IT</span><span>EN</span><span>FR</span><span>DE</span></div>
+<a class="btn btn-p" href="cms-pubblica.dc.html">Pubblica · 3</a></header>
+<main class="body">
+<div class="head"><div><h1>Pagine e capitoli</h1><p>Ogni pagina immersiva è una sequenza di capitoli legati allo scroll. Qui scegli ordine, titoli, quanto scroll occupa ciascuno e da dove prende i contenuti.</p></div><div style="display:flex;gap:var(--spacing-2);flex-wrap:wrap"><a class="btn" href="Home.dc.html">Anteprima</a><a class="btn btn-p" href="cms-pubblica.dc.html">Salva in bozza</a></div></div><div class="seg"><span class="on">Home</span><span>Lavori</span><span>Progetto</span><span>Percorso</span><span>Note</span><span>Nota</span><span>404</span></div><section class="card" style=""><div style="display:flex;justify-content:space-between;align-items:center;gap:var(--spacing-2)"><h2>Home · capitoli</h2></div><div aria-hidden="true" style="display:flex;height:28px;border-radius:var(--radius-inner);overflow:hidden;font-size:var(--font-size-xs);font-weight:700"><span style="flex:15;display:grid;place-items:center;background:var(--color-accent);color:var(--color-on-accent)">Hero</span><span style="flex:18;display:grid;place-items:center;background:var(--color-background-blue);color:var(--color-text-blue)">Discipline</span><span style="flex:20;display:grid;place-items:center;background:var(--color-background-orange);color:var(--color-text-orange)">Lavori</span><span style="flex:16;display:grid;place-items:center;background:var(--color-background-yellow);color:var(--color-text-yellow)">AI</span><span style="flex:16;display:grid;place-items:center;background:var(--color-background-teal);color:var(--color-text-teal)">Percorso</span><span style="flex:15;display:grid;place-items:center;background:var(--color-background-gray);color:var(--color-text-primary)">Contatti</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th scope="col">Ordine</th><th scope="col">Capitolo</th><th scope="col">Titolo (IT)</th><th scope="col">Scroll</th><th scope="col">Contenuto da</th><th scope="col">Visibile</th></tr></thead><tbody><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">00</span></td><td><b>Hero</b></td><td><input class="input" type="text" value="Software Engineer."></td><td><span class="mono">0–15%</span></td><td><span class="sm">Profilo · hero</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">01</span></td><td><b>Discipline</b></td><td><input class="input" type="text" value="Quattro strati dello stesso lavoro."></td><td><span class="mono">15–33%</span></td><td><span class="sm">Scena 3D · facce</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">02</span></td><td><b>Lavori</b></td><td><input class="input" type="text" value="Ogni lastra è un progetto."></td><td><span class="mono">33–53%</span></td><td><span class="sm">Progetti · primi 5</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">03</span></td><td><b>AI</b></td><td><input class="input" type="text" value="Gli agenti propongono, io rivedo."></td><td><span class="mono">53–69%</span></td><td><span class="sm">Pagina «Come uso l’AI»</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">04</span></td><td><b>Percorso</b></td><td><input class="input" type="text" value="Da Ferrara, un passo alla volta."></td><td><span class="mono">69–85%</span></td><td><span class="sm">Profilo · tappe</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr><tr><td><span class="handle">⋮⋮</span> <span class="mono muted">05</span></td><td><b>Contatti</b></td><td><input class="input" type="text" value="Parliamo del tuo progetto."></td><td><span class="mono">85–100%</span></td><td><span class="sm">Profilo · contatti</span></td><td><label class="sw"><input type="checkbox" checked aria-label="Visibile"></label></td></tr></tbody></table></div></section><div class="grid g3"><section class="card" style=""><div style="display:flex;justify-content:space-between;align-items:center;gap:var(--spacing-2)"><h2>Lunghezza e ritmo</h2></div><label class="field" style="">Lunghezza dello scroll<input class="input mono" type="text" value="6000px"><span class="help">Più lunga = capitoli più lenti.</span></label><label class="sw"><input type="checkbox" checked><span><b>Scroll morbido</b><span class="sm muted" style="font-weight:400">Lenis nel sito vero</span></span></label><label class="sw"><input type="checkbox" checked><span><b>Indice dei capitoli a destra</b></span></label></section><section class="card" style=""><div style="display:flex;justify-content:space-between;align-items:center;gap:var(--spacing-2)"><h2>Lastre in home</h2></div><label class="field" style="">Quante lastre<select class="input"><option>3</option><option>4</option><option selected>5</option></select></label><label class="field" style="">Quali<select class="input"><option selected>Le prime in ordine di Progetti</option><option>Scelte a mano</option></select></label><label class="sw"><input type="checkbox" checked><span><b>Link «Tutti i lavori»</b></span></label></section><section class="card" style=""><div style="display:flex;justify-content:space-between;align-items:center;gap:var(--spacing-2)"><h2>Apertura</h2></div><label class="sw"><input type="checkbox" checked><span><b>Preloader alla prima visita</b><span class="sm muted" style="font-weight:400">Blocco che si assembla, al massimo 1,3 s</span></span></label><label class="sw"><input type="checkbox" checked><span><b>Salta il preloader con «riduci movimento»</b></span></label><label class="field" style="">Testo sotto la barra<input class="input" type="text" value="Scorri per smontare il blocco"></label></section></div>
+</main>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
