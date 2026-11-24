@@ -1,83 +1,112 @@
-import { ConvexError, v } from 'convex/values'
+import { ConvexError, type Infer, v } from 'convex/values'
 
+import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import { readDraftSnapshot } from './drafts'
-import type { Locale } from './locales'
+import { movePublishedPointers, readVersions } from './pointers'
 import {
-  type DocumentFinding,
   documentFindingValidator,
   hasBlockingFinding,
   runPublishRules,
 } from './rules'
-import {
-  type DocumentRef,
-  type LocalizedDocument,
-  type Snapshot,
-  toLocalizedDocumentFromSnapshot,
-} from './snapshot'
+import type { DocumentRef, Snapshot } from './snapshot'
 
 /**
  * Releases (ADR 0003): publish freezes the selected drafts into immutable
  * versions, groups them in a release and moves the published pointers, all
  * in one mutation. Blocked publishes are a result the owner sees (DATA-03).
+ * Every command carries a `requestId` chosen by the caller: repeating it
+ * (double click, retry after a lost response) returns the first release.
  */
+const RELEASE_BASE_FIELDS = {
+  versionIds: v.array(v.id('versions')),
+  note: v.string(),
+  requestId: v.string(),
+  /** Rule findings at publish: warnings, or the blocks that failed it. */
+  findings: v.array(documentFindingValidator),
+}
+
+export const releaseValidator = v.union(
+  v.object({
+    ...RELEASE_BASE_FIELDS,
+    status: v.literal('scheduled'),
+    scheduledAt: v.number(),
+  }),
+  v.object({
+    ...RELEASE_BASE_FIELDS,
+    status: v.literal('published'),
+    publishedAt: v.number(),
+    scheduledAt: v.optional(v.number()),
+    /** Set on a rollback: the release whose versions it made live again. */
+    rolledBackFrom: v.optional(v.id('releases')),
+  }),
+  v.object({
+    ...RELEASE_BASE_FIELDS,
+    status: v.literal('failed'),
+    scheduledAt: v.number(),
+    failedAt: v.number(),
+  }),
+)
+
 export const publishOutcomeValidator = v.union(
   v.object({
     status: v.literal('blocked'),
     findings: v.array(documentFindingValidator),
   }),
   v.object({
-    status: v.union(v.literal('published'), v.literal('scheduled')),
+    status: v.union(
+      v.literal('published'),
+      v.literal('scheduled'),
+      v.literal('failed'),
+    ),
     releaseId: v.id('releases'),
     findings: v.array(documentFindingValidator),
   }),
 )
-
-type PublishOutcome =
-  | { status: 'blocked'; findings: DocumentFinding[] }
-  | {
-      status: 'published' | 'scheduled'
-      releaseId: Id<'releases'>
-      findings: DocumentFinding[]
-    }
+type PublishOutcome = Infer<typeof publishOutcomeValidator>
 
 interface PublishRequest {
   selection: DocumentRef[]
   note: string
+  requestId: string
   /** Epoch ms. In the future: schedule the release; omitted or past: now. */
   at?: number
 }
 
 export async function publishSelection(
   ctx: MutationCtx,
-  { selection, note, at }: PublishRequest,
+  { selection, note, requestId, at }: PublishRequest,
   now: number,
 ): Promise<PublishOutcome> {
+  const repeated = await findReleaseByRequestId(ctx, requestId)
+  if (repeated !== null) {
+    return toPublishOutcomeFromRelease(repeated)
+  }
   const snapshots = await readSelectedDrafts(ctx, selection)
   const findings = runPublishRules(snapshots)
   if (hasBlockingFinding(findings)) {
     return { status: 'blocked', findings }
   }
   const versionIds = await writeVersions(ctx, snapshots, now)
+  const base = { versionIds, note, requestId, findings }
   if (at !== undefined && at > now) {
     // Versions are frozen now; edits made after scheduling wait for the next
     // publish. The rules run again when the release comes due.
     const releaseId = await ctx.db.insert('releases', {
-      versionIds,
-      note,
+      ...base,
       status: 'scheduled',
       scheduledAt: at,
-      findings,
+    })
+    await ctx.scheduler.runAt(at, internal.content.publishScheduled, {
+      releaseId,
     })
     return { status: 'scheduled', releaseId, findings }
   }
   const releaseId = await ctx.db.insert('releases', {
-    versionIds,
-    note,
+    ...base,
     status: 'published',
     publishedAt: now,
-    findings,
   })
   await movePublishedPointers(ctx, releaseId, versionIds)
   return { status: 'published', releaseId, findings }
@@ -93,18 +122,24 @@ export async function publishScheduledRelease(
   if (release?.status !== 'scheduled') {
     return
   }
-  const versions = await readVersions(ctx, release.versionIds)
+  const { versionIds, note, requestId, scheduledAt } = release
+  const versions = await readVersions(ctx, versionIds)
   const findings = runPublishRules(versions.map(({ snapshot }) => snapshot))
+  const base = { versionIds, note, requestId, findings, scheduledAt }
   if (hasBlockingFinding(findings)) {
-    await ctx.db.patch(releaseId, { status: 'failed', findings })
+    await ctx.db.replace(releaseId, {
+      ...base,
+      status: 'failed',
+      failedAt: now,
+    })
     return
   }
-  await ctx.db.patch(releaseId, {
+  await ctx.db.replace(releaseId, {
+    ...base,
     status: 'published',
     publishedAt: now,
-    findings,
   })
-  await movePublishedPointers(ctx, releaseId, release.versionIds)
+  await movePublishedPointers(ctx, releaseId, versionIds)
 }
 
 /**
@@ -115,9 +150,13 @@ export async function publishScheduledRelease(
  */
 export async function rollBackToRelease(
   ctx: MutationCtx,
-  targetId: Id<'releases'>,
+  { targetId, requestId }: { targetId: Id<'releases'>; requestId: string },
   now: number,
 ) {
+  const repeated = await findReleaseByRequestId(ctx, requestId)
+  if (repeated !== null) {
+    return repeated._id
+  }
   const target = await ctx.db.get(targetId)
   if (target?.status !== 'published') {
     throw new ConvexError({
@@ -128,29 +167,29 @@ export async function rollBackToRelease(
   const releaseId = await ctx.db.insert('releases', {
     versionIds: target.versionIds,
     note: target.note,
+    requestId,
+    findings: [],
     status: 'published',
     publishedAt: now,
     rolledBackFrom: targetId,
-    findings: [],
   })
   await movePublishedPointers(ctx, releaseId, target.versionIds)
   return releaseId
 }
 
-/** What the public site shows for a document in a locale, or null. */
-export async function readPublishedDocument(
-  ctx: QueryCtx,
-  ref: DocumentRef,
-  locale: Locale,
-): Promise<LocalizedDocument | null> {
-  const pointer = await findPublishedPointer(ctx, ref)
-  if (pointer === null) {
-    return null
+function findReleaseByRequestId(ctx: QueryCtx, requestId: string) {
+  return ctx.db
+    .query('releases')
+    .withIndex('by_request_id', (query) => query.eq('requestId', requestId))
+    .unique()
+}
+
+function toPublishOutcomeFromRelease(release: Doc<'releases'>): PublishOutcome {
+  return {
+    status: release.status,
+    releaseId: release._id,
+    findings: release.findings,
   }
-  const version = await ctx.db.get(pointer.versionId)
-  return version === null
-    ? null
-    : toLocalizedDocumentFromSnapshot(version.snapshot, locale)
 }
 
 async function readSelectedDrafts(
@@ -186,50 +225,4 @@ async function writeVersions(
       }),
     ),
   )
-}
-
-async function readVersions(
-  ctx: QueryCtx,
-  versionIds: Id<'versions'>[],
-): Promise<Doc<'versions'>[]> {
-  return Promise.all(
-    versionIds.map(async (versionId) => {
-      const version = await ctx.db.get(versionId)
-      if (version === null) {
-        // Versions are immutable and never deleted; a release cannot lose one.
-        throw new Error(`Missing version ${versionId}`)
-      }
-      return version
-    }),
-  )
-}
-
-function findPublishedPointer(ctx: QueryCtx, { collection, key }: DocumentRef) {
-  return ctx.db
-    .query('publishedPointers')
-    .withIndex('by_collection_and_key', (query) =>
-      query.eq('collection', collection).eq('key', key),
-    )
-    .unique()
-}
-
-async function movePublishedPointers(
-  ctx: MutationCtx,
-  releaseId: Id<'releases'>,
-  versionIds: Id<'versions'>[],
-) {
-  const versions = await readVersions(ctx, versionIds)
-  for (const { _id: versionId, collection, key } of versions) {
-    const pointer = await findPublishedPointer(ctx, { collection, key })
-    if (pointer === null) {
-      await ctx.db.insert('publishedPointers', {
-        collection,
-        key,
-        versionId,
-        releaseId,
-      })
-    } else {
-      await ctx.db.patch(pointer._id, { versionId, releaseId })
-    }
-  }
 }

@@ -2,10 +2,8 @@ import { v } from 'convex/values'
 
 import { internalMutation } from './_generated/server'
 import { type DraftEdit, saveDraftEdit } from './model/content/drafts'
-import {
-  publishSelection,
-  readPublishedDocument,
-} from './model/content/releases'
+import { readPublishedDocument } from './model/content/pointers'
+import { publishSelection } from './model/content/releases'
 
 /**
  * Seed content, only from verified data in the mockups (PLAN → Seed content).
@@ -46,10 +44,10 @@ const SEED_PROFILE: DraftEdit = {
 }
 
 /**
- * Publishes the seed profile. Run with `bunx convex run seed:profile`; it
- * does nothing once a profile has been published, so retries are safe.
+ * Publishes the seed profile. Run with `bunx convex run seed:publishSeedProfile`;
+ * it does nothing once a profile has been published, so retries are safe.
  */
-export const profile = internalMutation({
+export const publishSeedProfile = internalMutation({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
@@ -60,11 +58,18 @@ export const profile = internalMutation({
     }
     const now = Date.now()
     await saveDraftEdit(ctx, SEED_PROFILE, now)
-    await publishSelection(
+    const outcome = await publishSelection(
       ctx,
-      { selection: [ref], note: 'Profilo iniziale' },
+      { selection: [ref], note: 'Profilo iniziale', requestId: 'seed-profile' },
       now,
     )
+    if (outcome.status === 'blocked') {
+      throw new Error(
+        `The seed profile breaks a publish rule: ${outcome.findings
+          .map((finding) => finding.message)
+          .join('; ')}`,
+      )
+    }
     return null
   },
 })

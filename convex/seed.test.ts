@@ -15,8 +15,8 @@ const read = (backend: ReturnType<typeof convexTest>) =>
 
 test('the seed publishes the profile once', async () => {
   const backend = convexTest(schema, modules)
-  await backend.mutation(internal.seed.profile, {})
-  await backend.mutation(internal.seed.profile, {})
+  await backend.mutation(internal.seed.publishSeedProfile, {})
+  await backend.mutation(internal.seed.publishSeedProfile, {})
 
   const profile = await read(backend)
   expect(profile?.fields.name).toBe('Anders Planck')
@@ -30,7 +30,7 @@ test('the seed publishes the profile once', async () => {
 
 test('the seeded copy has no free numbers (ADR 0004)', async () => {
   const backend = convexTest(schema, modules)
-  await backend.mutation(internal.seed.profile, {})
+  await backend.mutation(internal.seed.publishSeedProfile, {})
 
   const profile = await read(backend)
   expect(Object.values(profile?.content ?? {}).join(' ')).not.toMatch(/\d/)

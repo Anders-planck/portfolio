@@ -18,8 +18,9 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      // `seed:profile` publishes the seed profile once (a no-op afterwards).
-      command: 'bunx convex dev --tail-logs disable --run seed:profile',
+      // `seed:publishSeedProfile` publishes the seed profile once (a no-op afterwards).
+      command:
+        'bunx convex dev --tail-logs disable --run seed:publishSeedProfile',
       env: { CONVEX_AGENT_MODE: 'anonymous' },
       url: `${convexUrl}/version`,
       reuseExistingServer: !process.env.CI,

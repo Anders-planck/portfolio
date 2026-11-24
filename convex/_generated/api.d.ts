@@ -13,6 +13,7 @@ import type * as content from "../content.js";
 import type * as model_appearance from "../model/appearance.js";
 import type * as model_content_drafts from "../model/content/drafts.js";
 import type * as model_content_locales from "../model/content/locales.js";
+import type * as model_content_pointers from "../model/content/pointers.js";
 import type * as model_content_preview from "../model/content/preview.js";
 import type * as model_content_profile from "../model/content/profile.js";
 import type * as model_content_releases from "../model/content/releases.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   "model/appearance": typeof model_appearance;
   "model/content/drafts": typeof model_content_drafts;
   "model/content/locales": typeof model_content_locales;
+  "model/content/pointers": typeof model_content_pointers;
   "model/content/preview": typeof model_content_preview;
   "model/content/profile": typeof model_content_profile;
   "model/content/releases": typeof model_content_releases;

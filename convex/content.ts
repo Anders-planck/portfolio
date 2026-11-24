@@ -1,6 +1,5 @@
 import { v } from 'convex/values'
 
-import { internal } from './_generated/api'
 import { internalMutation, query } from './_generated/server'
 import {
   draftEditValidator,
@@ -8,12 +7,12 @@ import {
   saveDraftEdit,
 } from './model/content/drafts'
 import { localeValidator } from './model/content/locales'
+import { readPublishedDocument } from './model/content/pointers'
 import { PREVIEW_TOKEN_TTL_MS, signPreviewToken } from './model/content/preview'
 import {
   publishOutcomeValidator,
   publishScheduledRelease,
   publishSelection,
-  readPublishedDocument,
   rollBackToRelease,
 } from './model/content/releases'
 import {
@@ -43,23 +42,21 @@ export const saveDraft = internalMutation({
   },
 })
 
-/** Publishes the selected drafts now, or schedules them for `at` (epoch ms). */
+/**
+ * Publishes the selected drafts now, or schedules them for `at` (epoch ms).
+ * `requestId` makes it idempotent: repeating it returns the first release.
+ */
 export const publish = internalMutation({
   args: {
     selection: v.array(documentRefValidator),
     note: v.string(),
+    requestId: v.string(),
     at: v.optional(v.number()),
   },
   returns: publishOutcomeValidator,
   handler: async (ctx, request) => {
     await requireOwner()
-    const outcome = await publishSelection(ctx, request, Date.now())
-    if (outcome.status === 'scheduled' && request.at !== undefined) {
-      await ctx.scheduler.runAt(request.at, internal.content.publishScheduled, {
-        releaseId: outcome.releaseId,
-      })
-    }
-    return outcome
+    return publishSelection(ctx, request, Date.now())
   },
 })
 
@@ -73,13 +70,21 @@ export const publishScheduled = internalMutation({
   },
 })
 
-/** Makes an earlier published release live again, as a new release. */
+/**
+ * Makes an earlier published release live again, as a new release.
+ * `requestId` makes it idempotent: repeating it returns the first rollback.
+ */
 export const rollback = internalMutation({
-  args: { releaseId: v.id('releases') },
+  args: { releaseId: v.id('releases'), requestId: v.string() },
   returns: v.object({ releaseId: v.id('releases') }),
-  handler: async (ctx, { releaseId }) => {
+  handler: async (ctx, { releaseId: targetId, requestId }) => {
     await requireOwner()
-    return { releaseId: await rollBackToRelease(ctx, releaseId, Date.now()) }
+    const releaseId = await rollBackToRelease(
+      ctx,
+      { targetId, requestId },
+      Date.now(),
+    )
+    return { releaseId }
   },
 })
 

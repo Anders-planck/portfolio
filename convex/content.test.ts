@@ -35,6 +35,7 @@ test('publishing makes the draft public for its locale', async () => {
   })
 
   await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: 'Prima pubblicazione',
   })
@@ -58,6 +59,7 @@ test('later draft edits stay private until the next publish', async () => {
     content: { subtitle: 'Prima' },
   })
   await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: 'v1',
   })
@@ -72,6 +74,7 @@ test('later draft edits stay private until the next publish', async () => {
   expect((await read())?.content?.subtitle).toBe('Prima')
 
   await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: 'v2',
   })
@@ -91,6 +94,7 @@ test('each locale reads its own content; a missing locale has none', async () =>
     content: { statusLabel: 'Available' },
   })
   await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: 'Lingue',
   })
@@ -106,6 +110,7 @@ test('publishing a document without a draft fails', async () => {
   const backend = setup()
   await expect(
     backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Vuoto',
     }),
@@ -122,6 +127,7 @@ async function publishSubtitle(
     content: { subtitle },
   })
   const result = await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: subtitle,
   })
@@ -144,14 +150,21 @@ test('rollback restores any earlier release and leaves the draft alone', async (
     content: { subtitle: 'Bozza' },
   })
 
-  await backend.mutation(internal.content.rollback, { releaseId: first })
+  await backend.mutation(internal.content.rollback, {
+    releaseId: first,
+    requestId: crypto.randomUUID(),
+  })
   expect(await publishedSubtitle(backend)).toBe('Uno')
 
-  await backend.mutation(internal.content.rollback, { releaseId: second })
+  await backend.mutation(internal.content.rollback, {
+    releaseId: second,
+    requestId: crypto.randomUUID(),
+  })
   expect(await publishedSubtitle(backend)).toBe('Due')
 
   // The draft is the owner's work in progress; rollback never touches it.
   await backend.mutation(internal.content.publish, {
+    requestId: crypto.randomUUID(),
     selection: [profile],
     note: 'Dopo il rollback',
   })
@@ -165,12 +178,58 @@ test('rollback is itself a release that can be rolled back', async () => {
 
   const { releaseId: rollbackId } = await backend.mutation(
     internal.content.rollback,
-    { releaseId: first },
+    { releaseId: first, requestId: crypto.randomUUID() },
   )
   await publishSubtitle(backend, 'Tre')
-  await backend.mutation(internal.content.rollback, { releaseId: rollbackId })
+  await backend.mutation(internal.content.rollback, {
+    releaseId: rollbackId,
+    requestId: crypto.randomUUID(),
+  })
 
   expect(await publishedSubtitle(backend)).toBe('Uno')
+})
+
+const countReleases = (backend: ReturnType<typeof setup>) =>
+  backend.run(async (ctx) => (await ctx.db.query('releases').take(100)).length)
+
+test('a repeated publish request (double click, retry) publishes once', async () => {
+  const backend = setup()
+  await backend.mutation(internal.content.saveDraft, {
+    ...profile,
+    locale: 'it',
+    content: { subtitle: 'Una volta' },
+  })
+  const request = {
+    selection: [profile],
+    note: 'Doppio clic',
+    requestId: 'publish-once',
+  }
+
+  const first = await backend.mutation(internal.content.publish, request)
+  // The response was lost, the owner edits on, the client retries.
+  await backend.mutation(internal.content.saveDraft, {
+    ...profile,
+    locale: 'it',
+    content: { subtitle: 'Dopo il retry' },
+  })
+  const retry = await backend.mutation(internal.content.publish, request)
+
+  expect(retry).toEqual(first)
+  expect(await countReleases(backend)).toBe(1)
+  expect(await publishedSubtitle(backend)).toBe('Una volta')
+})
+
+test('a repeated rollback request rolls back once', async () => {
+  const backend = setup()
+  const first = await publishSubtitle(backend, 'Uno')
+  await publishSubtitle(backend, 'Due')
+  const request = { releaseId: first, requestId: 'rollback-once' }
+
+  const rollback = await backend.mutation(internal.content.rollback, request)
+  const retry = await backend.mutation(internal.content.rollback, request)
+
+  expect(retry).toEqual(rollback)
+  expect(await countReleases(backend)).toBe(3)
 })
 
 describe('scheduled publish', () => {
@@ -192,6 +251,7 @@ describe('scheduled publish', () => {
 
     const at = Date.now() + 24 * 60 * 60 * 1000
     const result = await backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Programmata',
       at,
@@ -218,6 +278,7 @@ describe('scheduled publish', () => {
       content: { subtitle: 'Subito' },
     })
     const result = await backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Passato',
       at: Date.now() - 1000,
@@ -271,6 +332,7 @@ describe('rules at publish', () => {
     })
 
     const result = await backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Bloccata',
     })
@@ -301,6 +363,7 @@ describe('rules at publish', () => {
     })
 
     const result = await backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Con avvisi',
     })
@@ -322,6 +385,7 @@ describe('rules at publish', () => {
     // Scheduled while the rule set is still empty...
     PUBLISH_RULES.length = 0
     await backend.mutation(internal.content.publish, {
+      requestId: crypto.randomUUID(),
       selection: [profile],
       note: 'Programmata',
       at: Date.now() + 60_000,

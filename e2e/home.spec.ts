@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 
-// The Convex webServer runs `seed:profile`, which publishes the profile once.
+// The Convex webServer runs `seed:publishSeedProfile`, which publishes the profile once.
 
 test('Home is server-rendered from the published profile', async ({
   request,

@@ -7,7 +7,7 @@ import {
   profileContentFieldsValidator,
   profileFieldsValidator,
 } from './model/content/profile'
-import { documentFindingValidator } from './model/content/rules'
+import { releaseValidator } from './model/content/releases'
 import {
   collectionValidator,
   snapshotValidator,
@@ -46,21 +46,7 @@ export default defineSchema({
   }).index('by_collection_and_key', ['collection', 'key']),
 
   /** Versions made live together by one publish (or a rollback). */
-  releases: defineTable({
-    versionIds: v.array(v.id('versions')),
-    note: v.string(),
-    status: v.union(
-      v.literal('scheduled'),
-      v.literal('published'),
-      v.literal('failed'),
-    ),
-    scheduledAt: v.optional(v.number()),
-    publishedAt: v.optional(v.number()),
-    /** Set on a rollback: the release whose versions it made live again. */
-    rolledBackFrom: v.optional(v.id('releases')),
-    /** Rule findings at publish: warnings, or the blocks that failed it. */
-    findings: v.array(documentFindingValidator),
-  }),
+  releases: defineTable(releaseValidator).index('by_request_id', ['requestId']),
 
   /** What the public site reads: the live version of each document. */
   publishedPointers: defineTable({
