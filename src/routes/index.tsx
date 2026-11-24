@@ -1,5 +1,5 @@
+import { Heading } from '@astryxdesign/core/Heading'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
-import { Text } from '@astryxdesign/core/Text'
 import { convexQuery } from '@convex-dev/react-query'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -20,9 +20,7 @@ function HelloPage() {
     <Layout
       content={
         <LayoutContent role="main" padding={8}>
-          <Text as="h1" type="large">
-            {data.message}
-          </Text>
+          <Heading level={1}>{data.message}</Heading>
         </LayoutContent>
       }
     />

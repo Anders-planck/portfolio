@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "vite build && wrangler deploy",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p convex",
+    "typecheck": "node_modules/@typescript/native/bin/tsc --noEmit && node_modules/@typescript/native/bin/tsc --noEmit -p convex",
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",

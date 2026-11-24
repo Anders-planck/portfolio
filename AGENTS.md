@@ -57,10 +57,11 @@ Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agen
 
 Portfolio v3: TanStack Start (React 19) + Convex + Astryx, served by Cloudflare Workers. Before any work read `GLOSSARY.md`, `docs/adr/`, then `docs/redesign/PLAN.md`; its "Design resolutions" override the mockups in `docs/redesign/design/`. Numbers never appear as free text (ADR 0004).
 
-Layout: `src/routes/` (file routes; `routeTree.gen.ts` is generated), `src/router.tsx` (Convex + React Query wiring), `src/styles/globals.css` (cascade-layer order; must stay the first stylesheet), `convex/` (backend; `_generated/` is generated, commit it), `themes/portfolio/` (Astryx theme, change it only through `bunx astryx experimental theme editor`), `e2e/` (Playwright), `scripts/wizard/` (owner-only steps).
+Layout: `src/routes/` (file routes; `routeTree.gen.ts` is generated), `src/router.tsx` (Convex + React Query wiring), `src/styles/globals.css` (cascade-layer order; must stay the first stylesheet), `convex/` (backend; `_generated/` is generated, commit it), `themes/portfolio/` (Astryx theme source; change it only through `bunx astryx experimental theme editor`), `src/themes/portfolio/` and `src/astryx-themes.js` (app copy the editor generates; never hand-edit), `e2e/` (Playwright), `scripts/wizard/` (owner-only steps).
 
 Commands (bun only):
 - `bun run dev` runs Convex and Vite. Without a Convex login use `CONVEX_AGENT_MODE=anonymous bun run dev:convex` plus `bun run dev:web`.
+- `bun run typecheck` runs TypeScript 7 (`@typescript/native`); the `typescript` package is TS 6 for tools that need its API.
 - Before pushing, all must pass: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run e2e`, then `bun run build && bun run doctor`.
 
 Data in routes: `convexQuery` + `context.queryClient.ensureQueryData` in the loader (server render), `useSuspenseQuery` in the component (live updates). Test Convex functions with `convex-test` next to them (`convex/*.test.ts`).
