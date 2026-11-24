@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "portfolio",
+  "account_id": "3befb59e22cf928c0fc1ff2afe626650",
   "compatibility_date": "2026-11-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
