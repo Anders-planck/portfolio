@@ -2,9 +2,11 @@
 
 Steps only the owner can do (accounts, logins, secrets, DNS). Each one has a wizard under `scripts/wizard/`; run it from the repo root. Agents never handle the secrets these steps produce.
 
-## Pending
+## Done
 
-### Ticket 01 · Convex cloud dev deployment and Workers preview
+### Ticket 01 · Convex cloud dev deployment and Workers preview (done 2026-11-24)
+
+Convex project `portafoglio` (dev deployment in eu-west-1) and Worker `portfolio` on the personal Cloudflare account (`account_id` pinned in `wrangler.jsonc`, since the owner has two accounts).
 
 Run `scripts/wizard/preview-deploy.sh`. It:
 
@@ -14,7 +16,9 @@ Run `scripts/wizard/preview-deploy.sh`. It:
 
 Until then, development and CI use the anonymous local Convex backend (`CONVEX_AGENT_MODE=anonymous bunx convex dev`), which needs no account.
 
-Preview URL: _not deployed yet_
+Preview URL: https://portfolio.anders-jipwouo.workers.dev
+
+## Pending
 
 ### Ticket 03 · Preview token secret
 
