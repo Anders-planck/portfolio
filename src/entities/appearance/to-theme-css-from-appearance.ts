@@ -86,15 +86,15 @@ function formatLength({ amount, unit }: Length): string {
   return `${String(rounded)}${unit}`
 }
 
-/** Each `base` token matching `name` whose value is a plain length, times `factor`. */
+/** Each `base` token matching `tokenPattern` whose value is a plain length, times `factor`. */
 function scaleLengthTokens(
   base: DefinedTheme,
-  name: RegExp,
+  tokenPattern: RegExp,
   factor: number,
 ): Record<string, string> {
   return Object.fromEntries(
     Object.entries(base.tokens).flatMap(([token, value]) => {
-      const length = name.test(token) ? readLength(value) : undefined
+      const length = tokenPattern.test(token) ? readLength(value) : undefined
       if (length === undefined) {
         return []
       }

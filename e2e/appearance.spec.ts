@@ -6,6 +6,8 @@ import { expect, type Page, test } from '@playwright/test'
 // put the defaults back at the end.
 test.describe.configure({ mode: 'serial' })
 
+// e2e/ may not import Convex or the appearance entity (ARC-01), so these are
+// written out; Convex validates them on publish.
 const LIGHT_APPEARANCE = {
   theme: {
     basePx: 16,
@@ -15,7 +17,7 @@ const LIGHT_APPEARANCE = {
     mode: 'light',
   },
   motion: { tempo: 1, character: 'standard' },
-}
+} as const
 
 const DARK_APPEARANCE = {
   theme: {
@@ -26,10 +28,12 @@ const DARK_APPEARANCE = {
     mode: 'dark',
   },
   motion: { tempo: 1.5, character: 'expressive' },
-}
+} as const
 
 /** Publishes params on the running Convex backend: no rebuild, no restart. */
-function publishAppearance(appearance: typeof LIGHT_APPEARANCE) {
+function publishAppearance(
+  appearance: typeof LIGHT_APPEARANCE | typeof DARK_APPEARANCE,
+) {
   const publishOutput = runConvexFunction(
     'appearance:publish',
     JSON.stringify(appearance),
@@ -101,10 +105,9 @@ test('the first paint already has the params, and hydration keeps them', async (
   await staticPage.goto('/')
   const firstPaint = await readRenderedAppearance(staticPage)
   await noJs.close()
-  expect(firstPaint).toEqual({
+  expect(firstPaint).toMatchObject({
     colorScheme: 'dark',
     headingFont: 'Georgia',
-    headingSize: firstPaint.headingSize,
     radius: '1.25rem',
     durationFast: '188ms',
     tempo: '1.5',

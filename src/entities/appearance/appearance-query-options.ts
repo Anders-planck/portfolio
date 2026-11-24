@@ -26,7 +26,7 @@ export function appearanceCssQueryOptions(appearance: Appearance) {
       if (!isSameAppearance(appearanceCss.appearance, appearance)) {
         throw new Error('The appearance changed while its CSS was made')
       }
-      return appearanceCss
+      return appearanceCss.css
     },
     staleTime: 'static',
     placeholderData: keepPreviousData,

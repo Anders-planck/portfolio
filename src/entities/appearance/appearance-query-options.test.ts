@@ -31,10 +31,7 @@ test('the CSS made from the params of the key is kept under that key', async () 
     queryClient.query(
       appearanceCssQueryOptions(createAppearance({ theme: { basePx: 18 } })),
     ),
-  ).resolves.toEqual({
-    appearance: createAppearance({ theme: { basePx: 18 } }),
-    css: 'css 18',
-  })
+  ).resolves.toBe('css 18')
 })
 
 test('CSS made from params published in between is never kept under the old key', async () => {
