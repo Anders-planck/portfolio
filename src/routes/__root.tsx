@@ -7,6 +7,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+
 import { defaultThemeSlug, themes } from '../astryx-themes'
 import globalsCss from '../styles/globals.css?url'
 
