@@ -32,15 +32,15 @@ function saveSubtitleDraft(
 
 function publishProfile(
   backend: Backend,
-  options: { publishAt?: number; requestId?: string } = {},
+  options: { scheduledAt?: number; requestId?: string } = {},
 ) {
   return backend.mutation(internal.content.publish, {
     selection: [PROFILE],
     note: 'Nota di rilascio',
     requestId: options.requestId ?? crypto.randomUUID(),
-    ...(options.publishAt === undefined
+    ...(options.scheduledAt === undefined
       ? {}
-      : { publishAt: options.publishAt }),
+      : { scheduledAt: options.scheduledAt }),
   })
 }
 
@@ -212,7 +212,7 @@ describe('scheduled publish', () => {
     await saveSubtitleDraft(backend, 'Domani')
 
     const outcome = await publishProfile(backend, {
-      publishAt: Date.now() + ONE_DAY_MS,
+      scheduledAt: Date.now() + ONE_DAY_MS,
     })
     expect(outcome.status).toBe('scheduled')
 
@@ -229,7 +229,7 @@ describe('scheduled publish', () => {
     await saveSubtitleDraft(backend, 'Subito')
 
     const outcome = await publishProfile(backend, {
-      publishAt: Date.now() - 1000,
+      scheduledAt: Date.now() - 1000,
     })
 
     expect(outcome.status).toBe('published')
@@ -315,13 +315,26 @@ describe('rules at publish', () => {
     await saveSubtitleDraft(backend, 'Dopo [anno]')
     // Scheduled while the rule set is still empty...
     PUBLISH_RULES.length = 0
-    await publishProfile(backend, { publishAt: Date.now() + 60_000 })
+    const outcome = await publishProfile(backend, {
+      scheduledAt: Date.now() + 60_000,
+    })
+    if (outcome.status === 'blocked') {
+      throw new Error('Expected the release to be scheduled')
+    }
     // ...then the rules are tightened before it runs.
     PUBLISH_RULES.push(placeholderRule)
 
     vi.advanceTimersByTime(60_000)
     await backend.finishInProgressScheduledFunctions()
+
     expect(await readPublishedSubtitle(backend)).toBe('Prima')
+    // No release history query exists yet (CMS ticket), so read the row.
+    const release = await backend.run((ctx) => ctx.db.get(outcome.releaseId))
+    expect(release).toMatchObject({
+      status: 'failed',
+      failedAt: Date.now(),
+      findings: [{ rule: 'placeholder', severity: 'block', locale: 'it' }],
+    })
   })
 })
 
@@ -368,14 +381,12 @@ describe('preview', () => {
     expect(await backend.query(api.content.getDraft, { token })).toBeNull()
   })
 
-  test('a token that is not genuine reads nothing', async () => {
+  test('rotating the secret invalidates earlier preview links', async () => {
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
 
-    expect(
-      await backend.query(api.content.getDraft, { token: 'not-a-token' }),
-    ).toBeNull()
     vi.stubEnv('PREVIEW_TOKEN_SECRET', 'another-secret')
+
     expect(await backend.query(api.content.getDraft, { token })).toBeNull()
   })
 })

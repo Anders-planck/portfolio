@@ -4,13 +4,14 @@ import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import { readDraftSnapshot } from './drafts'
-import { movePublishedPointers, readVersions } from './pointers'
+import { movePublishedPointers } from './pointers'
 import {
   documentFindingValidator,
   hasBlockingFinding,
   runPublishRules,
 } from './rules'
 import type { DocumentRef, Snapshot } from './snapshot'
+import { readVersions, writeVersions } from './versions'
 
 /**
  * Releases (ADR 0003): publish freezes the selected drafts into immutable
@@ -71,12 +72,12 @@ interface PublishRequest {
   note: string
   requestId: string
   /** Epoch ms. In the future: schedule the release; omitted or past: now. */
-  publishAt?: number
+  scheduledAt?: number
 }
 
 export async function publishSelection(
   ctx: MutationCtx,
-  { selection, note, requestId, publishAt }: PublishRequest,
+  { selection, note, requestId, scheduledAt }: PublishRequest,
   now: number,
 ): Promise<PublishOutcome> {
   const repeated = await findReleaseByRequestId(ctx, requestId)
@@ -90,15 +91,15 @@ export async function publishSelection(
   }
   const versionIds = await writeVersions(ctx, snapshots, now)
   const base = { versionIds, note, requestId, findings }
-  if (publishAt !== undefined && publishAt > now) {
+  if (scheduledAt !== undefined && scheduledAt > now) {
     // Versions are frozen now; edits made after scheduling wait for the next
     // publish. The rules run again when the release comes due.
     const releaseId = await ctx.db.insert('releases', {
       ...base,
       status: 'scheduled',
-      scheduledAt: publishAt,
+      scheduledAt,
     })
-    await ctx.scheduler.runAt(publishAt, internal.content.publishScheduled, {
+    await ctx.scheduler.runAt(scheduledAt, internal.content.publishScheduled, {
       releaseId,
     })
     return { status: 'scheduled', releaseId, findings }
@@ -207,22 +208,5 @@ async function readSelectedDrafts(
       }
       return snapshot
     }),
-  )
-}
-
-async function writeVersions(
-  ctx: MutationCtx,
-  snapshots: Snapshot[],
-  now: number,
-) {
-  return Promise.all(
-    snapshots.map((snapshot) =>
-      ctx.db.insert('versions', {
-        collection: snapshot.collection,
-        key: snapshot.key,
-        snapshot,
-        createdAt: now,
-      }),
-    ),
   )
 }

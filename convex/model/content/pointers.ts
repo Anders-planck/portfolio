@@ -1,4 +1,4 @@
-import type { Doc, Id } from '../../_generated/dataModel'
+import type { Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import type { Locale } from './locales'
 import {
@@ -6,6 +6,7 @@ import {
   type LocalizedDocument,
   toLocalizedDocumentFromSnapshot,
 } from './snapshot'
+import { readVersions } from './versions'
 
 /**
  * Published pointers: the live version of each document. The public site
@@ -26,22 +27,6 @@ export async function readPublishedDocument(
   return version === null
     ? null
     : toLocalizedDocumentFromSnapshot(version.snapshot, locale)
-}
-
-export async function readVersions(
-  ctx: QueryCtx,
-  versionIds: Id<'versions'>[],
-): Promise<Doc<'versions'>[]> {
-  return Promise.all(
-    versionIds.map(async (versionId) => {
-      const version = await ctx.db.get(versionId)
-      if (version === null) {
-        // Versions are immutable and never deleted; a release cannot lose one.
-        throw new Error(`Missing version ${versionId}`)
-      }
-      return version
-    }),
-  )
 }
 
 /** Points every document of the release at the release's version of it. */

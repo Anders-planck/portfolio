@@ -17,6 +17,16 @@ export interface PreviewClaims {
 
 export const PREVIEW_TOKEN_TTL_MS = 60 * 60 * 1000
 
+/** A preview token for one document in one locale, valid for an hour from `now`. */
+export async function issuePreviewToken(
+  target: Omit<PreviewClaims, 'expiresAt'>,
+  { secret, now }: { secret: string; now: number },
+) {
+  const expiresAt = now + PREVIEW_TOKEN_TTL_MS
+  const token = await signPreviewToken({ ...target, expiresAt }, secret)
+  return { token, expiresAt }
+}
+
 export async function signPreviewToken(claims: PreviewClaims, secret: string) {
   const payload = toBase64UrlFromBytes(
     new TextEncoder().encode(JSON.stringify(claims)),

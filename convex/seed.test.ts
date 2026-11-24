@@ -6,7 +6,7 @@ import { api, internal } from './_generated/api'
 import schema from './schema'
 const modules = import.meta.glob('./**/*.ts')
 
-const read = (backend: ReturnType<typeof convexTest>) =>
+const readPublishedProfile = (backend: ReturnType<typeof convexTest>) =>
   backend.query(api.content.getPublished, {
     collection: 'profile',
     key: 'main',
@@ -18,7 +18,7 @@ test('the seed publishes the profile once', async () => {
   await backend.mutation(internal.seed.publishSeedProfile, {})
   await backend.mutation(internal.seed.publishSeedProfile, {})
 
-  const profile = await read(backend)
+  const profile = await readPublishedProfile(backend)
   expect(profile?.fields.name).toBe('Anders Planck')
   expect(profile?.content).toMatchObject({
     titleLine1: 'Software',
@@ -32,6 +32,6 @@ test('the seeded copy has no free numbers (ADR 0004)', async () => {
   const backend = convexTest(schema, modules)
   await backend.mutation(internal.seed.publishSeedProfile, {})
 
-  const profile = await read(backend)
+  const profile = await readPublishedProfile(backend)
   expect(Object.values(profile?.content ?? {}).join(' ')).not.toMatch(/\d/)
 })

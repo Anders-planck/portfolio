@@ -19,6 +19,7 @@ import type * as model_content_profile from "../model/content/profile.js";
 import type * as model_content_releases from "../model/content/releases.js";
 import type * as model_content_rules from "../model/content/rules.js";
 import type * as model_content_snapshot from "../model/content/snapshot.js";
+import type * as model_content_versions from "../model/content/versions.js";
 import type * as model_env from "../model/env.js";
 import type * as model_owner from "../model/owner.js";
 import type * as seed from "../seed.js";
@@ -41,6 +42,7 @@ declare const fullApi: ApiFromModules<{
   "model/content/releases": typeof model_content_releases;
   "model/content/rules": typeof model_content_rules;
   "model/content/snapshot": typeof model_content_snapshot;
+  "model/content/versions": typeof model_content_versions;
   "model/env": typeof model_env;
   "model/owner": typeof model_owner;
   seed: typeof seed;

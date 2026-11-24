@@ -8,7 +8,7 @@ import {
 } from './model/content/drafts'
 import { localeValidator } from './model/content/locales'
 import { readPublishedDocument } from './model/content/pointers'
-import { PREVIEW_TOKEN_TTL_MS, signPreviewToken } from './model/content/preview'
+import { issuePreviewToken } from './model/content/preview'
 import {
   publishOutcomeValidator,
   publishScheduledRelease,
@@ -43,7 +43,7 @@ export const saveDraft = internalMutation({
 })
 
 /**
- * Publishes the selected drafts now, or schedules them for `publishAt` (epoch ms).
+ * Publishes the selected drafts now, or schedules them for `scheduledAt` (epoch ms).
  * `requestId` makes it idempotent: repeating it returns the first release.
  */
 export const publish = internalMutation({
@@ -51,7 +51,7 @@ export const publish = internalMutation({
     selection: v.array(documentRefValidator),
     note: v.string(),
     requestId: v.string(),
-    publishAt: v.optional(v.number()),
+    scheduledAt: v.optional(v.number()),
   },
   returns: publishOutcomeValidator,
   handler: async (ctx, request) => {
@@ -107,14 +107,12 @@ export const createPreviewToken = internalMutation({
     locale: localeValidator,
   },
   returns: v.object({ token: v.string(), expiresAt: v.number() }),
-  handler: async (_ctx, claims) => {
+  handler: async (_ctx, target) => {
     await requireOwner()
-    const expiresAt = Date.now() + PREVIEW_TOKEN_TTL_MS
-    const token = await signPreviewToken(
-      { ...claims, expiresAt },
-      readPreviewTokenSecret(),
-    )
-    return { token, expiresAt }
+    return issuePreviewToken(target, {
+      secret: readPreviewTokenSecret(),
+      now: Date.now(),
+    })
   },
 })
 
