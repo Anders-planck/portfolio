@@ -62,6 +62,18 @@ describe('preview token', () => {
     ).toBeNull()
   })
 
+  test('a genuine token whose claims name an unknown locale reads nothing', async () => {
+    const unknownLocale = {
+      ...CLAIMS,
+      locale: 'xx',
+    } as unknown as PreviewClaims
+    const token = await signPreviewToken(unknownLocale, SECRET)
+
+    expect(
+      await verifyPreviewToken(token, { secret: SECRET, now: NOW }),
+    ).toBeNull()
+  })
+
   test.each(['', 'not-a-token', 'a.b.c', 'payload.!!!'])(
     'malformed token %j reads nothing',
     async (token) => {

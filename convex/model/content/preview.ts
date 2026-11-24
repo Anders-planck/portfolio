@@ -1,5 +1,5 @@
-import type { Locale } from './locales'
-import type { Collection } from './snapshot'
+import { isLocale, type Locale } from './locales'
+import { type Collection, isCollection } from './snapshot'
 
 /**
  * Signed, expiring preview tokens: `<payload>.<signature>`, both base64url,
@@ -82,9 +82,9 @@ function isPreviewClaims(value: unknown): value is PreviewClaims {
   }
   const claims = value as Record<string, unknown>
   return (
-    typeof claims.collection === 'string' &&
+    isCollection(claims.collection) &&
     typeof claims.key === 'string' &&
-    typeof claims.locale === 'string' &&
+    isLocale(claims.locale) &&
     typeof claims.expiresAt === 'number'
   )
 }

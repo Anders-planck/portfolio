@@ -43,7 +43,7 @@ export const saveDraft = internalMutation({
 })
 
 /**
- * Publishes the selected drafts now, or schedules them for `at` (epoch ms).
+ * Publishes the selected drafts now, or schedules them for `publishAt` (epoch ms).
  * `requestId` makes it idempotent: repeating it returns the first release.
  */
 export const publish = internalMutation({
@@ -51,7 +51,7 @@ export const publish = internalMutation({
     selection: v.array(documentRefValidator),
     note: v.string(),
     requestId: v.string(),
-    at: v.optional(v.number()),
+    publishAt: v.optional(v.number()),
   },
   returns: publishOutcomeValidator,
   handler: async (ctx, request) => {

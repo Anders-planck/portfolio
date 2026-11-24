@@ -10,6 +10,12 @@ import {
 export const collectionValidator = v.union(v.literal('profile'))
 export type Collection = Infer<typeof collectionValidator>
 
+const COLLECTIONS: readonly Collection[] = ['profile']
+
+export function isCollection(value: unknown): value is Collection {
+  return COLLECTIONS.some((collection) => collection === value)
+}
+
 export const documentRefValidator = v.object({
   collection: collectionValidator,
   key: v.string(),

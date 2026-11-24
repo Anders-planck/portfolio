@@ -1,6 +1,6 @@
-// The only Convex module that reads deployment env values (ARC-08): convex/
-// cannot import src/shared/config/env.ts, so the backend has its own. Values
-// are set with `bunx convex env set` and validated here.
+// The only Convex module that reads deployment env values (ARC-08, ADR 0011).
+// convex/ cannot import src/shared/config/env.ts, so the backend has its own.
+// Values are set with `bunx convex env set` and validated here.
 
 declare const process: { env: Record<string, string | undefined> }
 

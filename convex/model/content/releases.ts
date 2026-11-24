@@ -71,12 +71,12 @@ interface PublishRequest {
   note: string
   requestId: string
   /** Epoch ms. In the future: schedule the release; omitted or past: now. */
-  at?: number
+  publishAt?: number
 }
 
 export async function publishSelection(
   ctx: MutationCtx,
-  { selection, note, requestId, at }: PublishRequest,
+  { selection, note, requestId, publishAt }: PublishRequest,
   now: number,
 ): Promise<PublishOutcome> {
   const repeated = await findReleaseByRequestId(ctx, requestId)
@@ -90,15 +90,15 @@ export async function publishSelection(
   }
   const versionIds = await writeVersions(ctx, snapshots, now)
   const base = { versionIds, note, requestId, findings }
-  if (at !== undefined && at > now) {
+  if (publishAt !== undefined && publishAt > now) {
     // Versions are frozen now; edits made after scheduling wait for the next
     // publish. The rules run again when the release comes due.
     const releaseId = await ctx.db.insert('releases', {
       ...base,
       status: 'scheduled',
-      scheduledAt: at,
+      scheduledAt: publishAt,
     })
-    await ctx.scheduler.runAt(at, internal.content.publishScheduled, {
+    await ctx.scheduler.runAt(publishAt, internal.content.publishScheduled, {
       releaseId,
     })
     return { status: 'scheduled', releaseId, findings }

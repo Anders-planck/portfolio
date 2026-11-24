@@ -12,7 +12,7 @@ import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 // The one module per runtime allowed to read `process.env` / `import.meta.env`
-// (ARC-08): the app's, and the Convex backend's (convex/ cannot import src/).
+// (ARC-08, ADR 0011): the app's, and the Convex backend's.
 const ENV_CONFIG_MODULE = 'src/shared/config/env.ts'
 const CONVEX_ENV_CONFIG_MODULE = 'convex/model/env.ts'
 // The one module allowed to call `console.warn` / `console.error` (TS-04).
