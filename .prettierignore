@@ -16,3 +16,4 @@ dist/
 .wrangler/
 playwright-report/
 test-results/
+.convex/
