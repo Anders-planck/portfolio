@@ -1,26 +1,13 @@
 import { expect, test } from 'vitest'
 
-import type { Appearance } from './appearance-css'
+import { createAppearance } from './appearance.fixture'
 import { createAppearanceCssCache } from './appearance-css-cache'
-
-function createAppearance(basePx: number): Appearance {
-  return {
-    theme: {
-      basePx,
-      ratio: 1.25,
-      fonts: { body: 'Figtree', heading: 'Figtree', code: 'ui-monospace' },
-      radiusMultiplier: 1,
-      mode: 'system',
-    },
-    motion: { tempo: 1, character: 'standard' },
-  }
-}
 
 /** Reads through `cache`, recording which appearances had to be made. */
 function readCounting(cache: ReturnType<typeof createAppearanceCssCache>) {
   const madeFor: number[] = []
   const read = (basePx: number) =>
-    cache.readOrMakeCss(createAppearance(basePx), () => {
+    cache.readOrMakeCss(createAppearance({ theme: { basePx } }), () => {
       madeFor.push(basePx)
       return `css ${String(basePx)}`
     })

@@ -2,7 +2,7 @@ import { keepPreviousData, queryOptions } from '@tanstack/react-query'
 
 import { api } from '../../../convex/_generated/api'
 import { convexQueryOptions } from '../../shared/convex/convex-query-options'
-import type { Appearance } from './appearance-css'
+import type { Appearance } from './appearance'
 import { getAppearanceCss } from './get-appearance-css'
 
 /** The published params, live: a publish reaches open pages at once. */

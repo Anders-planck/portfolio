@@ -30,7 +30,7 @@ export const Route = createRootRouteWithContext<{
   component: RootDocument,
 })
 
-const theme = themes[defaultThemeSlug]
+const SITE_THEME = themes[defaultThemeSlug]
 
 function RootDocument() {
   const { appearance, css } = useAppearance()
@@ -39,7 +39,7 @@ function RootDocument() {
     // The mode is on <html> from the server; <Theme> keeps it in sync.
     <html
       lang="it"
-      data-astryx-theme={theme.name}
+      data-astryx-theme={SITE_THEME.name}
       data-theme={mode === 'system' ? undefined : mode}
     >
       <head>
@@ -48,7 +48,7 @@ function RootDocument() {
         <style data-appearance="" dangerouslySetInnerHTML={{ __html: css }} />
       </head>
       <body>
-        <Theme theme={theme} mode={mode}>
+        <Theme theme={SITE_THEME} mode={mode}>
           <Outlet />
         </Theme>
         <Scripts />

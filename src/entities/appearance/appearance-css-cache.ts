@@ -1,4 +1,4 @@
-import type { Appearance } from './appearance-css'
+import type { Appearance } from './appearance'
 
 export interface AppearanceCssCache {
   /** The CSS made for `appearance` before, or the result of `makeCss` now. */

@@ -30,11 +30,11 @@ const DARK_APPEARANCE = {
 
 /** Publishes params on the running Convex backend: no rebuild, no restart. */
 function publishAppearance(appearance: typeof LIGHT_APPEARANCE) {
-  const result = runConvexFunction(
+  const publishOutput = runConvexFunction(
     'appearance:publish',
     JSON.stringify(appearance),
   )
-  expect(result).toContain('"published"')
+  expect(publishOutput).toContain('"published"')
 }
 
 /** Runs a Convex function on the deployment `convex dev` wrote to .env.local. */

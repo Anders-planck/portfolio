@@ -4,8 +4,9 @@ import { ConvexHttpClient } from 'convex/browser'
 import { api } from '../../../convex/_generated/api'
 import { defaultThemeSlug, themes } from '../../astryx-themes'
 import { readConvexUrl } from '../../shared/config/env'
-import { type Appearance, toThemeCssFromAppearance } from './appearance-css'
+import type { Appearance } from './appearance'
 import { createAppearanceCssCache } from './appearance-css-cache'
+import { toThemeCssFromAppearance } from './to-theme-css-from-appearance'
 
 export interface AppearanceCss {
   /** The params the CSS was made from. */

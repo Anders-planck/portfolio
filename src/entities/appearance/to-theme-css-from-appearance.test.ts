@@ -1,29 +1,13 @@
 import { expect, test } from 'vitest'
 
 import { defaultThemeSlug, themes } from '../../astryx-themes'
-import { type Appearance, toThemeCssFromAppearance } from './appearance-css'
+import { createAppearance } from './appearance.fixture'
+import { toThemeCssFromAppearance } from './to-theme-css-from-appearance'
 
 const BASE_THEME = themes[defaultThemeSlug]
 
-const SITE_APPEARANCE: Appearance = {
-  theme: {
-    basePx: 16,
-    ratio: 1.25,
-    fonts: { body: 'Figtree', heading: 'Figtree', code: 'ui-monospace' },
-    radiusMultiplier: 1,
-    mode: 'system',
-  },
-  motion: { tempo: 1, character: 'standard' },
-}
-
-function renderCss(change: {
-  theme?: Partial<Appearance['theme']>
-  motion?: Partial<Appearance['motion']>
-}): string {
-  return toThemeCssFromAppearance(BASE_THEME, {
-    theme: { ...SITE_APPEARANCE.theme, ...change.theme },
-    motion: { ...SITE_APPEARANCE.motion, ...change.motion },
-  })
+function renderCss(change: Parameters<typeof createAppearance>[0]): string {
+  return toThemeCssFromAppearance(BASE_THEME, createAppearance(change))
 }
 
 /** Every value `css` declares for `token`, in order. */
