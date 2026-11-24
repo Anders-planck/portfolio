@@ -1,10 +1,7 @@
-// The only module that writes to the console (TS-04): every other module
-// reports through it.
+// The only module that writes to the console (TS-04): server code reports
+// through it. On the Worker the lines land in the Workers logs.
 
-/**
- * Records a failure the page recovered from, so it is not lost even though
- * the reader sees nothing wrong. On the Worker it lands in the Workers logs.
- */
-export function logRecoveredError(context: string, error: unknown): void {
+/** Logs a failure that `context` recovers from or passes on. */
+export function log(context: string, error: unknown): void {
   console.error(`[${context}]`, error)
 }

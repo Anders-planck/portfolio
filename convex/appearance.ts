@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 
-import { internalMutation, query } from './_generated/server'
+import { internalMutation, internalQuery, query } from './_generated/server'
 import {
   appearanceProblemValidator,
   appearanceValidator,
@@ -20,6 +20,24 @@ export const getPublished = query({
     return toServedAppearanceFromStored(
       row === null ? null : { theme: row.theme, motion: row.motion },
     )
+  },
+})
+
+/**
+ * Why the stored row is not what the site shows, when it breaks a rule (it was
+ * written past `publish`): the site then serves the defaults, and this is what
+ * the CMS overview reports. Empty when the row is fine or there is none.
+ * Internal until owner auth exists (ticket 05).
+ */
+export const findStoredProblems = internalQuery({
+  args: {},
+  returns: v.array(appearanceProblemValidator),
+  handler: async (ctx) => {
+    const row = await ctx.db.query('appearance').first()
+    if (row === null) {
+      return []
+    }
+    return findAppearanceProblems({ theme: row.theme, motion: row.motion })
   },
 })
 

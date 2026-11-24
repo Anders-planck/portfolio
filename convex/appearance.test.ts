@@ -38,6 +38,9 @@ test('a publish replaces the published params', async () => {
     await backend.mutation(internal.appearance.publish, DARK_APPEARANCE),
   ).toEqual({ kind: 'published' })
   expect(await readPublished(backend)).toEqual(DARK_APPEARANCE)
+  expect(
+    await backend.query(internal.appearance.findStoredProblems, {}),
+  ).toEqual([])
 
   const quicker: Appearance = {
     ...DARK_APPEARANCE,
@@ -105,4 +108,7 @@ test('a malicious font name written straight to the table is never served', asyn
     })
   })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
+  expect(
+    await backend.query(internal.appearance.findStoredProblems, {}),
+  ).toEqual([{ kind: 'not-a-font-name', field: 'theme.fonts.heading' }])
 })
