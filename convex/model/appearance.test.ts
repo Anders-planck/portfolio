@@ -38,10 +38,10 @@ test('every number out of range is reported with its field', () => {
       motion: { tempo: 2, character: 'standard' },
     }),
   ).toEqual([
-    'theme.basePx must be between 12 and 24',
-    'theme.ratio must be between 1.05 and 1.6',
-    'theme.radiusMultiplier must be between 0 and 3',
-    'motion.tempo must be between 0.75 and 1.5',
+    { kind: 'out-of-range', field: 'theme.basePx', min: 12, max: 24 },
+    { kind: 'out-of-range', field: 'theme.ratio', min: 1.05, max: 1.6 },
+    { kind: 'out-of-range', field: 'theme.radiusMultiplier', min: 0, max: 3 },
+    { kind: 'out-of-range', field: 'motion.tempo', min: 0.75, max: 1.5 },
   ])
 })
 
@@ -67,8 +67,8 @@ test('a font name that could break out of CSS is reported', () => {
       }),
     ),
   ).toEqual([
-    'theme.fonts.body is not a font family name',
-    'theme.fonts.heading is not a font family name',
-    'theme.fonts.code is not a font family name',
+    { kind: 'not-a-font-name', field: 'theme.fonts.body' },
+    { kind: 'not-a-font-name', field: 'theme.fonts.heading' },
+    { kind: 'not-a-font-name', field: 'theme.fonts.code' },
   ])
 })

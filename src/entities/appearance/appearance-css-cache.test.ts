@@ -1,0 +1,46 @@
+import { expect, test } from 'vitest'
+
+import type { Appearance } from './appearance-css'
+import { createAppearanceCssCache } from './appearance-css-cache'
+
+function createAppearance(basePx: number): Appearance {
+  return {
+    theme: {
+      basePx,
+      ratio: 1.25,
+      fonts: { body: 'Figtree', heading: 'Figtree', code: 'ui-monospace' },
+      radiusMultiplier: 1,
+      mode: 'system',
+    },
+    motion: { tempo: 1, character: 'standard' },
+  }
+}
+
+/** Reads through `cache`, recording which appearances had to be made. */
+function readCounting(cache: ReturnType<typeof createAppearanceCssCache>) {
+  const madeFor: number[] = []
+  const read = (basePx: number) =>
+    cache.readOrMakeCss(createAppearance(basePx), () => {
+      madeFor.push(basePx)
+      return `css ${String(basePx)}`
+    })
+  return { read, madeFor }
+}
+
+test('the CSS of an appearance is made once and then reused', () => {
+  const { read, madeFor } = readCounting(createAppearanceCssCache(2))
+  expect(read(16)).toBe('css 16')
+  expect(read(16)).toBe('css 16')
+  expect(madeFor).toEqual([16])
+})
+
+test('past capacity, the least recently read appearance is made again', () => {
+  const { read, madeFor } = readCounting(createAppearanceCssCache(2))
+  read(16)
+  read(18)
+  read(16)
+  read(20)
+  read(16)
+  read(18)
+  expect(madeFor).toEqual([16, 18, 20, 18])
+})

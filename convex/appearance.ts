@@ -2,6 +2,7 @@ import { v } from 'convex/values'
 
 import { internalMutation, query } from './_generated/server'
 import {
+  appearanceProblemValidator,
   appearanceValidator,
   DEFAULT_APPEARANCE,
   findAppearanceProblems,
@@ -32,7 +33,10 @@ export const publish = internalMutation({
   args: appearanceValidator,
   returns: v.union(
     v.object({ kind: v.literal('published') }),
-    v.object({ kind: v.literal('rejected'), problems: v.array(v.string()) }),
+    v.object({
+      kind: v.literal('rejected'),
+      problems: v.array(appearanceProblemValidator),
+    }),
   ),
   handler: async (ctx, appearance) => {
     const problems = findAppearanceProblems(appearance)

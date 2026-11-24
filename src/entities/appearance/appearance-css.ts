@@ -73,9 +73,8 @@ interface Length {
 }
 
 /** `value` as a plain length (`125ms`, `0.75rem`, `28px`), or undefined. */
-function readLength(value: unknown): Length | undefined {
-  const match = typeof value === 'string' ? LENGTH.exec(value) : null
-  const [, amount, unit] = match ?? []
+function readLength(value: string): Length | undefined {
+  const [, amount, unit] = LENGTH.exec(value) ?? []
   if (amount === undefined || unit === undefined) {
     return undefined
   }
@@ -130,11 +129,8 @@ function readHeadingWeights(
 ): Partial<Record<HeadingLevel, FontWeight>> {
   return Object.fromEntries(
     HEADING_LEVELS.flatMap((level) => {
-      const value = base.tokens[`--text-heading-${String(level)}-weight`]
-      const weight =
-        typeof value === 'string'
-          ? WEIGHT_TOKEN_VALUE.exec(value)?.[1]
-          : undefined
+      const value = base.tokens[`--text-heading-${String(level)}-weight`] ?? ''
+      const weight = WEIGHT_TOKEN_VALUE.exec(value)?.[1]
       return isFontWeight(weight) ? [[level, weight]] : []
     }),
   )

@@ -14,9 +14,11 @@ import type { AppearanceCss } from './get-appearance-css'
  */
 export function useAppearance(): AppearanceCss {
   const { data: appearance } = useSuspenseQuery(appearanceQueryOptions)
-  const { data, error } = useQuery(appearanceCssQueryOptions(appearance))
-  if (data === undefined) {
+  const { data: appearanceCss, error } = useQuery(
+    appearanceCssQueryOptions(appearance),
+  )
+  if (appearanceCss === undefined) {
     throw error ?? new Error('The appearance CSS was not loaded')
   }
-  return data
+  return appearanceCss
 }

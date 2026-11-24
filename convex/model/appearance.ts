@@ -88,11 +88,36 @@ function isInRange(value: number, range: Range): boolean {
   return Number.isFinite(value) && value >= range.min && value <= range.max
 }
 
+export const appearanceProblemValidator = v.union(
+  v.object({
+    kind: v.literal('out-of-range'),
+    field: v.union(
+      v.literal('theme.basePx'),
+      v.literal('theme.ratio'),
+      v.literal('theme.radiusMultiplier'),
+      v.literal('motion.tempo'),
+    ),
+    min: v.number(),
+    max: v.number(),
+  }),
+  v.object({
+    kind: v.literal('not-a-font-name'),
+    field: v.union(
+      v.literal('theme.fonts.body'),
+      v.literal('theme.fonts.heading'),
+      v.literal('theme.fonts.code'),
+    ),
+  }),
+)
+
+/** Why params cannot be published; the CMS words it from its messages. */
+export type AppearanceProblem = Infer<typeof appearanceProblemValidator>
+
 /** Every reason `appearance` cannot be published; empty when it can. */
 export function findAppearanceProblems({
   theme,
   motion,
-}: Appearance): string[] {
+}: Appearance): AppearanceProblem[] {
   const numbers = [
     { field: 'theme.basePx', value: theme.basePx, range: RANGES.basePx },
     { field: 'theme.ratio', value: theme.ratio, range: RANGES.ratio },
@@ -102,15 +127,23 @@ export function findAppearanceProblems({
       range: RANGES.radiusMultiplier,
     },
     { field: 'motion.tempo', value: motion.tempo, range: RANGES.tempo },
+  ] as const
+  const fonts = [
+    { field: 'theme.fonts.body', name: theme.fonts.body },
+    { field: 'theme.fonts.heading', name: theme.fonts.heading },
+    { field: 'theme.fonts.code', name: theme.fonts.code },
+  ] as const
+  return [
+    ...numbers
+      .filter(({ value, range }) => !isInRange(value, range))
+      .map(({ field, range }) => ({
+        kind: 'out-of-range' as const,
+        field,
+        min: range.min,
+        max: range.max,
+      })),
+    ...fonts
+      .filter(({ name }) => !isFontName(name))
+      .map(({ field }) => ({ kind: 'not-a-font-name' as const, field })),
   ]
-  const rangeProblems = numbers
-    .filter(({ value, range }) => !isInRange(value, range))
-    .map(
-      ({ field, range }) =>
-        `${field} must be between ${String(range.min)} and ${String(range.max)}`,
-    )
-  const fontProblems = Object.entries(theme.fonts)
-    .filter(([, name]) => !isFontName(name))
-    .map(([role]) => `theme.fonts.${role} is not a font family name`)
-  return [...rangeProblems, ...fontProblems]
 }

@@ -63,7 +63,9 @@ test('a number out of range is not published', async () => {
     }),
   ).toEqual({
     kind: 'rejected',
-    problems: ['theme.basePx must be between 12 and 24'],
+    problems: [
+      { kind: 'out-of-range', field: 'theme.basePx', min: 12, max: 24 },
+    ],
   })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
 })
@@ -83,7 +85,7 @@ test('a font name that could break out of CSS is not published', async () => {
     }),
   ).toEqual({
     kind: 'rejected',
-    problems: ['theme.fonts.body is not a font family name'],
+    problems: [{ kind: 'not-a-font-name', field: 'theme.fonts.body' }],
   })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
 })
