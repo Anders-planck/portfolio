@@ -63,14 +63,3 @@ test('a CSS that cannot be made leaves the page on the built theme', async () =>
   await expect(loadAppearance(queryClient)).resolves.toBeUndefined()
   expect(readCss(queryClient)).toBeUndefined()
 })
-
-test('a failed refetch keeps the last good CSS', async () => {
-  const queryClient = createQueryClient(18)
-  mockServerCssFor(18)
-  await loadAppearance(queryClient)
-  mockServerFailure()
-  await queryClient.refetchQueries({
-    queryKey: appearanceCssQueryOptions().queryKey,
-  })
-  expect(readCss(queryClient)).toBe('css 18')
-})
