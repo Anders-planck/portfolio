@@ -167,7 +167,9 @@ export function findAppearanceProblems({
  * and only `publish` checks the rules, so a row written another way
  * (dashboard, import, migration) is checked again before it reaches the CSS.
  */
-export function toServedAppearance(stored: Appearance | null): Appearance {
+export function toServedAppearanceFromStored(
+  stored: Appearance | null,
+): Appearance {
   if (stored === null || findAppearanceProblems(stored).length > 0) {
     return DEFAULT_APPEARANCE
   }

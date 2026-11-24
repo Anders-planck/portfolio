@@ -18,8 +18,8 @@ export function useAppearance(): {
   appearance: Appearance
   css: string | undefined
 } {
-  const { data: appearance } = useSuspenseQuery(appearanceQueryOptions)
-  const { data: appearanceCss, refetch } = useQuery(appearanceCssQueryOptions)
+  const { data: appearance } = useSuspenseQuery(appearanceQueryOptions())
+  const { data: appearanceCss, refetch } = useQuery(appearanceCssQueryOptions())
   const isCssBehind =
     appearanceCss !== undefined &&
     !isSameAppearance(appearanceCss.appearance, appearance)

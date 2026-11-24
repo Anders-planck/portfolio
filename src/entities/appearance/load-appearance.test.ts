@@ -37,7 +37,7 @@ function mockServerFailure() {
 }
 
 function readCss(queryClient: QueryClient) {
-  return queryClient.getQueryData(appearanceCssQueryOptions.queryKey)?.css
+  return queryClient.getQueryData(appearanceCssQueryOptions().queryKey)?.css
 }
 
 test('the loader fills the params and their CSS', async () => {
@@ -45,7 +45,7 @@ test('the loader fills the params and their CSS', async () => {
   mockServerCssFor(18)
   await loadAppearance(queryClient)
   expect(
-    queryClient.getQueryData(appearanceQueryOptions.queryKey)?.theme.basePx,
+    queryClient.getQueryData(appearanceQueryOptions().queryKey)?.theme.basePx,
   ).toBe(18)
   expect(readCss(queryClient)).toBe('css 18')
 })
@@ -70,7 +70,7 @@ test('a failed refetch keeps the last good CSS', async () => {
   await loadAppearance(queryClient)
   mockServerFailure()
   await queryClient.refetchQueries({
-    queryKey: appearanceCssQueryOptions.queryKey,
+    queryKey: appearanceCssQueryOptions().queryKey,
   })
   expect(readCss(queryClient)).toBe('css 18')
 })

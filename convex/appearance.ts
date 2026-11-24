@@ -5,7 +5,7 @@ import {
   appearanceProblemValidator,
   appearanceValidator,
   findAppearanceProblems,
-  toServedAppearance,
+  toServedAppearanceFromStored,
 } from './model/appearance'
 
 /**
@@ -17,7 +17,7 @@ export const getPublished = query({
   returns: appearanceValidator,
   handler: async (ctx) => {
     const row = await ctx.db.query('appearance').first()
-    return toServedAppearance(
+    return toServedAppearanceFromStored(
       row === null ? null : { theme: row.theme, motion: row.motion },
     )
   },

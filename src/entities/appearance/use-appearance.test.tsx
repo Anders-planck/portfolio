@@ -24,9 +24,9 @@ function createSeededClient(css: AppearanceCss | null) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  queryClient.setQueryData(appearanceQueryOptions.queryKey, PUBLISHED)
+  queryClient.setQueryData(appearanceQueryOptions().queryKey, PUBLISHED)
   if (css !== null) {
-    queryClient.setQueryData(appearanceCssQueryOptions.queryKey, css)
+    queryClient.setQueryData(appearanceCssQueryOptions().queryKey, css)
   }
   return queryClient
 }
@@ -60,7 +60,7 @@ test('a publish fetches the new CSS and keeps the old one until it arrives', asy
     css: 'css 18',
   })
   const { result } = renderUseAppearance(queryClient)
-  queryClient.setQueryData(appearanceQueryOptions.queryKey, REPUBLISHED)
+  queryClient.setQueryData(appearanceQueryOptions().queryKey, REPUBLISHED)
   await waitFor(() => {
     expect(getAppearanceCss).toHaveBeenCalled()
   })
@@ -79,10 +79,10 @@ test('when the new CSS fails, the last good CSS stays', async () => {
     css: 'css 18',
   })
   const { result } = renderUseAppearance(queryClient)
-  queryClient.setQueryData(appearanceQueryOptions.queryKey, REPUBLISHED)
+  queryClient.setQueryData(appearanceQueryOptions().queryKey, REPUBLISHED)
   await waitFor(() => {
     expect(
-      queryClient.getQueryState(appearanceCssQueryOptions.queryKey)?.status,
+      queryClient.getQueryState(appearanceCssQueryOptions().queryKey)?.status,
     ).toBe('error')
   })
   expect(result.current).toEqual({ appearance: REPUBLISHED, css: 'css 18' })
