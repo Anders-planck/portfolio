@@ -7,10 +7,11 @@ export type Appearance = FunctionReturnType<typeof api.appearance.getPublished>
 
 /** Compares field by field, so the key order of the two objects never matters. */
 export function isSameAppearance(left: Appearance, right: Appearance): boolean {
-  return toComparableAppearance(left) === toComparableAppearance(right)
+  return toAppearanceKey(left) === toAppearanceKey(right)
 }
 
-function toComparableAppearance({ theme, motion }: Appearance): string {
+/** One string per distinct appearance, whatever the key order of the object. */
+export function toAppearanceKey({ theme, motion }: Appearance): string {
   return JSON.stringify([
     theme.basePx,
     theme.ratio,

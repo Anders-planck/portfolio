@@ -1,4 +1,4 @@
-import type { Appearance } from './appearance'
+import { type Appearance, toAppearanceKey } from './appearance'
 
 export interface AppearanceCssCache {
   /** The CSS made for `appearance` before, or the result of `makeCss` now. */
@@ -14,7 +14,7 @@ export function createAppearanceCssCache(capacity: number): AppearanceCssCache {
   const cssByAppearance = new Map<string, string>()
   return {
     readOrMakeCss: (appearance, makeCss) => {
-      const key = JSON.stringify(appearance)
+      const key = toAppearanceKey(appearance)
       const css = cssByAppearance.get(key) ?? makeCss()
       // Delete then set moves the key to the newest end of the Map's order.
       cssByAppearance.delete(key)
