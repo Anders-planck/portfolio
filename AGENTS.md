@@ -53,6 +53,16 @@ Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-
 
 Single-context: one `GLOSSARY.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
-## Redesign v3 (in progress)
+## Project
 
-The site is being rebuilt from scratch (TanStack Start + Convex + Astryx on Cloudflare Workers, media on R2, AI SDK + Claude). Before any work read `GLOSSARY.md`, `docs/adr/`, then `docs/redesign/PLAN.md`; its "Design resolutions" override the mockups in `docs/redesign/design/`.
+Portfolio v3: TanStack Start (React 19) + Convex + Astryx, served by Cloudflare Workers. Before any work read `GLOSSARY.md`, `docs/adr/`, then `docs/redesign/PLAN.md`; its "Design resolutions" override the mockups in `docs/redesign/design/`. Numbers never appear as free text (ADR 0004).
+
+Layout: `src/routes/` (file routes; `routeTree.gen.ts` is generated), `src/router.tsx` (Convex + React Query wiring), `src/styles/globals.css` (cascade-layer order; must stay the first stylesheet), `convex/` (backend; `_generated/` is generated, commit it), `themes/portfolio/` (Astryx theme, change it only through `bunx astryx experimental theme editor`), `e2e/` (Playwright), `scripts/wizard/` (owner-only steps).
+
+Commands (bun only):
+- `bun run dev` runs Convex and Vite. Without a Convex login use `CONVEX_AGENT_MODE=anonymous bun run dev:convex` plus `bun run dev:web`.
+- Before pushing, all must pass: `bun run lint`, `bun run typecheck`, `bun run test`, `bun run e2e`, then `bun run build && bun run doctor`.
+
+Data in routes: `convexQuery` + `context.queryClient.ensureQueryData` in the loader (server render), `useSuspenseQuery` in the component (live updates). Test Convex functions with `convex-test` next to them (`convex/*.test.ts`).
+
+Owner-only steps (accounts, logins, secrets, DNS): write a `wizard` script under `scripts/wizard/` and list it in `docs/redesign/OWNER-STEPS.md`. Never ask for, print or commit secrets.
