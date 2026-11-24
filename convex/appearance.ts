@@ -10,7 +10,10 @@ import {
 
 /**
  * The published theme and motion params the site renders with (ADR 0010),
- * or the defaults when nothing is published yet.
+ * or the defaults when nothing is published yet. The table takes any string
+ * its validator allows, and only `publish` checks the rules; a row written
+ * another way (dashboard, import, migration) is checked again here, and one
+ * that breaks a rule never reaches the CSS: the defaults are served instead.
  */
 export const getPublished = query({
   args: {},
@@ -20,7 +23,9 @@ export const getPublished = query({
     if (row === null) {
       return DEFAULT_APPEARANCE
     }
-    return { theme: row.theme, motion: row.motion }
+    const appearance = { theme: row.theme, motion: row.motion }
+    const isPublishable = findAppearanceProblems(appearance).length === 0
+    return isPublishable ? appearance : DEFAULT_APPEARANCE
   },
 })
 

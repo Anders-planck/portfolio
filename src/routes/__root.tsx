@@ -45,7 +45,9 @@ function RootDocument() {
       <head>
         <HeadContent />
         {/* After the built theme stylesheet, so the params win by order. */}
-        <style data-appearance="" dangerouslySetInnerHTML={{ __html: css }} />
+        {css === undefined ? null : (
+          <style data-appearance="" dangerouslySetInnerHTML={{ __html: css }} />
+        )}
       </head>
       <body>
         <Theme theme={SITE_THEME} mode={mode}>

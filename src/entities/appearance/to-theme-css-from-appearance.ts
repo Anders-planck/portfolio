@@ -20,7 +20,17 @@ export function toThemeCssFromAppearance(
   const { component } = generateThemeCSS(
     toThemeFromAppearance(base, appearance),
   )
-  return `@layer astryx-theme {\n${component}\n}`
+  return escapeForStyleElement(`@layer astryx-theme {\n${component}\n}`)
+}
+
+/**
+ * The CSS goes into a `<style>` element as raw text, where `</style>` would
+ * end it. Convex already refuses unsafe font names; as a second guard, every
+ * `</` becomes `<\/` (CSS reads `\/` as `/`). A bare `<` stays: media queries
+ * such as `(width < 1024px)` need it, and it cannot close the element.
+ */
+function escapeForStyleElement(css: string): string {
+  return css.replaceAll('</', '<\\/')
 }
 
 const SANS_FALLBACKS =

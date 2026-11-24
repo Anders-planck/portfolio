@@ -79,9 +79,22 @@ const RANGES = {
  */
 const FONT_NAME = /^[A-Za-z][A-Za-z0-9-]*( [A-Za-z0-9][A-Za-z0-9-]*)*$/
 const FONT_NAME_MAX_LENGTH = 64
+/** CSS-wide keywords: as a family they would not name a font at all. */
+const CSS_WIDE_KEYWORDS: readonly string[] = [
+  'inherit',
+  'initial',
+  'unset',
+  'revert',
+  'revert-layer',
+  'default',
+]
 
 function isFontName(name: string): boolean {
-  return name.length <= FONT_NAME_MAX_LENGTH && FONT_NAME.test(name)
+  return (
+    name.length <= FONT_NAME_MAX_LENGTH &&
+    FONT_NAME.test(name) &&
+    !CSS_WIDE_KEYWORDS.includes(name.toLowerCase())
+  )
 }
 
 function isInRange(value: number, range: Range): boolean {

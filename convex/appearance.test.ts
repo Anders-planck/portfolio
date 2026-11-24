@@ -89,3 +89,20 @@ test('a font name that could break out of CSS is not published', async () => {
   })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
 })
+
+test('a malicious font name written straight to the table is never served', async () => {
+  const backend = createBackend()
+  await backend.run(async (ctx) => {
+    await ctx.db.insert('appearance', {
+      ...DARK_APPEARANCE,
+      theme: {
+        ...DARK_APPEARANCE.theme,
+        fonts: {
+          ...DARK_APPEARANCE.theme.fonts,
+          heading: 'x</style><script>alert(1)</script>',
+        },
+      },
+    })
+  })
+  expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
+})

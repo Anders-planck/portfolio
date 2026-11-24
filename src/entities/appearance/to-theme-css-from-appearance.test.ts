@@ -91,3 +91,19 @@ test('the same params always give the same CSS', () => {
     renderCss({ theme: { basePx: 18 } }),
   )
 })
+
+test('nothing in the CSS can close the style element it goes into', () => {
+  // Convex refuses this name; the generator stays safe without that check.
+  const css = renderCss({
+    theme: {
+      fonts: {
+        body: 'x</style><script>alert(1)</script>',
+        heading: 'Figtree',
+        code: 'ui-monospace',
+      },
+    },
+  })
+  expect(css).not.toContain('</')
+  // Media queries keep their range syntax.
+  expect(css).toContain('(width < 1024px)')
+})

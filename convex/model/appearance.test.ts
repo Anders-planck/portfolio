@@ -72,3 +72,26 @@ test('a font name that could break out of CSS is reported', () => {
     { kind: 'not-a-font-name', field: 'theme.fonts.code' },
   ])
 })
+
+test('a CSS-wide keyword is not a font name, in any case', () => {
+  expect(
+    findAppearanceProblems(
+      withTheme({
+        fonts: { body: 'inherit', heading: 'Revert-Layer', code: 'DEFAULT' },
+      }),
+    ),
+  ).toEqual([
+    { kind: 'not-a-font-name', field: 'theme.fonts.body' },
+    { kind: 'not-a-font-name', field: 'theme.fonts.heading' },
+    { kind: 'not-a-font-name', field: 'theme.fonts.code' },
+  ])
+  for (const keyword of ['initial', 'unset', 'revert']) {
+    expect(
+      findAppearanceProblems(
+        withTheme({
+          fonts: { body: keyword, heading: 'Figtree', code: 'ui-monospace' },
+        }),
+      ),
+    ).toEqual([{ kind: 'not-a-font-name', field: 'theme.fonts.body' }])
+  }
+})
