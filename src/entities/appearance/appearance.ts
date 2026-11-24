@@ -24,3 +24,13 @@ export function toAppearanceKey({ theme, motion }: Appearance): string {
     motion.character,
   ])
 }
+
+/**
+ * The `data-theme` of `<html>` for a colour mode: light and dark force it;
+ * system leaves it out, so the reader's preference decides.
+ */
+export function toHtmlDataThemeFromMode(
+  mode: Appearance['theme']['mode'],
+): 'light' | 'dark' | undefined {
+  return mode === 'system' ? undefined : mode
+}

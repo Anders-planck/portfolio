@@ -25,15 +25,18 @@ const CSS_CACHE = createAppearanceCssCache(4)
  * the page up with the CSS they already have.
  */
 export const getAppearanceCss = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<AppearanceCss> => {
-    try {
-      return await makePublishedAppearanceCss()
-    } catch (error) {
-      log('appearance css', error)
-      throw error
-    }
-  },
+  readPublishedAppearanceCss,
 )
+
+/** The server function's body, apart so it can be tested without the RPC. */
+export async function readPublishedAppearanceCss(): Promise<AppearanceCss> {
+  try {
+    return await makePublishedAppearanceCss()
+  } catch (error) {
+    log('appearance css', error)
+    throw error
+  }
+}
 
 async function makePublishedAppearanceCss(): Promise<AppearanceCss> {
   const appearance = await new ConvexHttpClient(readConvexUrl()).query(

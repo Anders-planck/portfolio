@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { isSameAppearance } from './appearance'
+import { isSameAppearance, toHtmlDataThemeFromMode } from './appearance'
 import { createAppearance } from './appearance.fixture'
 
 test('the same params in another key order are the same appearance', () => {
@@ -32,4 +32,10 @@ test('one changed param makes another appearance', () => {
       }),
     ),
   ).toBe(false)
+})
+
+test('light and dark force the html theme; system leaves it to the reader', () => {
+  expect(toHtmlDataThemeFromMode('light')).toBe('light')
+  expect(toHtmlDataThemeFromMode('dark')).toBe('dark')
+  expect(toHtmlDataThemeFromMode('system')).toBeUndefined()
 })

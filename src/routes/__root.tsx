@@ -8,6 +8,7 @@ import {
 } from '@tanstack/react-router'
 
 import { defaultThemeSlug, themes } from '../astryx-themes'
+import { toHtmlDataThemeFromMode } from '../entities/appearance/appearance'
 import { loadAppearance } from '../entities/appearance/load-appearance'
 import { useAppearance } from '../entities/appearance/use-appearance'
 import globalsCss from '../styles/globals.css?url'
@@ -40,7 +41,7 @@ function RootDocument() {
     <html
       lang="it"
       data-astryx-theme={SITE_THEME.name}
-      data-theme={mode === 'system' ? undefined : mode}
+      data-theme={toHtmlDataThemeFromMode(mode)}
     >
       <head>
         <HeadContent />
