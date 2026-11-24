@@ -4,7 +4,13 @@ import { ConvexHttpClient } from 'convex/browser'
 import { api } from '../../../convex/_generated/api'
 import { defaultThemeSlug, themes } from '../../astryx-themes'
 import { readConvexUrl } from '../../shared/config/env'
-import { toThemeCssFromAppearance } from './appearance-css'
+import { type Appearance, toThemeCssFromAppearance } from './appearance-css'
+
+export interface AppearanceCss {
+  /** The params the CSS was made from. */
+  appearance: Appearance
+  css: string
+}
 
 /**
  * The CSS of the published appearance (ADR 0010). It runs only on the Worker,
@@ -12,19 +18,17 @@ import { toThemeCssFromAppearance } from './appearance-css'
  * itself, from Convex, so a caller cannot make it generate arbitrary CSS.
  */
 export const getAppearanceCss = createServerFn({ method: 'GET' }).handler(
-  async () => {
+  async (): Promise<AppearanceCss> => {
     const appearance = await new ConvexHttpClient(readConvexUrl()).query(
       api.appearance.getPublished,
       {},
     )
     const key = JSON.stringify(appearance)
-    const cached = CSS_BY_APPEARANCE.get(key)
-    if (cached !== undefined) {
-      return cached
-    }
-    const css = toThemeCssFromAppearance(themes[defaultThemeSlug], appearance)
+    const css =
+      CSS_BY_APPEARANCE.get(key) ??
+      toThemeCssFromAppearance(themes[defaultThemeSlug], appearance)
     rememberCss(key, css)
-    return css
+    return { appearance, css }
   },
 )
 
@@ -34,6 +38,7 @@ const CSS_BY_APPEARANCE = new Map<string, string>()
 const CACHE_SIZE = 4
 
 function rememberCss(key: string, css: string) {
+  CSS_BY_APPEARANCE.delete(key)
   const oldest = CSS_BY_APPEARANCE.keys().next()
   if (CSS_BY_APPEARANCE.size >= CACHE_SIZE && oldest.done !== true) {
     CSS_BY_APPEARANCE.delete(oldest.value)

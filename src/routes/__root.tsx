@@ -8,7 +8,7 @@ import {
 } from '@tanstack/react-router'
 
 import { defaultThemeSlug, themes } from '../astryx-themes'
-import { loadAppearance } from '../entities/appearance/appearance-query-options'
+import { loadAppearance } from '../entities/appearance/load-appearance'
 import { useAppearance } from '../entities/appearance/use-appearance'
 import globalsCss from '../styles/globals.css?url'
 
@@ -33,7 +33,8 @@ export const Route = createRootRouteWithContext<{
 const theme = themes[defaultThemeSlug]
 
 function RootDocument() {
-  const { mode, css } = useAppearance()
+  const { appearance, css } = useAppearance()
+  const { mode } = appearance.theme
   return (
     // The mode is on <html> from the server; <Theme> keeps it in sync.
     <html

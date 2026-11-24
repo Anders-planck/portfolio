@@ -34,7 +34,9 @@ test('the defaults are published before anything else', async () => {
 
 test('a publish replaces the published params', async () => {
   const backend = createBackend()
-  await backend.mutation(internal.appearance.publish, DARK_APPEARANCE)
+  expect(
+    await backend.mutation(internal.appearance.publish, DARK_APPEARANCE),
+  ).toEqual({ kind: 'published' })
   expect(await readPublished(backend)).toEqual(DARK_APPEARANCE)
 
   const quicker: Appearance = {
@@ -54,19 +56,22 @@ test('unpublishing brings the defaults back', async () => {
 
 test('a number out of range is not published', async () => {
   const backend = createBackend()
-  await expect(
-    backend.mutation(internal.appearance.publish, {
+  expect(
+    await backend.mutation(internal.appearance.publish, {
       ...DARK_APPEARANCE,
       theme: { ...DARK_APPEARANCE.theme, basePx: 4 },
     }),
-  ).rejects.toThrow(/theme.basePx must be between 12 and 24/)
+  ).toEqual({
+    kind: 'rejected',
+    problems: ['theme.basePx must be between 12 and 24'],
+  })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
 })
 
 test('a font name that could break out of CSS is not published', async () => {
   const backend = createBackend()
-  await expect(
-    backend.mutation(internal.appearance.publish, {
+  expect(
+    await backend.mutation(internal.appearance.publish, {
       ...DARK_APPEARANCE,
       theme: {
         ...DARK_APPEARANCE.theme,
@@ -76,6 +81,9 @@ test('a font name that could break out of CSS is not published', async () => {
         },
       },
     }),
-  ).rejects.toThrow(/theme.fonts.body is not a font family name/)
+  ).toEqual({
+    kind: 'rejected',
+    problems: ['theme.fonts.body is not a font family name'],
+  })
   expect(await readPublished(backend)).toEqual(DEFAULT_APPEARANCE)
 })

@@ -67,6 +67,30 @@ const RADIUS_TOKEN = /^--radius-(?!none$|full$)/
 const LENGTH = /^(-?\d*\.?\d+)(ms|px|rem)$/
 const REM_PRECISION = 10_000
 
+interface Length {
+  amount: number
+  unit: string
+}
+
+/** `value` as a plain length (`125ms`, `0.75rem`, `28px`), or undefined. */
+function readLength(value: unknown): Length | undefined {
+  const match = typeof value === 'string' ? LENGTH.exec(value) : null
+  const [, amount, unit] = match ?? []
+  if (amount === undefined || unit === undefined) {
+    return undefined
+  }
+  return { amount: Number(amount), unit }
+}
+
+/** Whole milliseconds and pixels; rem to four decimals. */
+function formatLength({ amount, unit }: Length): string {
+  const rounded =
+    unit === 'rem'
+      ? Math.round(amount * REM_PRECISION) / REM_PRECISION
+      : Math.round(amount)
+  return `${String(rounded)}${unit}`
+}
+
 /** Each `base` token matching `name` whose value is a plain length, times `factor`. */
 function scaleLengthTokens(
   base: DefinedTheme,
@@ -75,22 +99,16 @@ function scaleLengthTokens(
 ): Record<string, string> {
   return Object.fromEntries(
     Object.entries(base.tokens).flatMap(([token, value]) => {
-      const match = typeof value === 'string' ? LENGTH.exec(value) : null
-      if (
-        !name.test(token) ||
-        match?.[1] === undefined ||
-        match[2] === undefined
-      ) {
+      const length = name.test(token) ? readLength(value) : undefined
+      if (length === undefined) {
         return []
       }
-      const unit = match[2]
-      const amount = Number(match[1]) * factor
-      // Whole milliseconds and pixels; rem to four decimals.
-      const rounded =
-        unit === 'rem'
-          ? Math.round(amount * REM_PRECISION) / REM_PRECISION
-          : Math.round(amount)
-      return [[token, `${String(rounded)}${unit}`]]
+      return [
+        [
+          token,
+          formatLength({ amount: length.amount * factor, unit: length.unit }),
+        ],
+      ]
     }),
   )
 }

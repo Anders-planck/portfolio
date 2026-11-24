@@ -1,4 +1,4 @@
-import { ConvexError, v } from 'convex/values'
+import { v } from 'convex/values'
 
 import { internalMutation, query } from './_generated/server'
 import {
@@ -24,17 +24,20 @@ export const getPublished = query({
 })
 
 /**
- * Publishes new params; open pages restyle at once. Internal until the CMS
- * and owner auth exist (tickets 03 and 05); the e2e test calls it with
- * `convex run`.
+ * Publishes new params; open pages restyle at once. Params that break a rule
+ * are a result the owner sees, not an error. Internal until the CMS and owner
+ * auth exist (tickets 03 and 05); the e2e test calls it with `convex run`.
  */
 export const publish = internalMutation({
   args: appearanceValidator,
-  returns: v.null(),
+  returns: v.union(
+    v.object({ kind: v.literal('published') }),
+    v.object({ kind: v.literal('rejected'), problems: v.array(v.string()) }),
+  ),
   handler: async (ctx, appearance) => {
     const problems = findAppearanceProblems(appearance)
     if (problems.length > 0) {
-      throw new ConvexError(problems.join('; '))
+      return { kind: 'rejected' as const, problems }
     }
     const row = await ctx.db.query('appearance').first()
     if (row === null) {
@@ -42,7 +45,7 @@ export const publish = internalMutation({
     } else {
       await ctx.db.replace(row._id, appearance)
     }
-    return null
+    return { kind: 'published' as const }
   },
 })
 

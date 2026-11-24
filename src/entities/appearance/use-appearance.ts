@@ -4,14 +4,19 @@ import {
   appearanceCssQueryOptions,
   appearanceQueryOptions,
 } from './appearance-query-options'
+import type { AppearanceCss } from './get-appearance-css'
 
 /**
- * The published colour mode and the CSS of the published params. After
- * `loadAppearance` both are there on the first render; while a new publish
- * loads, the CSS of the previous one stays, so nothing flashes.
+ * The CSS of the published params and the colour mode it was made with, so
+ * the two always match. While a new publish loads, the previous pair stays,
+ * so nothing flashes. `loadAppearance` fills it before the first render; if
+ * the CSS still cannot load, that is unexpected and goes to the error boundary.
  */
-export function useAppearance() {
+export function useAppearance(): AppearanceCss {
   const { data: appearance } = useSuspenseQuery(appearanceQueryOptions)
-  const { data: css = '' } = useQuery(appearanceCssQueryOptions(appearance))
-  return { mode: appearance.theme.mode, css }
+  const { data, error } = useQuery(appearanceCssQueryOptions(appearance))
+  if (data === undefined) {
+    throw error ?? new Error('The appearance CSS was not loaded')
+  }
+  return data
 }
