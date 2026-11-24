@@ -1,0 +1,116 @@
+import { type Infer, v } from 'convex/values'
+
+/**
+ * Appearance: the published theme and motion params (ADR 0010). Pure domain
+ * rules for the Convex functions: validators, defaults and the publish checks.
+ * The site turns validated params into Astryx CSS (src/entities/appearance).
+ */
+
+export const colorModeValidator = v.union(
+  v.literal('light'),
+  v.literal('dark'),
+  v.literal('system'),
+)
+
+export const themeParamsValidator = v.object({
+  /** Body text size in px; the type scale grows from it. */
+  basePx: v.number(),
+  /** Ratio between two steps of the type scale. */
+  ratio: v.number(),
+  /** Font family names, without fallbacks: the site appends them. */
+  fonts: v.object({
+    body: v.string(),
+    heading: v.string(),
+    code: v.string(),
+  }),
+  /** Multiplies every corner radius of the theme; 0 is square. */
+  radiusMultiplier: v.number(),
+  mode: colorModeValidator,
+})
+
+export const motionCharacterValidator = v.union(
+  v.literal('crisp'),
+  v.literal('standard'),
+  v.literal('expressive'),
+)
+
+export const motionParamsValidator = v.object({
+  /** Multiplies every motion duration of the theme. */
+  tempo: v.number(),
+  character: motionCharacterValidator,
+})
+
+export const appearanceValidator = v.object({
+  theme: themeParamsValidator,
+  motion: motionParamsValidator,
+})
+
+export type Appearance = Infer<typeof appearanceValidator>
+
+/** What the site renders before anything is published (resolution 11). */
+export const DEFAULT_APPEARANCE: Appearance = {
+  theme: {
+    basePx: 16,
+    ratio: 1.25,
+    fonts: { body: 'Figtree', heading: 'Figtree', code: 'ui-monospace' },
+    radiusMultiplier: 1,
+    mode: 'system',
+  },
+  motion: { tempo: 1, character: 'standard' },
+}
+
+interface Range {
+  min: number
+  max: number
+}
+
+/** Ranges every published number must fall in; Astryx clamps tempo to the same. */
+const RANGES = {
+  basePx: { min: 12, max: 24 },
+  ratio: { min: 1.05, max: 1.6 },
+  radiusMultiplier: { min: 0, max: 3 },
+  tempo: { min: 0.75, max: 1.5 },
+} as const satisfies Record<string, Range>
+
+/**
+ * A font family name the site may write into CSS: words of letters, digits
+ * and hyphens separated by single spaces. Quotes, commas, semicolons or braces
+ * could break out of the declaration, so they never pass.
+ */
+const FONT_NAME = /^[A-Za-z][A-Za-z0-9-]*( [A-Za-z0-9][A-Za-z0-9-]*)*$/
+const FONT_NAME_MAX_LENGTH = 64
+
+function isFontName(name: string): boolean {
+  return name.length <= FONT_NAME_MAX_LENGTH && FONT_NAME.test(name)
+}
+
+function isInRange(value: number, range: Range): boolean {
+  return Number.isFinite(value) && value >= range.min && value <= range.max
+}
+
+/** Every reason `appearance` cannot be published; empty when it can. */
+export function findAppearanceProblems({
+  theme,
+  motion,
+}: Appearance): string[] {
+  const numbers = [
+    { field: 'theme.basePx', value: theme.basePx, range: RANGES.basePx },
+    { field: 'theme.ratio', value: theme.ratio, range: RANGES.ratio },
+    {
+      field: 'theme.radiusMultiplier',
+      value: theme.radiusMultiplier,
+      range: RANGES.radiusMultiplier,
+    },
+    { field: 'motion.tempo', value: motion.tempo, range: RANGES.tempo },
+  ]
+  const rangeProblems = numbers
+    .filter(({ value, range }) => !isInRange(value, range))
+    .map(
+      ({ field, range }) =>
+        `${field} must be between ${String(range.min)} and ${String(range.max)}`,
+    )
+  const fontProblems = Object.entries(theme.fonts)
+    .filter(([, name]) => !isFontName(name))
+    .map(([role]) => `theme.fonts.${role} is not a font family name`)
+  return [...rangeProblems, ...fontProblems]
+}

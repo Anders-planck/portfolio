@@ -59,6 +59,8 @@ Each smell reads *what it is* → *how to fix*; match it against the diff:
 
 Issue both sub-agent calls together, in the foreground, and aggregate the reports they return.
 
+**Standards sub-agent**: in this repo, spawn the `standards-reviewer` agent (`.claude/agents/standards-reviewer.md`); it reviews against `CODING_STANDARDS.md`. Give it the base ref and the prompt below.
+
 **Standards sub-agent prompt** should include:
 
 - The full diff command and commit list.

@@ -1,0 +1,19 @@
+# Markdown is written by hand (a formatter mangles the ASTRYX block in AGENTS.md).
+*.md
+# Generated files are never formatted or edited by hand (ARC-07).
+convex/_generated/
+src/routeTree.gen.ts
+src/astryx-themes.js
+src/themes/
+themes/
+# Not ours, or build output.
+docs/
+.agents/
+.claude/
+skills-lock.json
+bun.lock
+dist/
+.wrangler/
+playwright-report/
+test-results/
+.convex/

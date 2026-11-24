@@ -8,10 +8,9 @@
  * @module
  */
 
+import type * as appearance from "../appearance.js";
 import type * as hello from "../hello.js";
-import type * as lib_appearance from "../lib/appearance.js";
-import type * as lib_appearanceCss from "../lib/appearanceCss.js";
-import type * as siteSettings from "../siteSettings.js";
+import type * as model_appearance from "../model/appearance.js";
 
 import type {
   ApiFromModules,
@@ -20,10 +19,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  appearance: typeof appearance;
   hello: typeof hello;
-  "lib/appearance": typeof lib_appearance;
-  "lib/appearanceCss": typeof lib_appearanceCss;
-  siteSettings: typeof siteSettings;
+  "model/appearance": typeof model_appearance;
 }>;
 
 /**

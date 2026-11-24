@@ -14,7 +14,7 @@ test('SSR head links globals.css first, then the portfolio theme', async ({
   const head = html.slice(0, html.indexOf('</head>'))
   const hrefs = [
     ...head.matchAll(/<link rel="stylesheet" href="([^"]+)"/g),
-  ].map((match) => match[1])
+  ].flatMap((match) => match[1] ?? [])
 
   // globals.css declares the cascade-layer order, so it must come first.
   expect(hrefs[0]).toMatch(/\/assets\/globals-[^/]+\.css$/)
