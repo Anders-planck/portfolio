@@ -14,7 +14,7 @@ export const mediaMimeValidator = v.union(
 )
 export type MediaMime = Infer<typeof mediaMimeValidator>
 
-const MEDIA_MIMES: readonly MediaMime[] = mediaMimeValidator.members.map(
+export const MEDIA_MIMES: readonly MediaMime[] = mediaMimeValidator.members.map(
   (member) => member.value,
 )
 

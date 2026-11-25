@@ -91,8 +91,8 @@ function callEveryCmsFunction(
 /** How many CMS functions `callEveryCmsFunction` calls. */
 const CMS_FUNCTION_COUNT = 16
 
-/** A backend with one published release, and the owner's session on it. */
-async function createBackendWithRelease() {
+/** A backend with a published release and an image, and the owner’s session on it. */
+async function createBackendWithExistingRecords() {
   const backend = createAuthBackend()
   return { backend, ...(await publishFirstRelease(backend)) }
 }
@@ -140,7 +140,7 @@ async function expectEveryCallRefused(
 
 describe('requireOwner on every CMS function', () => {
   test('the owner can call every CMS function', async () => {
-    const { owner, existing } = await createBackendWithRelease()
+    const { owner, existing } = await createBackendWithExistingRecords()
 
     const outcomes = await Promise.allSettled(
       callEveryCmsFunction(owner, existing),
@@ -152,7 +152,7 @@ describe('requireOwner on every CMS function', () => {
   })
 
   test('an anonymous caller is refused by every CMS function', async () => {
-    const { backend, existing } = await createBackendWithRelease()
+    const { backend, existing } = await createBackendWithExistingRecords()
 
     await expectEveryCallRefused(
       callEveryCmsFunction(backend, existing),
@@ -161,7 +161,7 @@ describe('requireOwner on every CMS function', () => {
   })
 
   test('a signed-in account removed from the allowlist is refused at once', async () => {
-    const { owner, existing } = await createBackendWithRelease()
+    const { owner, existing } = await createBackendWithExistingRecords()
     vi.stubEnv('OWNER_GITHUB_IDS', OTHER_GITHUB_ID)
 
     await expectEveryCallRefused(
@@ -191,7 +191,7 @@ describe('requireOwner on every CMS function', () => {
   })
 
   test('a forged identity without a session is refused', async () => {
-    const { backend, existing } = await createBackendWithRelease()
+    const { backend, existing } = await createBackendWithExistingRecords()
 
     await expectEveryCallRefused(
       callEveryCmsFunction(

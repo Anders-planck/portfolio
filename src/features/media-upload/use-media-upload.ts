@@ -20,7 +20,7 @@ export type UploadState =
   | {
       kind: 'failed'
       fileName: string
-      problem: UploadProblem | 'interrupted'
+      problem: UploadProblem | 'interrupted' | 'unreadable-image'
       canRetry: boolean
     }
 
@@ -30,8 +30,7 @@ interface PendingUpload {
 }
 
 /** Problems a retry of the same request can fix. */
-const RETRYABLE_PROBLEMS: readonly (UploadProblem | 'interrupted')[] = [
-  'interrupted',
+const RETRYABLE_PROBLEMS: readonly UploadProblem[] = [
   'not-uploaded',
   'not-stored',
   'mismatch',
@@ -66,7 +65,9 @@ export function useMediaUpload(
       kind: 'failed',
       fileName,
       problem: outcome.problem,
-      canRetry: RETRYABLE_PROBLEMS.includes(outcome.problem),
+      canRetry:
+        outcome.problem === 'interrupted' ||
+        RETRYABLE_PROBLEMS.includes(outcome.problem),
     })
   }
 
@@ -77,7 +78,7 @@ export function useMediaUpload(
       setUploadState({
         kind: 'failed',
         fileName: picked.name,
-        problem: 'bad-size',
+        problem: 'unreadable-image',
         canRetry: false,
       })
       return

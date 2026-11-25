@@ -80,9 +80,10 @@ test('the owner uploads an image without its EXIF and writes its alt', async ({
   expect(storedBytes.includes('Exif')).toBe(false)
   expect(storedBytes.includes('GPS-secret-place')).toBe(false)
 
-  await ownerPage
-    .getByRole('button', { name: `Testo alternativo di ${fileName}` })
-    .click()
+  const altButton = ownerPage.getByRole('button', {
+    name: `Testo alternativo di ${fileName}`,
+  })
+  await altButton.click()
   const italianAlt = ownerPage.getByRole('textbox', { name: 'Alt · Italiano' })
   await italianAlt.fill('Un rettangolo verde acqua')
   await italianAlt.blur()
@@ -93,6 +94,8 @@ test('the owner uploads an image without its EXIF and writes its alt', async ({
     (await new AxeBuilder({ page: ownerPage }).analyze()).violations,
   ).toEqual([])
   await ownerPage.getByRole('button', { name: 'Chiudi' }).click()
+  // One way out, and focus goes back to what opened the dialog (UI-04).
+  await expect(altButton).toBeFocused()
   await expect(ownerPage.getByText('manca: EN, FR, DE').first()).toBeVisible()
 })
 

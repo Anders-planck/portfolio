@@ -31,6 +31,7 @@ function renderField(
   render(
     <MediaUploadField
       isDisabled={false}
+      acceptedMimes={['application/pdf']}
       onCreateUploadUrl={onCreateUploadUrl}
       onCompleteUpload={onCompleteUpload}
     />,

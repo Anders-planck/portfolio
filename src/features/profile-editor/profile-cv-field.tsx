@@ -10,9 +10,17 @@ export interface CvChoice {
   fileName: string
 }
 
+/** The PDFs in Media the CV can be, as the Media read stands. */
+export type CvChoices =
+  | { kind: 'loading' }
+  | { kind: 'failed' }
+  | { kind: 'ready'; choices: readonly CvChoice[] }
+
 /**
  * The CV the site's header links to: one of the PDFs in Media, or none.
  * The choice is part of the Profile draft, so it goes live on publish.
+ * While Media cannot be read the field is off and says why, so an empty
+ * list never passes for "no PDFs".
  */
 export function ProfileCvField({
   cvMediaId,
@@ -20,24 +28,31 @@ export function ProfileCvField({
   onCvChange,
 }: {
   cvMediaId: Id<'media'> | null
-  cvChoices: readonly CvChoice[]
+  cvChoices: CvChoices
   onCvChange: (cvMediaId: Id<'media'> | null) => void
 }) {
+  const choices = cvChoices.kind === 'ready' ? cvChoices.choices : []
   return (
     <Selector
       label={CV_COPY.label}
       description={CV_COPY.description}
-      placeholder={CV_COPY.placeholder}
+      placeholder={
+        cvChoices.kind === 'loading' ? CV_COPY.loading : CV_COPY.placeholder
+      }
       emptyText={CV_COPY.empty}
-      options={cvChoices.map(({ mediaId, fileName }) => ({
+      options={choices.map(({ mediaId, fileName }) => ({
         value: mediaId,
         label: fileName,
       }))}
       value={cvMediaId}
       hasClear
+      isDisabled={cvChoices.kind !== 'ready'}
+      {...(cvChoices.kind === 'failed'
+        ? { disabledMessage: CV_COPY.loadFailed }
+        : {})}
       onChange={(value) => {
         onCvChange(
-          cvChoices.find((choice) => choice.mediaId === value)?.mediaId ?? null,
+          choices.find((choice) => choice.mediaId === value)?.mediaId ?? null,
         )
       }}
     />

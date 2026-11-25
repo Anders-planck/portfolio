@@ -14,7 +14,7 @@ import {
   type EditableProfileDraft,
   profileDraftQueryOptions,
 } from '../../entities/profile/profile-draft'
-import type { CvChoice } from '../../features/profile-editor/profile-cv-field'
+import type { CvChoices } from '../../features/profile-editor/profile-cv-field'
 import { ProfileEditor } from '../../features/profile-editor/profile-editor'
 import { SaveStatus } from '../../features/profile-editor/save-status'
 import { useProfileAutosave } from '../../features/profile-editor/use-profile-autosave'
@@ -33,11 +33,7 @@ const PROFILE_COPY = CMS_MESSAGES.profile
 export function CmsProfilePage() {
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const draft = useQuery(profileDraftQueryOptions(locale))
-  // The CV choices; while Media cannot be read the list is just empty.
-  const { data: library } = useQuery(mediaLibraryQueryOptions())
-  const cvChoices: CvChoice[] = (library?.media ?? [])
-    .filter((entry) => entry.mime === 'application/pdf')
-    .map(({ mediaId, fileName }) => ({ mediaId, fileName }))
+  const cvChoices = useCvChoices()
 
   return (
     <VStack gap={6}>
@@ -81,7 +77,7 @@ function ProfileDraftWorkspace({
 }: {
   draft: EditableProfileDraft
   locale: Locale
-  cvChoices: readonly CvChoice[]
+  cvChoices: CvChoices
   onLocaleChange: (locale: Locale) => void
 }) {
   const { saveState, queueEdit, retry } = useProfileAutosave(
@@ -125,4 +121,21 @@ function ProfileDraftWorkspace({
       />
     </VStack>
   )
+}
+
+/** The files in Media the CV can be, with the state of the Media read. */
+function useCvChoices(): CvChoices {
+  const library = useQuery(mediaLibraryQueryOptions())
+  if (library.isError) {
+    return { kind: 'failed' }
+  }
+  if (library.isPending) {
+    return { kind: 'loading' }
+  }
+  return {
+    kind: 'ready',
+    choices: library.data.media
+      .filter((entry) => entry.kind === 'file')
+      .map(({ mediaId, fileName }) => ({ mediaId, fileName })),
+  }
 }

@@ -2,7 +2,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { SCREENSHOT_ENTRY } from '../../entities/media/media.fixture'
+import {
+  MEDIA_LIMITS,
+  SCREENSHOT_ENTRY,
+} from '../../entities/media/media.fixture'
 import { MediaAltDialog } from './media-alt-dialog'
 
 afterEach(cleanup)
@@ -12,6 +15,7 @@ function renderDialog(onSaveAlt: () => Promise<unknown>) {
   render(
     <MediaAltDialog
       entry={SCREENSHOT_ENTRY}
+      maxAltLength={MEDIA_LIMITS.maxAltLength}
       onSaveAlt={onSaveAlt}
       onClose={onClose}
     />,

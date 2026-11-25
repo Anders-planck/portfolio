@@ -3,7 +3,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { SCREENSHOT_ENTRY } from '../../entities/media/media.fixture'
+import {
+  MEDIA_LIMITS,
+  SCREENSHOT_ENTRY,
+} from '../../entities/media/media.fixture'
 import { mediaLibraryQueryOptions } from '../../entities/media/media-library-query-options'
 import { CmsMediaPage } from './cms-media-page'
 
@@ -36,6 +39,7 @@ test('Media shows the library the owner reads', () => {
     queryClient.setQueryData(mediaLibraryQueryOptions().queryKey, {
       isStorageConfigured: true,
       hasImageVariants: true,
+      limits: MEDIA_LIMITS,
       media: [SCREENSHOT_ENTRY],
     })
   })

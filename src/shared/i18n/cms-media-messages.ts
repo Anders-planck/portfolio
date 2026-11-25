@@ -32,6 +32,8 @@ export const CMS_MEDIA_MESSAGES = {
       'not-configured': 'L’archivio R2 non è configurato.',
       'not-stored': 'L’archivio ha rifiutato il file. Riprova.',
       interrupted: 'Caricamento interrotto. Riprova.',
+      'unreadable-image':
+        'Il browser non riesce a leggere questa immagine: esportala di nuovo e riprova.',
     },
   },
   table: {

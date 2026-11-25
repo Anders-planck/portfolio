@@ -117,6 +117,7 @@ describe('completing an upload', () => {
           url: `${TEST_MEDIA_ORIGIN}/${OBJECT_KEY}`,
           preview: { src: `${TEST_MEDIA_ORIGIN}/${OBJECT_KEY}`, srcSet: null },
           alts: [],
+          missingAltLocales: ['it', 'en', 'fr', 'de'],
           usages: [],
         },
       ],

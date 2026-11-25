@@ -7,13 +7,14 @@ import { TextArea } from '@astryxdesign/core/TextArea'
 import { TextInput } from '@astryxdesign/core/TextInput'
 import { useState } from 'react'
 
+import type { Id } from '../../../convex/_generated/dataModel'
 import type {
   ProfileContent,
   ProfileEdit,
   ProfileFields,
 } from '../../entities/profile/profile-draft'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
-import { type CvChoice, ProfileCvField } from './profile-cv-field'
+import { type CvChoices, ProfileCvField } from './profile-cv-field'
 import { ProfileLinksEditor } from './profile-links-editor'
 
 const PROFILE_COPY = CMS_MESSAGES.profile
@@ -40,8 +41,7 @@ export function ProfileEditor({
 }: {
   initialFields: ProfileFields
   initialContent: ProfileContent
-  /** The PDFs in Media the CV can be. */
-  cvChoices: readonly CvChoice[]
+  cvChoices: CvChoices
   onEdit: (edit: ProfileEdit) => void
 }) {
   const [fields, setFields] = useState(initialFields)
@@ -182,8 +182,8 @@ function ProfileContactSection({
   name: string
   email: string
   links: ProfileFields['links']
-  cvMediaId: CvChoice['mediaId'] | null
-  cvChoices: readonly CvChoice[]
+  cvMediaId: Id<'media'> | null
+  cvChoices: CvChoices
   contactLabel: string
   onFieldsChange: (edit: Partial<ProfileFields>) => void
   onContactLabelChange: (contactLabel: string) => void

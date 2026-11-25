@@ -2,10 +2,15 @@ import { type Infer, v } from 'convex/values'
 
 import type { Doc } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
-import { localeValidator } from '../content/locales'
+import { LOCALES, localeValidator } from '../content/locales'
 import { readImageTransformOrigin, readMediaStorageSettings } from '../env'
-import { readAltRecords } from './alts'
-import { mediaMimeValidator, toMediaKindFromMime } from './files'
+import { listLocalesWithAlt, MAX_ALT_LENGTH, readAltRecords } from './alts'
+import {
+  MAX_MEDIA_BYTES,
+  MEDIA_MIMES,
+  mediaMimeValidator,
+  toMediaKindFromMime,
+} from './files'
 import { toPublicObjectUrl } from './storage'
 import { altReviewStateValidator, MAX_MEDIA } from './tables'
 import { type MediaUsage, mediaUsageValidator, readMediaUsages } from './usage'
@@ -33,6 +38,8 @@ const mediaEntryValidator = v.object({
       reviewState: altReviewStateValidator,
     }),
   ),
+  /** Site locales without alt text; empty for a file, which needs none. */
+  missingAltLocales: v.array(localeValidator),
   usages: v.array(mediaUsageValidator),
 })
 export type MediaEntry = Infer<typeof mediaEntryValidator>
@@ -41,6 +48,12 @@ export const mediaLibraryValidator = v.object({
   isStorageConfigured: v.boolean(),
   /** Whether images are served as AVIF/WebP variants or as uploaded. */
   hasImageVariants: v.boolean(),
+  /** The server's limits, so the CMS picker and fields never copy them. */
+  limits: v.object({
+    acceptedMimes: v.array(mediaMimeValidator),
+    maxBytes: v.number(),
+    maxAltLength: v.number(),
+  }),
   media: v.array(mediaEntryValidator),
 })
 
@@ -64,6 +77,11 @@ export async function readMediaLibrary(ctx: QueryCtx) {
   return {
     isStorageConfigured: settings !== null,
     hasImageVariants: transformOrigin !== null,
+    limits: {
+      acceptedMimes: [...MEDIA_MIMES],
+      maxBytes: MAX_MEDIA_BYTES,
+      maxAltLength: MAX_ALT_LENGTH,
+    },
     media,
   }
 }
@@ -105,6 +123,18 @@ function toMediaEntry(
       alt,
       reviewState,
     })),
+    missingAltLocales: toMissingAltLocales(kind, related.alts),
     usages: related.usages,
   }
+}
+
+function toMissingAltLocales(
+  kind: MediaEntry['kind'],
+  alts: Doc<'mediaAlt'>[],
+): MediaEntry['missingAltLocales'] {
+  if (kind === 'file') {
+    return []
+  }
+  const withAlt = listLocalesWithAlt(alts)
+  return LOCALES.filter((locale) => !withAlt.includes(locale))
 }

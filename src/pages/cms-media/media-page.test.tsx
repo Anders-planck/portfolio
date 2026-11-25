@@ -2,7 +2,10 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { SCREENSHOT_ENTRY } from '../../entities/media/media.fixture'
+import {
+  MEDIA_LIMITS,
+  SCREENSHOT_ENTRY,
+} from '../../entities/media/media.fixture'
 import type { MediaLibrary } from '../../entities/media/media-library-query-options'
 import { MediaPage } from './media-page'
 
@@ -11,6 +14,7 @@ afterEach(cleanup)
 const LIBRARY: MediaLibrary = {
   isStorageConfigured: true,
   hasImageVariants: false,
+  limits: MEDIA_LIMITS,
   media: [SCREENSHOT_ENTRY],
 }
 

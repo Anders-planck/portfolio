@@ -9,11 +9,10 @@ import { type UploadState, useMediaUpload } from './use-media-upload'
 
 const UPLOAD_COPY = CMS_MEDIA_MESSAGES.upload
 
-/** What the picker offers; the server holds the same list and decides. */
-const ACCEPTED_TYPES = 'image/jpeg,image/png,image/webp,application/pdf'
-
 export interface MediaUploadFieldProps {
   isDisabled: boolean
+  /** The server's allowlist (`media.listMedia` limits); it decides again. */
+  acceptedMimes: readonly string[]
   onCreateUploadUrl: UploadCommands['createUploadUrl']
   onCompleteUpload: UploadCommands['completeUpload']
 }
@@ -24,6 +23,7 @@ export interface MediaUploadFieldProps {
  */
 export function MediaUploadField({
   isDisabled,
+  acceptedMimes,
   onCreateUploadUrl,
   onCompleteUpload,
 }: MediaUploadFieldProps) {
@@ -37,7 +37,7 @@ export function MediaUploadField({
       <FileInput
         label={UPLOAD_COPY.label}
         description={UPLOAD_COPY.description}
-        accept={ACCEPTED_TYPES}
+        accept={acceptedMimes.join(',')}
         value={null}
         isDisabled={isDisabled || uploadState.kind === 'uploading'}
         isLoading={uploadState.kind === 'uploading'}

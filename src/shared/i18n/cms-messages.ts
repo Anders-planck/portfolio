@@ -71,6 +71,8 @@ export const CMS_MESSAGES = {
       description:
         'Il PDF a cui portano i pulsanti «CV» del sito, scelto tra i file in Media.',
       placeholder: 'Nessun CV',
+      loading: 'Caricamento dei PDF…',
+      loadFailed: 'Non riesco a leggere i PDF in Media: ricarica la pagina.',
       empty: 'Nessun PDF in Media: caricalo lì.',
     },
     links: {

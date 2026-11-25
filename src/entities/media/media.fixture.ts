@@ -1,5 +1,5 @@
 import type { Id } from '../../../convex/_generated/dataModel'
-import type { MediaEntry } from './media-library-query-options'
+import type { MediaEntry, MediaLibrary } from './media-library-query-options'
 
 /** Media entries as `media.listMedia` returns them, for component tests. */
 
@@ -18,6 +18,7 @@ export const SCREENSHOT_ENTRY: MediaEntry = {
     srcSet: null,
   },
   alts: [{ locale: 'it', alt: 'Chat di Bussola', reviewState: 'reviewed' }],
+  missingAltLocales: ['en', 'fr', 'de'],
   usages: [],
 }
 
@@ -33,7 +34,15 @@ export const CV_ENTRY: MediaEntry = {
   url: 'https://media.example.com/media/two/cv-anders-planck.pdf',
   preview: null,
   alts: [],
+  missingAltLocales: [],
   usages: [
     { collection: 'profile', key: 'main', field: 'cvMediaId', state: 'live' },
   ],
+}
+
+/** The server's limits as `media.listMedia` returns them. */
+export const MEDIA_LIMITS: MediaLibrary['limits'] = {
+  acceptedMimes: ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'],
+  maxBytes: 10 * 1024 * 1024,
+  maxAltLength: 300,
 }

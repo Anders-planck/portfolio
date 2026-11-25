@@ -8,7 +8,10 @@ import { ProfileCvField } from './profile-cv-field'
 afterEach(cleanup)
 
 const CV_ID = 'media-cv' as Id<'media'>
-const CHOICES = [{ mediaId: CV_ID, fileName: 'cv-anders-planck.pdf' }]
+const CHOICES = {
+  kind: 'ready',
+  choices: [{ mediaId: CV_ID, fileName: 'cv-anders-planck.pdf' }],
+} as const
 
 test('the chosen PDF is shown by its file name', () => {
   render(
@@ -40,4 +43,23 @@ test('picking a PDF makes it the CV', async () => {
   )
 
   expect(onCvChange).toHaveBeenCalledWith(CV_ID)
+})
+
+test('while Media cannot be read the field is off and says why', () => {
+  render(
+    <ProfileCvField
+      cvMediaId={CV_ID}
+      cvChoices={{ kind: 'failed' }}
+      onCvChange={vi.fn()}
+    />,
+  )
+
+  expect(
+    screen.getByRole('combobox', { name: 'CV' }).getAttribute('aria-disabled'),
+  ).toBe('true')
+  expect(
+    screen.getByText(
+      'Non riesco a leggere i PDF in Media: ricarica la pagina.',
+    ),
+  ).toBeDefined()
 })

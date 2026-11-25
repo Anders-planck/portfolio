@@ -3,7 +3,7 @@ import type {
   MediaUsage,
 } from '../../entities/media/media-library-query-options'
 import { CMS_MEDIA_MESSAGES } from '../../shared/i18n/cms-media-messages'
-import { type Locale, LOCALES } from '../../shared/i18n/locale'
+import type { Locale } from '../../shared/i18n/locale'
 
 const { table: TABLE_COPY, usage: USAGE_COPY } = CMS_MEDIA_MESSAGES
 
@@ -52,18 +52,14 @@ function toLocaleList(locales: readonly Locale[]) {
 }
 
 /** Missing alt blocks publish, so it wins over alt still to review. */
-function toAltStatus({ kind, alts }: MediaEntry): AltStatus {
+function toAltStatus({ kind, alts, missingAltLocales }: MediaEntry): AltStatus {
   if (kind === 'file') {
     return { tone: 'neutral', label: TABLE_COPY.altNotNeeded }
   }
-  const missing = LOCALES.filter(
-    (locale) =>
-      !alts.some((record) => record.locale === locale && record.alt !== ''),
-  )
-  if (missing.length > 0) {
+  if (missingAltLocales.length > 0) {
     return {
       tone: 'error',
-      label: TABLE_COPY.altMissing(toLocaleList(missing)),
+      label: TABLE_COPY.altMissing(toLocaleList(missingAltLocales)),
     }
   }
   const toReview = alts

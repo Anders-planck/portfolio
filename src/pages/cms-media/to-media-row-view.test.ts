@@ -31,11 +31,16 @@ test('alt in every locale is complete, unless some is still to review', () => {
   }))
 
   expect(
-    toMediaRowViewFromEntry({ ...SCREENSHOT_ENTRY, alts }).altStatus,
+    toMediaRowViewFromEntry({
+      ...SCREENSHOT_ENTRY,
+      alts,
+      missingAltLocales: [],
+    }).altStatus,
   ).toEqual({ tone: 'success', label: 'completo' })
   expect(
     toMediaRowViewFromEntry({
       ...SCREENSHOT_ENTRY,
+      missingAltLocales: [],
       alts: alts.map((record) =>
         record.locale === 'fr'
           ? { ...record, reviewState: 'to-review' as const }

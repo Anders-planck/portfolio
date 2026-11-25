@@ -66,22 +66,24 @@ export function MediaPage({
             )}
             <MediaUploadField
               isDisabled={!library.isStorageConfigured}
+              acceptedMimes={library.limits.acceptedMimes}
               onCreateUploadUrl={onCreateUploadUrl}
               onCompleteUpload={onCompleteUpload}
             />
             <MediaTable entries={library.media} onOpenAlt={setAltMediaId} />
           </VStack>
-          {altEntry !== null && (
-            <MediaAltDialog
-              entry={altEntry}
-              onSaveAlt={(edit) =>
-                onSaveAlt({ mediaId: altEntry.mediaId, ...edit })
+          <MediaAltDialog
+            entry={altEntry}
+            maxAltLength={library.limits.maxAltLength}
+            onSaveAlt={async (edit) => {
+              if (altEntry !== null) {
+                await onSaveAlt({ mediaId: altEntry.mediaId, ...edit })
               }
-              onClose={() => {
-                setAltMediaId(null)
-              }}
-            />
-          )}
+            }}
+            onClose={() => {
+              setAltMediaId(null)
+            }}
+          />
         </LayoutContent>
       }
     />

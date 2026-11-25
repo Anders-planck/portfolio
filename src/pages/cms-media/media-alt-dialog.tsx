@@ -10,11 +10,11 @@ import { type Locale, LOCALES } from '../../shared/i18n/locale'
 
 const ALT_COPY = CMS_MEDIA_MESSAGES.alt
 
-/** Matches the server's limit (`model/media/alts.ts`). */
-const MAX_ALT_LENGTH = 300
-
 export interface MediaAltDialogProps {
-  entry: MediaEntry
+  /** The image being described; null keeps the dialog closed. */
+  entry: MediaEntry | null
+  /** The server's limit (`media.listMedia` limits). */
+  maxAltLength: number
   onSaveAlt: (edit: { locale: Locale; alt: string }) => Promise<unknown>
   onClose: () => void
 }
@@ -22,16 +22,18 @@ export interface MediaAltDialogProps {
 /**
  * The alt text of one image, one field per locale. Each field saves when it
  * loses focus (resolution 14: no save button) and says whether it did.
- * Closing goes through `onClose` only (Escape and the header's close button).
+ * Closing goes through `onClose` only (Escape and the header's close button);
+ * the dialog stays mounted, so closing returns focus to what opened it.
  */
 export function MediaAltDialog({
   entry,
+  maxAltLength,
   onSaveAlt,
   onClose,
 }: MediaAltDialogProps) {
   return (
     <Dialog
-      isOpen
+      isOpen={entry !== null}
       onOpenChange={(isOpen) => {
         if (!isOpen) {
           onClose()
@@ -39,32 +41,36 @@ export function MediaAltDialog({
       }}
       purpose="form"
     >
-      <Layout
-        header={
-          <DialogHeader
-            title={ALT_COPY.title(entry.fileName)}
-            onOpenChange={onClose}
-          />
-        }
-        content={
-          <LayoutContent>
-            <VStack gap={4}>
-              <Text color="secondary">{ALT_COPY.description}</Text>
-              {LOCALES.map((locale) => (
-                <AltField
-                  key={locale}
-                  locale={locale}
-                  savedAlt={
-                    entry.alts.find((record) => record.locale === locale)
-                      ?.alt ?? ''
-                  }
-                  onSaveAlt={onSaveAlt}
-                />
-              ))}
-            </VStack>
-          </LayoutContent>
-        }
-      />
+      {entry !== null && (
+        <Layout
+          header={
+            <DialogHeader
+              title={ALT_COPY.title(entry.fileName)}
+              onOpenChange={onClose}
+            />
+          }
+          content={
+            <LayoutContent>
+              <VStack gap={4}>
+                <Text color="secondary">{ALT_COPY.description}</Text>
+                {LOCALES.map((locale) => (
+                  <AltField
+                    // Keyed by image too: another image opens on its own text.
+                    key={`${entry.mediaId}-${locale}`}
+                    locale={locale}
+                    maxAltLength={maxAltLength}
+                    savedAlt={
+                      entry.alts.find((record) => record.locale === locale)
+                        ?.alt ?? ''
+                    }
+                    onSaveAlt={onSaveAlt}
+                  />
+                ))}
+              </VStack>
+            </LayoutContent>
+          }
+        />
+      )}
     </Dialog>
   )
 }
@@ -80,10 +86,12 @@ const SAVE_STATUS_PROPS = {
 
 function AltField({
   locale,
+  maxAltLength,
   savedAlt,
   onSaveAlt,
 }: {
   locale: Locale
+  maxAltLength: number
   savedAlt: string
   onSaveAlt: MediaAltDialogProps['onSaveAlt']
 }) {
@@ -106,7 +114,7 @@ function AltField({
     <TextArea
       label={ALT_COPY.fieldLabel(CMS_MEDIA_MESSAGES.locales[locale])}
       value={alt}
-      maxLength={MAX_ALT_LENGTH}
+      maxLength={maxAltLength}
       onChange={setAlt}
       onBlur={() => {
         void saveAlt()

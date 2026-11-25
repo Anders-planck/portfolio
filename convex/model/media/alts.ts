@@ -13,6 +13,15 @@ import { toMediaKindFromMime } from './files'
 /** Screen readers read alt in one breath; longer belongs in a caption. */
 export const MAX_ALT_LENGTH = 300
 
+/** Locales whose alt text is written (not blank): the one test of "has alt". */
+export function listLocalesWithAlt(
+  alts: readonly Pick<Doc<'mediaAlt'>, 'locale' | 'alt'>[],
+): Locale[] {
+  return alts
+    .filter((record) => record.alt.trim() !== '')
+    .map((record) => record.locale)
+}
+
 export function readAltRecords(
   ctx: QueryCtx,
   mediaId: Id<'media'>,

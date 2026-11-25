@@ -2,7 +2,7 @@ import type { Id } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
 import type { Locale } from '../content/locales'
 import type { Snapshot } from '../content/snapshot'
-import { readAltRecords } from './alts'
+import { listLocalesWithAlt, readAltRecords } from './alts'
 import { type MediaKind, toMediaKindFromMime } from './files'
 import { findMediaReferences } from './references'
 
@@ -36,11 +36,7 @@ export async function readRuleMedia(
       const ruleMedia: RuleMedia = {
         kind: toMediaKindFromMime(media.mime),
         fileName: media.fileName,
-        altLocales: new Set(
-          alts
-            .filter((record) => record.alt.trim() !== '')
-            .map((record) => record.locale),
-        ),
+        altLocales: new Set(listLocalesWithAlt(alts)),
       }
       return [mediaId, ruleMedia] as const
     }),
