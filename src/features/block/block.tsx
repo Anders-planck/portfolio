@@ -28,7 +28,7 @@ export function Block({
 }) {
   const { immersive } = useMessages()
   const hintId = useId()
-  const { handleRef, blockRef, frontFaceIndex, turnByFaces } =
+  const { dragAreaRef, blockRef, frontFaceIndex, turnByFaces } =
     useBlockDrive(readScrollPose)
   const frontFace = faces[frontFaceIndex] ?? faces[0]
   const isDriven = readScrollPose !== undefined
@@ -59,7 +59,7 @@ export function Block({
   return (
     <>
       <Stack
-        ref={handleRef}
+        ref={dragAreaRef}
         {...(isDriven ? sliderProps : { 'aria-hidden': true })}
         align="center"
         padding={4}

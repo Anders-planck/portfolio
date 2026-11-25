@@ -5,26 +5,26 @@ import { waitForFrames } from './block.fixture'
 import type { BlockPose } from './block-pose'
 import { driveBlock } from './drive-block'
 
-let handle: HTMLElement
+let dragArea: HTMLElement
 let block: HTMLElement
 let scrollPose: BlockPose
 
 beforeEach(() => {
-  handle = document.createElement('div')
+  dragArea = document.createElement('div')
   block = document.createElement('div')
-  handle.append(block)
-  document.body.append(handle)
+  dragArea.append(block)
+  document.body.append(dragArea)
   scrollPose = { yawDeg: 0, scale: 1 }
 })
 
 afterEach(() => {
-  handle.remove()
+  dragArea.remove()
 })
 
 function startDrive() {
   const onFrontFaceChange = vi.fn()
   const drive = driveBlock(
-    { handle, block },
+    { dragArea, block },
     { readScrollPose: () => scrollPose, onFrontFaceChange },
   )
   return { drive, onFrontFaceChange }

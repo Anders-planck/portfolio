@@ -35,28 +35,28 @@ function toBlockDragFromPress(press: Press, event: PointerEvent) {
 }
 
 /**
- * The drag gesture on a Block: a mouse or pen pressed on `handle` and moved
+ * The drag gesture on a Block: a mouse or pen pressed on `dragArea` and moved
  * past a few pixels turns the Block across and tips it up/down (within a
  * limit) until released; a click that does not move is no drag. Touch
  * keeps scrolling the page, while a pen gets `touch-action: none` on the
- * handle so its drag is not taken for a scroll. `block` carries
+ * drag area so its drag is not taken for a scroll. `block` carries
  * `data-dragging` meanwhile, so its transition stops and it follows the
  * pointer exactly. Returns the cleanup.
  */
 export function trackBlockDrag(
-  { handle, block }: { handle: HTMLElement; block: HTMLElement },
+  { dragArea, block }: { dragArea: HTMLElement; block: HTMLElement },
   { readTurnYawDeg, onDragMove, onDragEnd }: BlockDragCallbacks,
 ): () => void {
   let press: Press | undefined
 
   const fitTouchActionToPointer = (event: PointerEvent) => {
-    handle.style.touchAction = event.pointerType === 'pen' ? 'none' : ''
+    dragArea.style.touchAction = event.pointerType === 'pen' ? 'none' : ''
   }
   const startPress = (event: PointerEvent) => {
     if (event.pointerType === 'touch' || event.button !== 0) {
       return
     }
-    handle.setPointerCapture(event.pointerId)
+    dragArea.setPointerCapture(event.pointerId)
     press = {
       pointerId: event.pointerId,
       clientX: event.clientX,
@@ -101,13 +101,13 @@ export function trackBlockDrag(
     ['lostpointercapture', endPress],
   ] as const
   listeners.forEach(([type, listener]) => {
-    handle.addEventListener(type, listener)
+    dragArea.addEventListener(type, listener)
   })
   return () => {
     listeners.forEach(([type, listener]) => {
-      handle.removeEventListener(type, listener)
+      dragArea.removeEventListener(type, listener)
     })
-    handle.style.removeProperty('touch-action')
+    dragArea.style.removeProperty('touch-action')
     delete block.dataset.dragging
   }
 }

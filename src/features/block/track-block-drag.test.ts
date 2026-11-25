@@ -3,18 +3,18 @@ import { beforeEach, expect, test, vi } from 'vitest'
 
 import { trackBlockDrag } from './track-block-drag'
 
-let handle: HTMLElement
+let dragArea: HTMLElement
 let block: HTMLElement
 
 beforeEach(() => {
-  handle = document.createElement('div')
+  dragArea = document.createElement('div')
   block = document.createElement('div')
-  handle.setPointerCapture = vi.fn()
-  handle.append(block)
+  dragArea.setPointerCapture = vi.fn()
+  dragArea.append(block)
 })
 
 function press(type: string, init: PointerEventInit) {
-  handle.dispatchEvent(
+  dragArea.dispatchEvent(
     new PointerEvent(type, { pointerId: 1, button: 0, ...init }),
   )
 }
@@ -23,7 +23,7 @@ function startTracking() {
   const onDragMove = vi.fn()
   const onDragEnd = vi.fn()
   const stop = trackBlockDrag(
-    { handle, block },
+    { dragArea, block },
     { readTurnYawDeg: () => 10, onDragMove, onDragEnd },
   )
   return { onDragMove, onDragEnd, stop }
@@ -77,8 +77,8 @@ test('a finger scrolls the page instead of dragging the Block', () => {
 test('a pen over the Block keeps its drag from scrolling; a finger does not', () => {
   const { stop } = startTracking()
   press('pointerover', { pointerType: 'pen' })
-  expect(handle.style.touchAction).toBe('none')
+  expect(dragArea.style.touchAction).toBe('none')
   press('pointerover', { pointerType: 'touch' })
-  expect(handle.style.touchAction).toBe('')
+  expect(dragArea.style.touchAction).toBe('')
   stop()
 })

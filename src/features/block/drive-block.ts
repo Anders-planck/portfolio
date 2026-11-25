@@ -12,7 +12,7 @@ import { watchOnScreen } from './watch-on-screen'
 /** The two elements of a driven Block. */
 export interface BlockElements {
   /** Takes the drag: the area around the Block. */
-  handle: HTMLElement
+  dragArea: HTMLElement
   /** Turns: the element the faces sit on. */
   block: HTMLElement
 }
@@ -46,7 +46,7 @@ function toViewportPointerFromEvent(event: PointerEvent): ViewportPointer {
  * and drag share the same frame state.
  */
 export function driveBlock(
-  { handle, block }: BlockElements,
+  { dragArea, block }: BlockElements,
   { readScrollPose, onFrontFaceChange }: BlockDriveOptions,
 ): BlockDrive {
   let pendingFrameId = 0
@@ -91,7 +91,7 @@ export function driveBlock(
     }
   }
   const stopDragTracking = trackBlockDrag(
-    { handle, block },
+    { dragArea, block },
     {
       readTurnYawDeg: () => motion.turnYawDeg,
       onDragMove: ({ turnYawDeg, dragPitchDeg }) => {
@@ -105,7 +105,7 @@ export function driveBlock(
     },
   )
 
-  const stopWatchingScreen = watchOnScreen(handle, (isVisible) => {
+  const stopWatchingScreen = watchOnScreen(dragArea, (isVisible) => {
     isOnScreen = isVisible
     scheduleDraw()
   })
