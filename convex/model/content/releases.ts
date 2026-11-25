@@ -3,6 +3,7 @@ import { ConvexError, type Infer, v } from 'convex/values'
 import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
+import { recordNoteFirstPublications } from '../notes/firstpublication'
 import { readDraftRevision, readDraftSnapshot } from './drafts'
 import { checkPublishLimits } from './limits'
 import {
@@ -170,6 +171,7 @@ export async function publishSelection(
     liveVersionIds: await readLiveVersionIdsAfter(ctx, versions),
   })
   await movePublishedPointers(ctx, releaseId, versions)
+  await recordNoteFirstPublications(ctx, versions, now)
   return { status: 'published', releaseId, findings }
 }
 
@@ -215,6 +217,7 @@ export async function publishScheduledRelease(
     liveVersionIds: await readLiveVersionIdsAfter(ctx, versions),
   })
   await movePublishedPointers(ctx, releaseId, versions)
+  await recordNoteFirstPublications(ctx, versions, now)
 }
 
 function toPublishOutcomeFromRelease(release: Doc<'releases'>): PublishOutcome {

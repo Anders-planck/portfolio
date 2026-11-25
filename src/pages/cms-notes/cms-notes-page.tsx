@@ -97,16 +97,20 @@ function CreateNoteButton() {
   const createNote = useMutation(api.notes.createNote)
   const navigate = useNavigate()
   const pendingKey = useRef<string | null>(null)
-  const [hasFailed, setHasFailed] = useState(false)
+  const [problem, setProblem] = useState<CreateProblem | null>(null)
 
   const createAndOpen = async () => {
     pendingKey.current ??= crypto.randomUUID()
     try {
-      const { key } = await createNote({ key: pendingKey.current })
+      const created = await createNote({ key: pendingKey.current })
       pendingKey.current = null
-      await navigate({ to: `${CMS_PATHNAME}/note/${key}` })
+      if (created.kind === 'limit-reached') {
+        setProblem('limit-reached')
+        return
+      }
+      await navigate({ to: `${CMS_PATHNAME}/note/${created.key}` })
     } catch {
-      setHasFailed(true)
+      setProblem('failed')
     }
   }
 
@@ -117,7 +121,19 @@ function CreateNoteButton() {
         label={NOTES_COPY.create}
         clickAction={createAndOpen}
       />
-      {hasFailed && <Banner status="error" title={NOTES_COPY.createFailed} />}
+      {problem !== null && (
+        <Banner
+          status="error"
+          title={
+            problem === 'failed'
+              ? NOTES_COPY.createFailed
+              : NOTES_COPY.limitReached
+          }
+        />
+      )}
     </VStack>
   )
 }
+
+/** Why "Nuova nota" opened nothing: the answer was lost, or the limit is hit. */
+type CreateProblem = 'failed' | 'limit-reached'

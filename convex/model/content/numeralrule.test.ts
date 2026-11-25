@@ -59,7 +59,7 @@ test('publish runs the free-numeral rule', () => {
   const findings = runPublishRules(
     [toProfileSnapshot({}, 'Da quasi 4 anni.')],
     PUBLISH_RULES,
-    { metricKeys: new Set(), noteSlugs: new Map() },
+    { metricKeys: new Set(), noteSlugClaims: [], noteCount: 0 },
   )
 
   expect(hasBlockingFinding(findings)).toBe(true)

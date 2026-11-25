@@ -19,6 +19,7 @@ import { useMessages } from '../../shared/i18n/use-messages'
 import { NextNoteCard } from './next-note-card'
 import { NoteMeta } from './note-meta'
 import { NOTE_PAGE_COPY } from './note-page-copy'
+import { useElementHeight } from './use-element-height'
 import { useReadingProgress } from './use-reading-progress'
 
 /**
@@ -34,6 +35,8 @@ export function NotePage({ slug }: { slug: string }) {
   const { data: note } = useSuspenseQuery(publishedNoteQueryOptions(slug))
   const articleRef = useRef<HTMLElement>(null)
   const percentRead = useReadingProgress(articleRef)
+  const progressRef = useRef<HTMLElement>(null)
+  const progressHeight = useElementHeight(progressRef)
   const picked =
     note === null ? null : pickNoteTranslation(note.translations, locale)
 
@@ -51,7 +54,7 @@ export function NotePage({ slug }: { slug: string }) {
 
   return (
     <Stack gap={6} padding={8}>
-      <Stack className="sticky top-header z-10 bg-body">
+      <Stack ref={progressRef} className="sticky top-header z-10 bg-body">
         <ProgressBar
           label={notePageCopy.progressLabel}
           value={percentRead}
@@ -71,6 +74,10 @@ export function NotePage({ slug }: { slug: string }) {
               label={notePageCopy.outlineLabel}
               items={translation.outline}
               density="compact"
+              // Headings clear the sticky header with their scroll margin
+              // (so plain #anchor links land right too); the offset adds the
+              // sticky reading bar under it.
+              offset={progressHeight}
             />
           )}
         </Stack>

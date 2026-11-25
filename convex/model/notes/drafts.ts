@@ -1,4 +1,4 @@
-import { type Infer, v } from 'convex/values'
+import { ConvexError, type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
@@ -11,6 +11,7 @@ import {
   noteFieldsValidator,
   pickNoteContentFields,
 } from './fields'
+import { MAX_NOTES } from './tables'
 
 /**
  * Note drafts (tables `notes` + `noteContent`): what the editor saves and
@@ -40,6 +41,22 @@ export interface NoteDraft {
   content: (NoteContentFields & { locale: Locale })[]
 }
 
+/** A note key the editor chooses: a random id, so a repeated create is one note. */
+const NOTE_KEY_PATTERN = /^[a-z0-9-]{8,64}$/
+
+/** Refuses a key the editor never makes (a forged or broken call). */
+export function checkNoteKey(key: string) {
+  if (!NOTE_KEY_PATTERN.test(key)) {
+    throw new ConvexError({ kind: 'invalid-note-key' })
+  }
+}
+
+/** Whether another note may be created: reads list at most `MAX_NOTES`. */
+export async function hasRoomForNote(ctx: QueryCtx) {
+  const notes = await ctx.db.query('notes').take(MAX_NOTES)
+  return notes.length < MAX_NOTES
+}
+
 export function findNote(ctx: QueryCtx, key: string) {
   return ctx.db
     .query('notes')
@@ -56,6 +73,7 @@ export async function createNoteDraft(
   key: string,
   now: number,
 ): Promise<Doc<'notes'>> {
+  checkNoteKey(key)
   const existing = await findNote(ctx, key)
   if (existing !== null) {
     return existing

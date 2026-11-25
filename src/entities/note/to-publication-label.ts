@@ -19,6 +19,11 @@ export function toPublicationLabel(publication: NotePublication): string {
     case 'scheduled':
       return statuses.scheduled(DATE_FORMAT.format(publication.scheduledAt))
     case 'published':
-      return statuses.published(DATE_FORMAT.format(publication.publishedAt))
+      return publication.scheduledEditAt === null
+        ? statuses.published(DATE_FORMAT.format(publication.publishedAt))
+        : statuses.publishedWithScheduledEdit(
+            DATE_FORMAT.format(publication.publishedAt),
+            DATE_FORMAT.format(publication.scheduledEditAt),
+          )
   }
 }

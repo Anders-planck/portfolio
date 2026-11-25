@@ -3,13 +3,15 @@ import { expect, test } from 'vitest'
 import type { RuleContext } from '../content/rulecontext'
 import type { Snapshot } from '../content/snapshot'
 import { noteRule } from './noterule'
+import { MAX_NOTES } from './tables'
 
 const CONTEXT: RuleContext = {
   metricKeys: new Set(['sdk-downloads']),
-  noteSlugs: new Map([
-    ['note-a', 'review-agenti'],
-    ['note-b', 'altra-nota'],
-  ]),
+  noteSlugClaims: [
+    { key: 'note-a', slug: 'review-agenti' },
+    { key: 'note-b', slug: 'altra-nota' },
+  ],
+  noteCount: 2,
 }
 
 function toNote({
@@ -90,6 +92,14 @@ test('a figure only warns until media exists', () => {
   expect(rulesOf(toNote({ body: '::figure{media="m1"}' }))).toEqual([
     { rule: 'note-figure-unavailable', severity: 'warn', locale: 'it' },
   ])
+})
+
+test('a note past the read cap blocks, so no list ever leaves one out', () => {
+  expect(
+    noteRule(toNote(), { ...CONTEXT, noteCount: MAX_NOTES + 1 }).map(
+      (finding) => finding.rule,
+    ),
+  ).toEqual(['note-limit'])
 })
 
 test('other collections are not this rule’s business', () => {

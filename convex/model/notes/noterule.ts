@@ -2,6 +2,7 @@ import type { Locale } from '../content/locales'
 import type { RuleContext } from '../content/rulecontext'
 import type { Snapshot } from '../content/snapshot'
 import { type MarkdownProblem, parseNoteMarkdown } from './markdown'
+import { MAX_NOTES } from './tables'
 
 /**
  * The publish rule of the `note` collection (pure). It blocks a note the
@@ -32,6 +33,9 @@ export function noteRule(
     return []
   }
   return [
+    ...(context.noteCount > MAX_NOTES
+      ? [toBlockingFinding('note-limit', 'slug', null, 'Too many notes')]
+      : []),
     ...findSlugFindings(snapshot, context),
     ...findTitleFindings(snapshot),
     ...snapshot.content.flatMap(({ locale, body }) =>
@@ -64,8 +68,8 @@ function findSlugFindings(
       ),
     ]
   }
-  const isTaken = [...context.noteSlugs].some(
-    ([otherKey, otherSlug]) => otherKey !== key && otherSlug === slug,
+  const isTaken = context.noteSlugClaims.some(
+    (claim) => claim.key !== key && claim.slug === slug,
   )
   return isTaken
     ? [

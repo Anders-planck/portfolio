@@ -6,7 +6,8 @@ import type { Snapshot } from './snapshot'
 
 const CONTEXT = {
   metricKeys: new Set(['sdk-commits']),
-  noteSlugs: new Map(),
+  noteSlugClaims: [],
+  noteCount: 0,
 }
 
 function toProfileSnapshot(subtitle: string): Snapshot {

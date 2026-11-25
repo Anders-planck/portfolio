@@ -37,7 +37,11 @@ export const NOTE_ROWS: NoteRow[] = [
     title: 'Pubblicata da tempo',
     topic: 'ai',
     locales: ['it', 'en'],
-    publication: { kind: 'published', publishedAt: PUBLISHED_AT },
+    publication: {
+      kind: 'published',
+      publishedAt: PUBLISHED_AT,
+      scheduledEditAt: null,
+    },
     readingMinutes: 7,
     updatedAt: PUBLISHED_AT,
   },

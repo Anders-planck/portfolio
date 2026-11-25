@@ -29,4 +29,10 @@ export const NOTES_TABLES = {
     ...noteContentFieldsValidator.fields,
     updatedAt: v.number(),
   }).index('by_note_and_locale', ['noteId', 'locale']),
+
+  /** When each note first went live (its public date); written once by publish. */
+  noteFirstPublications: defineTable({
+    key: v.string(),
+    publishedAt: v.number(),
+  }).index('by_key', ['key']),
 }

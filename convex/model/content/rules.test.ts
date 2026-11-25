@@ -11,7 +11,11 @@ const SNAPSHOT: Snapshot = {
   content: [{ ...EMPTY_PROFILE_CONTENT_FIELDS, locale: 'en' }],
 }
 
-const NO_METRICS = { metricKeys: new Set<string>(), noteSlugs: new Map() }
+const NO_METRICS = {
+  metricKeys: new Set<string>(),
+  noteSlugClaims: [],
+  noteCount: 0,
+}
 
 const emptySubtitleRule: Rule = (snapshot) =>
   (snapshot.collection === 'profile' ? snapshot.content : [])

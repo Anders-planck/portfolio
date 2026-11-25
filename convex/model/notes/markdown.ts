@@ -3,6 +3,7 @@ import { createAnchorIssuer } from './anchors'
 import {
   type DirectiveLine,
   isContainerClose,
+  isDirectiveLine,
   parseDirectiveLine,
 } from './directive'
 import { type ParsedInline, parseInline } from './inline'
@@ -10,6 +11,7 @@ import {
   BLANK,
   FENCE,
   HEADING,
+  isFenceClose,
   lineAt,
   type ParsedSimpleBlock,
   QUOTE,
@@ -50,6 +52,7 @@ export type MarkdownProblem =
         | 'malformed-directive'
         | 'unclosed-directive'
         | 'nested-block'
+        | 'unclosed-fence'
       name: string
       /** 1-based line of the note body. */
       line: number
@@ -108,13 +111,10 @@ function readBlockAt(reader: Reader, index: number, to: number): Read {
   const line = lineAt(reader.lines, index)
   const fence = FENCE.exec(line)
   if (fence !== null) {
-    return readFence(reader.lines, index, to, fence)
+    return readCheckedFence(reader, index, to, fence)
   }
-  const directive = parseDirectiveLine(line)
-  if (directive !== null) {
-    return reader.isNested
-      ? skipNested(reader, index, directive.name)
-      : readDirective(reader, index, to, directive)
+  if (isDirectiveLine(line)) {
+    return readDirectiveLine(reader, index, to)
   }
   const heading = HEADING.exec(line)
   if (heading !== null) {
@@ -129,6 +129,38 @@ function readBlockAt(reader: Reader, index: number, to: number): Read {
     return readQuote(reader.lines, index, to)
   }
   return readParagraph(reader.lines, index, to)
+}
+
+function readCheckedFence(
+  reader: Reader,
+  index: number,
+  to: number,
+  fence: RegExpExecArray,
+): Read {
+  const { block, next, isClosed } = readFence(reader.lines, index, to, fence)
+  if (!isClosed) {
+    reader.problems.push({
+      kind: 'unclosed-fence',
+      name: fence[2] ?? '',
+      line: index + 1,
+    })
+  }
+  return { block, next }
+}
+
+function readDirectiveLine(reader: Reader, index: number, to: number): Read {
+  const directive = parseDirectiveLine(lineAt(reader.lines, index))
+  if (directive === null) {
+    reader.problems.push({
+      kind: 'malformed-directive',
+      name: '',
+      line: index + 1,
+    })
+    return { block: null, next: index + 1 }
+  }
+  return reader.isNested
+    ? skipNested(reader, index, directive.name)
+    : readDirective(reader, index, to, directive)
 }
 
 function skipNested(reader: Reader, index: number, name: string): Read {
@@ -171,10 +203,7 @@ function readContainer(
   directive: DirectiveLine,
 ): Read {
   const line = index + 1
-  let close = index + 1
-  while (close < to && !isContainerClose(lineAt(reader.lines, close))) {
-    close += 1
-  }
+  const close = findContainerClose(reader.lines, index + 1, to)
   if (close === to) {
     reader.problems.push({
       kind: 'unclosed-directive',
@@ -211,6 +240,22 @@ function readContainer(
     },
     next,
   }
+}
+
+/** The `:::` that closes a container, skipping fenced code; `to` if none. */
+function findContainerClose(lines: string[], from: number, to: number) {
+  let openFence: string | null = null
+  for (let index = from; index < to; index += 1) {
+    const line = lineAt(lines, index)
+    if (openFence !== null) {
+      openFence = isFenceClose(line, openFence) ? null : openFence
+    } else if (isContainerClose(line)) {
+      return index
+    } else {
+      openFence = FENCE.exec(line)?.[1] ?? null
+    }
+  }
+  return to
 }
 
 function isSimpleBlock(block: ParsedBlock): block is ParsedSimpleBlock {

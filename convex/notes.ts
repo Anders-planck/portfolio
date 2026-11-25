@@ -1,4 +1,4 @@
-import { ConvexError, v } from 'convex/values'
+import { v } from 'convex/values'
 
 import { mutation, query } from './_generated/server'
 import { localeValidator } from './model/content/locales'
@@ -9,7 +9,10 @@ import {
   readEditableNote,
 } from './model/notes/cms'
 import {
+  checkNoteKey,
   createNoteDraft,
+  findNote,
+  hasRoomForNote,
   noteDraftEditValidator,
   saveNoteDraftEdit,
 } from './model/notes/drafts'
@@ -26,9 +29,6 @@ import { requireOwner } from './model/owner'
  * these functions read published notes for the site and drafts for the CMS.
  * The CMS ones start with `requireOwner` (ADR 0005).
  */
-
-/** A note key the editor chose: a random id, so a repeated create is one note. */
-const NOTE_KEY_PATTERN = /^[a-z0-9-]{8,64}$/
 
 /** The Note list: every published note, newest first. */
 export const listPublished = query({
@@ -54,17 +54,24 @@ export const listNotes = query({
   },
 })
 
-/** Creates an empty note; repeating the same key returns the same note. */
+/**
+ * Creates an empty note; repeating the same key returns the same note. Past
+ * the note limit nothing is created and the CMS says so.
+ */
 export const createNote = mutation({
   args: { key: v.string() },
-  returns: v.object({ key: v.string() }),
+  returns: v.union(
+    v.object({ kind: v.literal('created'), key: v.string() }),
+    v.object({ kind: v.literal('limit-reached') }),
+  ),
   handler: async (ctx, { key }) => {
     await requireOwner(ctx)
-    if (!NOTE_KEY_PATTERN.test(key)) {
-      throw new ConvexError({ kind: 'invalid-note-key' })
+    checkNoteKey(key)
+    if ((await findNote(ctx, key)) === null && !(await hasRoomForNote(ctx))) {
+      return { kind: 'limit-reached' as const }
     }
     await createNoteDraft(ctx, key, Date.now())
-    return { key }
+    return { kind: 'created' as const, key }
   },
 })
 

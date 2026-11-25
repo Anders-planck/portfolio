@@ -1,5 +1,6 @@
 import type { QueryCtx } from '../../_generated/server'
 import type { Snapshot } from '../content/snapshot'
+import { readNoteFirstPublishedAt } from './firstpublication'
 import { MAX_NOTES } from './tables'
 import {
   type NoteCard,
@@ -10,8 +11,8 @@ import {
 
 /**
  * Published notes, read only through the content store's pointers (a draft
- * is never public, ADR 0003). Newest first: a note's date is when the
- * release behind its live version was published.
+ * is never public, ADR 0003). Newest first: a note's date is when it
+ * first went live (`firstpublication.ts`), so publishing again never moves it.
  */
 
 type NoteSnapshot = Extract<Snapshot, { collection: 'note' }>
@@ -43,7 +44,12 @@ async function readLiveNotes(ctx: QueryCtx): Promise<LiveNote[]> {
           `Note pointer names no published release ${pointer.releaseId}`,
         )
       }
-      return [{ snapshot: version.snapshot, publishedAt: release.publishedAt }]
+      const publishedAt = await readNoteFirstPublishedAt(
+        ctx,
+        pointer.key,
+        release.publishedAt,
+      )
+      return [{ snapshot: version.snapshot, publishedAt }]
     }),
   )
   return notes

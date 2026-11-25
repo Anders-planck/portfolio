@@ -32,11 +32,54 @@ const ESCAPABLE = /^[\\`*_[\]()#+\-.!{}>~|:]$/
 /** Web and mail addresses, site paths (`/lavori`, not `//host`) and anchors. */
 const SAFE_HREF = /^(?:https?:\/\/|mailto:|\/(?!\/)|#)/i
 
+/** The DEL control character; the others are below the space. */
+const DELETE_CODE = 0x7f
+const SPACE_CODE = 0x20
+const BACKSLASH_CODE = 0x5c
+
+/**
+ * Browsers drop tabs and newlines from addresses and read `\` as `/`, so
+ * `/\host` or `/<tab>/host` would leave the site: never allowed.
+ */
+function hasUnsafeCharacter(href: string) {
+  return Array.from({ length: href.length }, (_, index) =>
+    href.charCodeAt(index),
+  ).some(
+    (code) =>
+      code < SPACE_CODE || code === DELETE_CODE || code === BACKSLASH_CODE,
+  )
+}
+
+/** A stand-in origin to resolve site paths against (never fetched). */
+const SITE_ORIGIN = 'https://site.invalid'
+
 const WORD_CHARACTER = /[\p{L}\p{N}]/u
 const WHITESPACE = /\s/
 
+/**
+ * Whether a link may keep its address: a web or mail address the URL parser
+ * reads, an anchor, or a site path that still resolves to the site.
+ */
 export function isSafeHref(href: string) {
-  return SAFE_HREF.test(href)
+  if (!SAFE_HREF.test(href) || hasUnsafeCharacter(href)) {
+    return false
+  }
+  if (href.startsWith('#')) {
+    return true
+  }
+  if (href.startsWith('/')) {
+    return parseUrl(href, SITE_ORIGIN)?.origin === SITE_ORIGIN
+  }
+  return parseUrl(href) !== null
+}
+
+// `URL.parse` is not in every runtime Convex runs on; the constructor is.
+function parseUrl(href: string, base?: string): URL | null {
+  try {
+    return new URL(href, base)
+  } catch {
+    return null
+  }
 }
 
 /** The runs of one line or paragraph of inline Markdown, in reading order. */

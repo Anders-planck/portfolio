@@ -18,6 +18,14 @@ const DIRECTIVE_LINE =
 const ATTRIBUTE = /([a-z][a-z-]*)="([^"]*)"/g
 const ATTRIBUTE_SEPARATOR = /^\s*$/
 
+/**
+ * Whether a line is written as a directive (it starts with `::`), parsed or
+ * not: one that does not parse is a problem, never text.
+ */
+export function isDirectiveLine(line: string) {
+  return line.trim().startsWith('::')
+}
+
 export function isContainerClose(line: string) {
   return /^:::\s*$/.test(line)
 }

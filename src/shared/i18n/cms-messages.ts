@@ -103,6 +103,7 @@ export const CMS_MESSAGES = {
       'Articoli in Markdown. Una nota pubblicata compare in Note, nella lingua di chi legge o in quella di riserva.',
     create: 'Nuova nota',
     createFailed: 'Non riesco a creare la nota: riprova.',
+    limitReached: 'Hai raggiunto il numero massimo di note.',
     loading: 'Caricamento delle note…',
     errorTitle: 'Non riesco a leggere le note',
     emptyTitle: 'Ancora nessuna nota',
@@ -130,6 +131,8 @@ export const CMS_MESSAGES = {
       draft: 'Bozza',
       scheduled: (date: string) => `Programmata · ${date}`,
       published: (date: string) => `Pubblicata · ${date}`,
+      publishedWithScheduledEdit: (date: string, editDate: string) =>
+        `Pubblicata · ${date} · modifica programmata · ${editDate}`,
     },
     topics: { ai: 'AI', mobile: 'Mobile', architecture: 'Architettura' },
     editor: {
@@ -172,7 +175,10 @@ export const CMS_MESSAGES = {
       'note-unknown-directive':
         'Una direttiva non esiste: usa case, metric o figure.',
       'note-malformed-directive':
-        'Gli attributi di una direttiva si scrivono chiave="valore".',
+        'Una riga che inizia con :: non è una direttiva valida: scrivi ::nome[etichetta]{chiave="valore"}, senza spazi né testo dopo.',
+      'note-unclosed-fence': 'Un blocco di codice aperto con ``` non è chiuso.',
+      'note-limit':
+        'Ci sono troppe note: eliminane qualcuna prima di pubblicare.',
       'note-missing-attribute':
         'A una direttiva manca un attributo: title per case, key per metric, media per figure.',
       'note-unclosed-directive': 'Un blocco :::case non è chiuso da :::.',

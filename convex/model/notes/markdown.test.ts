@@ -86,7 +86,7 @@ describe('blocks', () => {
     ])
   })
 
-  test('an unclosed fence runs to the end of the note', () => {
+  test('an unclosed fence still renders to the end of the note', () => {
     expect(parseNoteMarkdown('```\nx').blocks).toEqual([
       { kind: 'code', language: null, text: 'x' },
     ])
@@ -185,6 +185,60 @@ describe('directives', () => {
     expect(problems).toEqual([
       { kind: 'nested-block', name: 'heading', line: 2 },
       { kind: 'nested-block', name: 'metric', line: 3 },
+    ])
+  })
+})
+
+describe('directive problems', () => {
+  test('a directive line that does not parse is a problem, never text', () => {
+    const lines = [
+      '::metric {key="sdk"}',
+      '::metric[a]b]{key="sdk"}',
+      '::metric{key="sdk"} e poi testo',
+      ':::',
+      '::',
+    ]
+    const { blocks, problems } = parseNoteMarkdown(lines.join('\n\n'))
+
+    expect(blocks).toEqual([])
+    expect(problems).toEqual(
+      [1, 3, 5, 7, 9].map((line) => ({
+        kind: 'malformed-directive',
+        name: '',
+        line,
+      })),
+    )
+  })
+
+  test('a fence inside a case does not close it on a ::: line', () => {
+    const { blocks, problems } = parseNoteMarkdown(
+      ':::case{title="A"}\n```\n:::\n```\nDopo il codice.\n:::\nFuori.',
+    )
+
+    expect(problems).toEqual([])
+    expect(blocks).toEqual([
+      {
+        kind: 'case',
+        id: 'a',
+        title: plain('A'),
+        blocks: [
+          { kind: 'code', language: null, text: ':::' },
+          { kind: 'paragraph', inlines: plain('Dopo il codice.') },
+        ],
+      },
+      { kind: 'paragraph', inlines: plain('Fuori.') },
+    ])
+  })
+
+  test('an unterminated fence is a problem, also inside a case', () => {
+    expect(parseNoteMarkdown('Testo\n\n```ts\ncodice').problems).toEqual([
+      { kind: 'unclosed-fence', name: 'ts', line: 3 },
+    ])
+    expect(
+      parseNoteMarkdown(':::case{title="A"}\n```\ncodice\n:::').problems,
+    ).toEqual([
+      { kind: 'unclosed-directive', name: 'case', line: 1 },
+      { kind: 'unclosed-fence', name: '', line: 2 },
     ])
   })
 

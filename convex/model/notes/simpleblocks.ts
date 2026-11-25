@@ -1,4 +1,4 @@
-import { isContainerClose, parseDirectiveLine } from './directive'
+import { isDirectiveLine } from './directive'
 import { type ParsedInline, parseInline } from './inline'
 
 /**
@@ -35,8 +35,7 @@ export function startsBlock(line: string) {
     FENCE.test(line) ||
     HEADING.test(line) ||
     QUOTE.test(line) ||
-    isContainerClose(line) ||
-    parseDirectiveLine(line) !== null ||
+    isDirectiveLine(line) ||
     toListItemText(line) !== null
   )
 }
@@ -45,17 +44,24 @@ export function toListItemText(line: string) {
   return (UNORDERED_ITEM.exec(line) ?? ORDERED_ITEM.exec(line))?.[1] ?? null
 }
 
+/** Whether a line closes the fence opened with `marker` (as long or longer). */
+export function isFenceClose(line: string, marker: string) {
+  const trimmed = line.trim()
+  return (
+    trimmed.startsWith(marker) &&
+    trimmed.replaceAll(marker.charAt(0), '') === ''
+  )
+}
+
+/** A fenced code block; `isClosed` is false when the note ends inside it. */
 export function readFence(
   lines: string[],
   index: number,
   to: number,
   [, marker = '', language = '']: RegExpExecArray,
-): SimpleRead {
-  const isClose = (line: string) =>
-    line.trim().startsWith(marker) &&
-    line.trim().replaceAll(marker.charAt(0), '') === ''
+): SimpleRead & { isClosed: boolean } {
   let close = index + 1
-  while (close < to && !isClose(lineAt(lines, close))) {
+  while (close < to && !isFenceClose(lineAt(lines, close), marker)) {
     close += 1
   }
   return {
@@ -65,6 +71,7 @@ export function readFence(
       text: lines.slice(index + 1, close).join('\n'),
     },
     next: close + 1,
+    isClosed: close < to,
   }
 }
 

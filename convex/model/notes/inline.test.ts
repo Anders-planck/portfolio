@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { parseInline } from './inline'
+import { isSafeHref, parseInline } from './inline'
 
 test('plain text is one run without marks', () => {
   expect(parseInline('Uso gli agenti ogni giorno.')).toEqual([
@@ -74,6 +74,26 @@ test('a link to an unsafe address shows only its label', () => {
       { kind: 'text', text: 'clic', marks: [] },
     ])
   }
+})
+
+test('an address that browsers read as another host shows only its label', () => {
+  const hrefs = [
+    '/\\evil.example',
+    '/\tevil',
+    'https://ok.example/\\x',
+    'http://',
+  ]
+  for (const href of hrefs) {
+    expect(parseInline(`[clic](${href})`)).toEqual([
+      { kind: 'text', text: 'clic', marks: [] },
+    ])
+  }
+})
+
+test('a site path stays on the site once resolved', () => {
+  expect(isSafeHref('/lavori/../note#metodo')).toBe(true)
+  expect(isSafeHref('/\nevil')).toBe(false)
+  expect(isSafeHref('/\revil')).toBe(false)
 })
 
 test('raw HTML is text, never markup', () => {

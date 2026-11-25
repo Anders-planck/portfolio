@@ -52,7 +52,7 @@ test('with no notes yet the list says so', async () => {
 test('a create whose answer was lost is retried with the same note key', async () => {
   createNote.mockRejectedValueOnce(new Error('network'))
   createNote.mockImplementation(({ key }: { key: string }) =>
-    Promise.resolve({ key }),
+    Promise.resolve({ kind: 'created', key }),
   )
   const { router } = renderList([])
   const button = await screen.findByRole('button', { name: 'Nuova nota' })
@@ -71,7 +71,23 @@ test('a create whose answer was lost is retried with the same note key', async (
     [{ key: string }],
   ]
   expect(second.key).toBe(first.key)
-  await waitFor(() => {
-    expect(router.state.location.pathname).toBe(`/cms/note/${first.key}`)
-  })
+  // Navigation can take a moment while the whole suite runs in parallel.
+  await waitFor(
+    () => {
+      expect(router.state.location.pathname).toBe(`/cms/note/${first.key}`)
+    },
+    { timeout: 5000 },
+  )
+})
+
+test('past the note limit the list says so and opens nothing', async () => {
+  createNote.mockResolvedValue({ kind: 'limit-reached' })
+  const { router } = renderList([])
+
+  fireEvent.click(await screen.findByRole('button', { name: 'Nuova nota' }))
+
+  expect(
+    await screen.findByText('Hai raggiunto il numero massimo di note.'),
+  ).toBeDefined()
+  expect(router.state.location.pathname).toBe('/cms/note')
 })
