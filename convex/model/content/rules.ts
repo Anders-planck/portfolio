@@ -30,11 +30,11 @@ export type DocumentFinding = Infer<typeof documentFindingValidator>
 export type Rule = (snapshot: Snapshot) => Finding[]
 
 /** The server-side rule set. Empty until the rules engine lands. */
-export const PUBLISH_RULES: Rule[] = []
+export const PUBLISH_RULES: readonly Rule[] = []
 
 export function runPublishRules(
   snapshots: Snapshot[],
-  rules: Rule[] = PUBLISH_RULES,
+  rules: readonly Rule[],
 ): DocumentFinding[] {
   return snapshots.flatMap((snapshot) =>
     rules.flatMap((rule) =>

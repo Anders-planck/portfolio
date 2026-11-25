@@ -26,14 +26,18 @@ const MAX_LOCALE_RECORDS = 8
  * A live-save edit to one document: some shared fields and/or some fields of
  * one locale. Unknown documents and locales start from empty values.
  * (Function args must be one object, so new collections widen `collection`,
- * `fields` and `content` rather than adding union members.)
+ * `fields` and `localeEdit` rather than adding union members.)
  */
 export const draftEditValidator = v.object({
   collection: v.literal('profile'),
   key: v.string(),
   fields: v.optional(profileFieldsValidator.partial()),
-  locale: v.optional(localeValidator),
-  content: v.optional(profileContentFieldsValidator.partial()),
+  localeEdit: v.optional(
+    v.object({
+      locale: localeValidator,
+      content: profileContentFieldsValidator.partial(),
+    }),
+  ),
 })
 export type DraftEdit = Infer<typeof draftEditValidator>
 
@@ -43,9 +47,6 @@ export async function saveDraftEdit(
   edit: DraftEdit,
   savedAt: number,
 ) {
-  if (edit.content !== undefined && edit.locale === undefined) {
-    throw new Error('A content edit needs a locale')
-  }
   const profile = await findOrCreateProfile(ctx, edit.key, savedAt)
   // Every save moves the revision, so publish can tell whether the draft the
   // owner reviewed is still the current one.
@@ -55,11 +56,10 @@ export async function saveDraftEdit(
     revision,
     updatedAt: savedAt,
   })
-  if (edit.locale !== undefined && edit.content !== undefined) {
+  if (edit.localeEdit !== undefined) {
     await saveProfileContent(ctx, {
       profileId: profile._id,
-      locale: edit.locale,
-      content: edit.content,
+      ...edit.localeEdit,
       savedAt,
     })
   }

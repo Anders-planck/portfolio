@@ -5,10 +5,21 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { api, internal } from './_generated/api'
 import type { Locale } from './model/content/locales'
 import { PREVIEW_TOKEN_TTL_MS } from './model/content/preview'
-import { type Finding, PUBLISH_RULES, type Rule } from './model/content/rules'
+import type * as rulesModule from './model/content/rules'
+import type { Finding, Rule } from './model/content/rules'
 import schema from './schema'
 
 const modules = import.meta.glob('./**/*.ts')
+
+// The store's tests choose the server rule set (the rules engine has its own
+// tests): publish reads `PUBLISH_RULES`, which returns `serverRules.current`.
+const serverRules = vi.hoisted(() => ({ current: [] as readonly Rule[] }))
+vi.mock('./model/content/rules', async (importOriginal) => ({
+  ...(await importOriginal<typeof rulesModule>()),
+  get PUBLISH_RULES() {
+    return serverRules.current
+  },
+}))
 
 const PROFILE = { collection: 'profile', key: 'main' } as const
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
@@ -26,8 +37,7 @@ function saveSubtitleDraft(
 ) {
   return backend.mutation(internal.content.saveDraft, {
     ...PROFILE,
-    locale,
-    content: { subtitle },
+    localeEdit: { locale, content: { subtitle } },
   })
 }
 
@@ -93,8 +103,10 @@ describe('publish', () => {
     const { revision } = await backend.mutation(internal.content.saveDraft, {
       ...PROFILE,
       fields: { name: 'Anders Planck' },
-      locale: 'it',
-      content: { titleLine1: 'Software', titleLine2: 'Engineer.' },
+      localeEdit: {
+        locale: 'it',
+        content: { titleLine1: 'Software', titleLine2: 'Engineer.' },
+      },
     })
 
     await publishProfile(backend, { revision })
@@ -293,13 +305,11 @@ describe('rules at publish', () => {
         : []),
     ])
 
-  let realRules: Rule[] = []
   beforeEach(() => {
-    realRules = PUBLISH_RULES.splice(0)
-    PUBLISH_RULES.push(placeholderRule)
+    serverRules.current = [placeholderRule]
   })
   afterEach(() => {
-    PUBLISH_RULES.splice(0, PUBLISH_RULES.length, ...realRules)
+    serverRules.current = []
     vi.useRealTimers()
   })
 
@@ -346,7 +356,7 @@ describe('rules at publish', () => {
     await publishSubtitle(backend, 'Prima')
     const { revision } = await saveSubtitleDraft(backend, 'Dopo [anno]')
     // Scheduled while the rule set is still empty...
-    PUBLISH_RULES.splice(PUBLISH_RULES.indexOf(placeholderRule), 1)
+    serverRules.current = []
     const outcome = await publishProfile(backend, {
       revision,
       scheduledAt: Date.now() + 60_000,
@@ -355,7 +365,7 @@ describe('rules at publish', () => {
       throw new Error('Expected the release to be scheduled')
     }
     // ...then the rules are tightened before it runs.
-    PUBLISH_RULES.push(placeholderRule)
+    serverRules.current = [placeholderRule]
 
     vi.advanceTimersByTime(60_000)
     await backend.finishInProgressScheduledFunctions()

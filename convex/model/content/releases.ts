@@ -8,6 +8,7 @@ import { movePublishedPointers } from './pointers'
 import {
   documentFindingValidator,
   hasBlockingFinding,
+  PUBLISH_RULES,
   runPublishRules,
 } from './rules'
 import {
@@ -99,7 +100,7 @@ export async function publishSelection(
     return { status: 'stale', documents: staleDocuments }
   }
   const snapshots = await readSelectedDrafts(ctx, selection)
-  const findings = runPublishRules(snapshots)
+  const findings = runPublishRules(snapshots, PUBLISH_RULES)
   if (hasBlockingFinding(findings)) {
     return { status: 'blocked', findings }
   }
@@ -139,7 +140,10 @@ export async function publishScheduledRelease(
   }
   const { versionIds, note, requestId, scheduledAt } = release
   const versions = await readVersions(ctx, versionIds)
-  const findings = runPublishRules(versions.map(({ snapshot }) => snapshot))
+  const findings = runPublishRules(
+    versions.map(({ snapshot }) => snapshot),
+    PUBLISH_RULES,
+  )
   const releaseFields = { versionIds, note, requestId, findings, scheduledAt }
   if (hasBlockingFinding(findings)) {
     await ctx.db.replace(releaseId, {
