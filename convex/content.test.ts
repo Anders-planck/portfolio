@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { api, internal } from './_generated/api'
+import type { Id } from './_generated/dataModel'
 import type { Locale } from './model/content/locales'
 import { PREVIEW_TOKEN_TTL_MS } from './model/content/preview'
 import type * as rulesModule from './model/content/rules'
@@ -115,6 +116,11 @@ async function readPublishedSubtitle(
   key: string = PROFILE.key,
 ) {
   return (await readPublishedProfile(backend, 'it', key))?.content?.subtitle
+}
+
+/** The release row: no release history query exists yet (CMS ticket). */
+function readRelease(backend: Backend, releaseId: Id<'releases'>) {
+  return backend.run((ctx) => ctx.db.get(releaseId))
 }
 
 function countReleases(backend: Backend) {
@@ -259,6 +265,24 @@ describe('publish request checks', () => {
 })
 
 describe('rollback', () => {
+  test('only a published release can be rolled back to', async () => {
+    const backend = createBackend()
+    await publishSubtitle(backend, 'Uno')
+    const { revision } = await saveSubtitleDraft(backend, 'Domani')
+    const scheduled = await publishProfile(backend, {
+      revision,
+      scheduledAt: Date.now() + ONE_DAY_MS,
+    })
+    if (scheduled.status !== 'scheduled') {
+      throw new Error('Expected a scheduled release')
+    }
+
+    await expect(rollBack(backend, scheduled.releaseId)).rejects.toThrow(
+      /Only a published release/,
+    )
+    expect(await readPublishedSubtitle(backend)).toBe('Uno')
+  })
+
   test('restores the whole site as it was: later documents become unpublished', async () => {
     const backend = createBackend()
     const first = await publishSubtitle(backend, 'Uno')
@@ -365,18 +389,17 @@ describe('scheduled publish', () => {
       'it',
       OTHER_KEY,
     )
-    const scheduled = {
-      scheduledAt: Date.now() + ONE_DAY_MS,
-      requestId: 'scheduled-both',
-    }
-    await publishDrafts(
+    const scheduled = await publishDrafts(
       backend,
       [
         { key: PROFILE.key, revision: main.revision },
         { key: OTHER_KEY, revision: other.revision },
       ],
-      scheduled,
+      { scheduledAt: Date.now() + ONE_DAY_MS },
     )
+    if (scheduled.status !== 'scheduled') {
+      throw new Error('Expected a scheduled release')
+    }
 
     await publishSubtitle(backend, 'Più nuova')
     vi.advanceTimersByTime(ONE_DAY_MS)
@@ -384,8 +407,7 @@ describe('scheduled publish', () => {
 
     expect(await readPublishedSubtitle(backend)).toBe('Più nuova')
     expect(await readPublishedProfile(backend, 'it', OTHER_KEY)).toBeNull()
-    const outcome = await publishDrafts(backend, [], scheduled)
-    expect(outcome).toMatchObject({
+    expect(await readRelease(backend, scheduled.releaseId)).toMatchObject({
       status: 'failed',
       failure: {
         kind: 'conflict',
@@ -399,18 +421,20 @@ describe('scheduled publish', () => {
     const first = await publishSubtitle(backend, 'Uno')
     await publishSubtitle(backend, 'Due')
     const { revision } = await saveSubtitleDraft(backend, 'Tre')
-    const scheduled = {
+    const scheduled = await publishProfile(backend, {
+      revision,
       scheduledAt: Date.now() + ONE_DAY_MS,
-      requestId: 'scheduled-after-two',
+    })
+    if (scheduled.status !== 'scheduled') {
+      throw new Error('Expected a scheduled release')
     }
-    await publishProfile(backend, { revision, ...scheduled })
 
     await rollBack(backend, first)
     vi.advanceTimersByTime(ONE_DAY_MS)
     await backend.finishInProgressScheduledFunctions()
 
     expect(await readPublishedSubtitle(backend)).toBe('Uno')
-    expect(await publishDrafts(backend, [], scheduled)).toMatchObject({
+    expect(await readRelease(backend, scheduled.releaseId)).toMatchObject({
       status: 'failed',
       failure: { kind: 'conflict' },
     })
@@ -511,9 +535,7 @@ describe('rules at publish', () => {
     await backend.finishInProgressScheduledFunctions()
 
     expect(await readPublishedSubtitle(backend)).toBe('Prima')
-    // No release history query exists yet (CMS ticket), so read the row.
-    const release = await backend.run((ctx) => ctx.db.get(outcome.releaseId))
-    expect(release).toMatchObject({
+    expect(await readRelease(backend, outcome.releaseId)).toMatchObject({
       status: 'failed',
       failedAt: Date.now(),
       failure: { kind: 'rules' },
@@ -597,5 +619,17 @@ describe('preview', () => {
         locale: 'it',
       }),
     ).rejects.toThrow(/at least 32 bytes/)
+  })
+
+  test('a link for a document without a draft shows no draft', async () => {
+    const backend = createBackend()
+    const { token } = await backend.mutation(
+      internal.content.createPreviewToken,
+      { collection: 'profile', key: OTHER_KEY, locale: 'it' },
+    )
+
+    expect(await backend.action(api.content.getDraft, { token })).toEqual({
+      status: 'no-draft',
+    })
   })
 })

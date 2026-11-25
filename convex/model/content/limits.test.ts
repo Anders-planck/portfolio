@@ -1,23 +1,19 @@
 import { expect, test } from 'vitest'
 
-import {
-  checkPublishRequest,
-  MAX_NOTE_LENGTH,
-  MAX_SELECTION,
-} from './selection'
+import { checkPublishLimits, MAX_NOTE_LENGTH, MAX_SELECTION } from './limits'
 
 const MAIN = { collection: 'profile', key: 'main' } as const
 const OTHER = { collection: 'profile', key: 'other' } as const
 
 test('a request with distinct documents and a short note passes', () => {
   expect(() => {
-    checkPublishRequest({ selection: [MAIN, OTHER], note: 'Rilascio' })
+    checkPublishLimits({ selection: [MAIN, OTHER], note: 'Rilascio' })
   }).not.toThrow()
 })
 
 test('an empty selection is refused', () => {
   expect(() => {
-    checkPublishRequest({ selection: [], note: '' })
+    checkPublishLimits({ selection: [], note: '' })
   }).toThrow(/at least one/)
 })
 
@@ -28,19 +24,19 @@ test('a selection over the limit is refused', () => {
   }))
 
   expect(() => {
-    checkPublishRequest({ selection, note: '' })
+    checkPublishLimits({ selection, note: '' })
   }).toThrow(/at most/)
 })
 
 test('a document named twice is refused', () => {
   expect(() => {
-    checkPublishRequest({ selection: [MAIN, OTHER, MAIN], note: '' })
+    checkPublishLimits({ selection: [MAIN, OTHER, MAIN], note: '' })
   }).toThrow(/profile\/main is selected more than once/)
 })
 
 test('a note over the limit is refused', () => {
   expect(() => {
-    checkPublishRequest({
+    checkPublishLimits({
       selection: [MAIN],
       note: 'x'.repeat(MAX_NOTE_LENGTH + 1),
     })

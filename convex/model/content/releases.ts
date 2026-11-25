@@ -4,6 +4,7 @@ import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import { readDraftRevision, readDraftSnapshot } from './drafts'
+import { checkPublishLimits } from './limits'
 import {
   expectedPointerValidator,
   findPublishedPointer,
@@ -18,7 +19,6 @@ import {
   PUBLISH_RULES,
   runPublishRules,
 } from './rules'
-import { checkPublishRequest } from './selection'
 import {
   type DocumentRef,
   documentRefValidator,
@@ -125,7 +125,7 @@ export async function publishSelection(
   if (repeated !== null) {
     return toPublishOutcomeFromRelease(repeated)
   }
-  checkPublishRequest({ selection, note })
+  checkPublishLimits({ selection, note })
   const staleDocuments = await findStaleDrafts(ctx, selection)
   if (staleDocuments.length > 0) {
     return { status: 'stale', documents: staleDocuments }

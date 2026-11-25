@@ -37,11 +37,14 @@ export async function readPublishedDocument(
   if (pointer === null) {
     return null
   }
-  // A pointer always names a version; readVersions throws if one is missing.
-  const [version] = await readVersions(ctx, [pointer.versionId])
-  return version === undefined
-    ? null
-    : toLocalizedDocumentFromSnapshot(version.snapshot, locale)
+  const version = await ctx.db.get(pointer.versionId)
+  if (version === null) {
+    // Versions are never deleted, so a pointer always names one.
+    throw new Error(
+      `Published pointer names a missing version ${pointer.versionId}`,
+    )
+  }
+  return toLocalizedDocumentFromSnapshot(version.snapshot, locale)
 }
 
 export function findPublishedPointer(

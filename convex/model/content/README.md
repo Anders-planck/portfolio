@@ -6,7 +6,7 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 
 - **Draft**: `saveDraft` → `drafts.ts` `saveDraftEdit` patches the per-collection draft tables (`profile` from `fields`, `profileContent` per locale from `localeEdit`), creating them from empty values on the first edit.
 - **Publish**: `publish` → `releases.ts` `publishSelection`: each selected document carries the draft `revision` the owner reviewed (`saveDraft` returns it; every save moves it), and a draft saved since then returns `stale` and writes nothing. Then it reads the selected drafts as snapshots, runs `rules.ts` `PUBLISH_RULES` (a `block` finding returns `blocked` and writes nothing), writes immutable versions (`versions.ts`), records a release and moves the published pointers (`pointers.ts`).
-  `selection.ts` refuses a request that is empty, names a document twice, holds more than 100 documents or has a note over 500 characters.
+  `limits.ts` refuses a request that is empty, names a document twice, holds more than 100 documents or has a note over 500 characters.
 - **Schedule**: the same call with a future `scheduledAt` freezes the versions now, records a `scheduled` release with each document's current pointer (`expectedPointers`) and schedules `content.publishScheduled`. When it runs: if a pointer moved since (a later publish or rollback), the release becomes `failed` with `{ kind: 'conflict', documents }`; else if a rule blocks, `failed` with `{ kind: 'rules' }`; else `published`. All documents or none.
 - **Rollback**: `rollback.ts` `rollBackToRelease` restores the site as it was right after the target release: every document points at the version it had then, documents first published later are unpublished (`pointers.ts` `replaceLiveSite`). It is a new `published` release with `rolledBackFrom`. No rules, drafts untouched.
 - **Read**: the public site reads the `getPublished` query → `pointers.ts` `readPublishedDocument`. Preview calls the `getDraft` action with a token from `preview.ts` (HMAC-SHA256, one hour, secret of at least 32 bytes from `model/env.ts`): `ready` with the draft, `expired` or `no-draft`; a token this backend did not sign throws. It is an action so expiry is checked against the clock on every call; a cached query result could outlive the link.
@@ -22,7 +22,7 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 | `rules.ts` | The publish rules hook and finding shape (`{rule, severity, field, locale, message}`). |
 | `versions.ts` | Writing and reading immutable versions. |
 | `pointers.ts` | Published pointers, the public read, the live set of the whole site. |
-| `selection.ts` | Limits of one publish request (pure): size, duplicates, note length. |
+| `limits.ts` | Limits of one publish request (pure): size, duplicates, note length. |
 | `requests.ts` | Idempotency: `requestId` with its kind (publish or rollback). |
 | `releases.ts` | Release shapes, publish, scheduled publish and its conflict check. |
 | `rollback.ts` | Restoring the site of an earlier release. |

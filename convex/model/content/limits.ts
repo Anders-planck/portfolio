@@ -11,7 +11,7 @@ export const MAX_NOTE_LENGTH = 500
  * twice or has a note over the limit. The CMS never sends one, so these are
  * errors, not results.
  */
-export function checkPublishRequest({
+export function checkPublishLimits({
   selection,
   note,
 }: {
