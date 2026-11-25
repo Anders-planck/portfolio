@@ -29,8 +29,11 @@ import type * as model_content_versions from "../model/content/versions.js";
 import type * as model_env from "../model/env.js";
 import type * as model_loopback from "../model/loopback.js";
 import type * as model_owner from "../model/owner.js";
+import type * as model_secret from "../model/secret.js";
+import type * as model_sessions from "../model/sessions.js";
 import type * as model_users from "../model/users.js";
 import type * as seed from "../seed.js";
+import type * as sessions from "../sessions.js";
 import type * as users from "../users.js";
 
 import type {
@@ -61,8 +64,11 @@ declare const fullApi: ApiFromModules<{
   "model/env": typeof model_env;
   "model/loopback": typeof model_loopback;
   "model/owner": typeof model_owner;
+  "model/secret": typeof model_secret;
+  "model/sessions": typeof model_sessions;
   "model/users": typeof model_users;
   seed: typeof seed;
+  sessions: typeof sessions;
   users: typeof users;
 }>;
 

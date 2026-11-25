@@ -1,10 +1,12 @@
 import { ConvexError } from 'convex/values'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 
-import { api } from './_generated/api'
+import { internal } from './_generated/api'
+import { signInAsTestOwner as signInAsTestOwnerFunction } from './e2e'
 import {
   createAuthBackend,
   stubLocalOwnerEnv,
+  TEST_OWNER_GITHUB_ID,
   TEST_SIGN_IN_SECRET,
 } from './owner.fixture'
 
@@ -13,7 +15,9 @@ afterEach(() => {
 })
 
 function signInAsTestOwner(secret: string = TEST_SIGN_IN_SECRET) {
-  return createAuthBackend().mutation(api.e2e.signInAsTestOwner, { secret })
+  return createAuthBackend().mutation(internal.e2e.signInAsTestOwner, {
+    secret,
+  })
 }
 
 describe('test-only sign-in', () => {
@@ -46,5 +50,34 @@ describe('test-only sign-in', () => {
     await expect(
       signInAsTestOwner(`wrong-${TEST_SIGN_IN_SECRET}`),
     ).rejects.toThrow(ConvexError)
+  })
+
+  test('no client can call it: it is an internal function', () => {
+    expect(signInAsTestOwnerFunction.isInternal).toBe(true)
+  })
+
+  test('an existing owner keeps their GitHub login and name', async () => {
+    stubLocalOwnerEnv()
+    const backend = createAuthBackend()
+    const userId = await backend.mutation(internal.users.admitGithubUser, {
+      method: {
+        name: 'github',
+        profile: {
+          id: TEST_OWNER_GITHUB_ID,
+          login: 'Anders-planck',
+          name: 'Anders Planck',
+          emailVerified: true,
+        },
+      },
+    })
+
+    await backend.mutation(internal.e2e.signInAsTestOwner, {
+      secret: TEST_SIGN_IN_SECRET,
+    })
+
+    expect(await backend.run((ctx) => ctx.db.get(userId))).toMatchObject({
+      login: 'Anders-planck',
+      name: 'Anders Planck',
+    })
   })
 })

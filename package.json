@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "convex dev --run seed:publishSeedProfile --start 'vite dev'",
+    "dev": "bun scripts/local-convex/prepare-local-convex.ts --for-dev && convex dev --run seed:publishSeedProfile --start 'vite dev'",
     "dev:convex": "convex dev",
     "dev:web": "vite dev",
     "build": "vite build",

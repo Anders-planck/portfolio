@@ -52,19 +52,38 @@ export async function admitOwner(
   profile: OwnerProfile,
   now: number,
 ): Promise<Id<'users'>> {
-  if (!isAllowlistedGithubId(profile.githubId, readOwnerGithubIds())) {
-    throw new ConvexError<AccessRefusal>({ kind: 'not-owner' })
-  }
-  const existing = await ctx.db
-    .query('users')
-    .withIndex('by_github_id', (query) =>
-      query.eq('githubId', profile.githubId),
-    )
-    .unique()
+  const existing = await findAllowlistedUser(ctx, profile.githubId)
   if (existing !== null) {
     await ctx.db.patch(existing._id, profile)
     return existing._id
   }
+  return insertOwner(ctx, profile, now)
+}
+
+/**
+ * The test-only sign-in's way in (`e2e.ts`): the same allowlist, but an
+ * existing user keeps its profile, so a test run never renames the owner.
+ */
+export async function admitTestOwner(
+  ctx: MutationCtx,
+  profile: OwnerProfile,
+  now: number,
+): Promise<Id<'users'>> {
+  const existing = await findAllowlistedUser(ctx, profile.githubId)
+  return existing === null ? insertOwner(ctx, profile, now) : existing._id
+}
+
+async function findAllowlistedUser(ctx: MutationCtx, githubId: string) {
+  if (!isAllowlistedGithubId(githubId, readOwnerGithubIds())) {
+    throw new ConvexError<AccessRefusal>({ kind: 'not-owner' })
+  }
+  return ctx.db
+    .query('users')
+    .withIndex('by_github_id', (query) => query.eq('githubId', githubId))
+    .unique()
+}
+
+function insertOwner(ctx: MutationCtx, profile: OwnerProfile, now: number) {
   return ctx.db.insert('users', { ...profile, role: 'owner', createdAt: now })
 }
 

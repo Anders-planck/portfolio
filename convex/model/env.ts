@@ -50,17 +50,33 @@ export function readOwnerGithubIds(): string[] {
 
 /**
  * Origins the GitHub sign-in may return to (`AUTH_REDIRECT_ORIGINS`,
- * comma-separated, e.g. `http://localhost:3000,https://example.com`).
- * Read when `auth.ts` loads, so a missing value must not throw: that would
- * take the whole deployment down. Unset means no origin is allowed and every
- * GitHub sign-in is refused.
+ * comma-separated bare origins, e.g. `http://localhost:3000,https://example.com`).
+ * Read when `auth.ts` loads, where Convex Auth throws on an entry that is not
+ * a bare http(s) origin, and a throw there takes every function of the
+ * deployment down. So nothing here throws: entries that are not bare http(s)
+ * origins are left out, and unset (or nothing valid) allows no origin, which
+ * refuses every GitHub sign-in.
  */
 export function readAuthRedirectOrigins(): string[] {
   const raw = process.env.AUTH_REDIRECT_ORIGINS ?? ''
   return raw
     .split(',')
-    .map((origin) => origin.trim())
-    .filter((origin) => origin !== '')
+    .map((entry) => entry.trim())
+    .filter(isBareHttpOrigin)
+    .map((entry) => new URL(entry).origin)
+}
+
+function isBareHttpOrigin(entry: string) {
+  if (!URL.canParse(entry)) {
+    return false
+  }
+  const { protocol, pathname, search, hash } = new URL(entry)
+  return (
+    (protocol === 'http:' || protocol === 'https:') &&
+    pathname === '/' &&
+    search === '' &&
+    hash === ''
+  )
 }
 
 /**

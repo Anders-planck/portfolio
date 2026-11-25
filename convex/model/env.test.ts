@@ -45,6 +45,15 @@ describe('readAuthRedirectOrigins', () => {
     ])
   })
 
+  test('entries that are not bare http(s) origins are left out, not thrown', () => {
+    vi.stubEnv(
+      'AUTH_REDIRECT_ORIGINS',
+      'https://example.com/cms,myapp://callback,not a url,https://ok.example.com/,https://q.example.com?x=1',
+    )
+
+    expect(readAuthRedirectOrigins()).toEqual(['https://ok.example.com'])
+  })
+
   test('unset means no origin, without throwing at module load', () => {
     vi.stubEnv('AUTH_REDIRECT_ORIGINS', undefined)
 

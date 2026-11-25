@@ -51,7 +51,7 @@ export default defineConfig<{ convexUrl: string; testSignInSecret: string }>({
       // the script refuses any other deployment). The site port (HTTP
       // actions) sits next to the cloud port, as by default.
       // `seed:publishSeedProfile` publishes the seed profile once (a no-op afterwards).
-      command: `bun scripts/e2e/prepare-local-convex.ts && bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)} --run seed:publishSeedProfile`,
+      command: `bun scripts/local-convex/prepare-local-convex.ts && bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)} --run seed:publishSeedProfile`,
       env: { CONVEX_AGENT_MODE: 'anonymous', ...e2eEnv },
       url: `${convexUrl}/version`,
       reuseExistingServer: !process.env.CI,

@@ -4,7 +4,7 @@ import authTest, { sessionIdentity } from '@convex-dev/auth/test'
 import { convexTest } from 'convex-test'
 import { vi } from 'vitest'
 
-import { api } from './_generated/api'
+import { internal } from './_generated/api'
 import schema from './schema'
 
 /**
@@ -40,7 +40,7 @@ export function stubLocalOwnerEnv() {
 /** Signs the owner in; returns the backend as that session calls it. */
 export async function signInAsOwner(backend: AuthBackend) {
   stubLocalOwnerEnv()
-  const tokens = await backend.mutation(api.e2e.signInAsTestOwner, {
+  const tokens = await backend.mutation(internal.e2e.signInAsTestOwner, {
     secret: TEST_SIGN_IN_SECRET,
   })
   return backend.withIdentity(sessionIdentity(tokens))

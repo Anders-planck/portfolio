@@ -126,7 +126,7 @@ describe('requireOwner on every CMS function', () => {
   test('a signed-out session is refused by every CMS function', async () => {
     const backend = createAuthBackend()
     stubLocalOwnerEnv()
-    const tokens = await backend.mutation(api.e2e.signInAsTestOwner, {
+    const tokens = await backend.mutation(internal.e2e.signInAsTestOwner, {
       secret: TEST_SIGN_IN_SECRET,
     })
     const { releaseId } = await publishFirstRelease(backend)

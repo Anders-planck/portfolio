@@ -210,6 +210,11 @@ export default defineConfig(
               from: { element: { type: 'e2e' } },
               allow: { to: { element: { type: 'shared' } } },
             },
+            // A tooling script may keep its pure rules in a module of its own.
+            {
+              from: { file: { categories: 'tooling' } },
+              allow: { to: { file: { categories: 'tooling' } } },
+            },
           ],
         },
       ],
