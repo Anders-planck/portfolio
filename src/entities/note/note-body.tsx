@@ -45,13 +45,13 @@ function NoteBlockView({
   switch (block.kind) {
     case 'heading':
       return (
-        <Heading level={block.level} id={block.id} className="scroll-mt-6">
+        <Heading level={block.level} id={block.id} className="scroll-mt-header">
           <NoteRuns runs={block.inlines} />
         </Heading>
       )
     case 'case':
       return (
-        <Card id={block.id} padding={6} className="scroll-mt-6">
+        <Card id={block.id} padding={6} className="scroll-mt-header">
           <Stack gap={3}>
             <Heading level={2}>
               <NoteRuns runs={block.title} />

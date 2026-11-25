@@ -3,10 +3,8 @@ import { Stack } from '@astryxdesign/core/Stack'
 import { Text } from '@astryxdesign/core/Text'
 import { Fragment } from 'react'
 
-import {
-  formatNoteCount,
-  formatNoteDate,
-} from '../../entities/note/format-note-date'
+import { formatNoteCount } from '../../entities/note/format-note-count'
+import { formatNoteDate } from '../../entities/note/format-note-date'
 import type { NoteTopic } from '../../entities/note/note-query-options'
 import { type Locale, toPathnameInLocale } from '../../shared/i18n/locale'
 import { toMessagesFromLocale } from '../../shared/i18n/to-messages-from-locale'

@@ -14,19 +14,19 @@ import { useMutation } from 'convex/react'
 import { useRef, useState } from 'react'
 
 import { api } from '../../../convex/_generated/api'
+import { formatNoteCount } from '../../entities/note/format-note-count'
 import { noteRowsQueryOptions } from '../../entities/note/note-draft'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 import { CMS_PATHNAME } from '../../shared/router/is-cms-pathname'
 import { NotesTable } from './notes-table'
 import {
-  countRowsByStatus,
+  filterRowsByStatus,
   isStatusFilter,
   STATUS_FILTERS,
   type StatusFilter,
 } from './status-filter'
 
 const NOTES_COPY = CMS_MESSAGES.notes
-const NUMBER_FORMAT = new Intl.NumberFormat('it-IT', { useGrouping: 'always' })
 
 /** `/cms/note`: every note with where it stands, and "Nuova nota". */
 export function CmsNotesPage() {
@@ -70,19 +70,18 @@ export function CmsNotesPage() {
                 value={status}
                 label={NOTES_COPY.filterOption(
                   NOTES_COPY.statusFilters[status],
-                  NUMBER_FORMAT.format(countRowsByStatus(rows.data, status)),
+                  formatNoteCount(
+                    filterRowsByStatus(rows.data, status).length,
+                    'it',
+                  ),
                 )}
               />
             ))}
           </SegmentedControl>
-          {countRowsByStatus(rows.data, filter) === 0 ? (
+          {filterRowsByStatus(rows.data, filter).length === 0 ? (
             <EmptyState title={NOTES_COPY.emptyFilterTitle} headingLevel={2} />
           ) : (
-            <NotesTable
-              rows={rows.data.filter(
-                (row) => filter === 'all' || row.publication.kind === filter,
-              )}
-            />
+            <NotesTable rows={filterRowsByStatus(rows.data, filter)} />
           )}
         </VStack>
       )}

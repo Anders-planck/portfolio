@@ -188,6 +188,12 @@ export const CMS_MESSAGES = {
     },
     severities: { block: 'Blocca la pubblicazione', warn: 'Avviso' },
     sharedField: 'tutte le lingue',
+    findingFields: {
+      title: 'Titolo',
+      summary: 'Sintesi',
+      body: 'Testo',
+      slug: 'Slug',
+    },
     otherFinding: (rule: string) => `Regola non rispettata: ${rule}`,
     findingWhere: (field: string, locale: string) => `${field} · ${locale}`,
   },

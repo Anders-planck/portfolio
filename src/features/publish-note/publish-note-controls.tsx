@@ -4,18 +4,10 @@ import {
   type ISODateTimeString,
 } from '@astryxdesign/core/DateTimeInput'
 import { HStack, VStack } from '@astryxdesign/core/Stack'
-import { useMutation } from 'convex/react'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
-import { api } from '../../../convex/_generated/api'
-import {
-  PublishOutcomeBanner,
-  type PublishState,
-} from '../../entities/release/publish-outcome-banner'
-import {
-  type PublishRequest,
-  toPublishRequest,
-} from '../../entities/release/publish-request'
+import { PublishOutcomeBanner } from '../../entities/release/publish-outcome-banner'
+import { usePublishDraft } from '../../entities/release/use-publish-draft'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 import { toScheduledAtFromDateTime } from './to-scheduled-at-from-date-time'
 
@@ -36,36 +28,14 @@ export function PublishNoteControls({
   revision: number
   isDisabled: boolean
 }) {
-  const publish = useMutation(api.content.publish)
-  const unconfirmed = useRef<PublishRequest | null>(null)
-  const [publishState, setPublishState] = useState<PublishState>({
-    kind: 'idle',
+  const { publishState, publishDraft } = usePublishDraft({
+    collection: 'note',
+    key: noteKey,
   })
   const [dateTime, setDateTime] = useState<ISODateTimeString | undefined>(
     undefined,
   )
   const scheduledAt = toScheduledAtFromDateTime(dateTime, Date.now())
-
-  const publishDraft = async (at: number | null) => {
-    const request = toPublishRequest(unconfirmed.current, revision, () =>
-      crypto.randomUUID(),
-    )
-    unconfirmed.current = request
-    try {
-      const outcome = await publish({
-        selection: [
-          { collection: 'note', key: noteKey, revision: request.revision },
-        ],
-        note: '',
-        requestId: request.requestId,
-        ...(at === null ? {} : { scheduledAt: at }),
-      })
-      unconfirmed.current = null
-      setPublishState({ kind: 'answered', outcome })
-    } catch {
-      setPublishState({ kind: 'unconfirmed' })
-    }
-  }
 
   return (
     <VStack gap={3}>
@@ -73,7 +43,7 @@ export function PublishNoteControls({
         variant="primary"
         label={RELEASE_COPY.publishNow}
         isDisabled={isDisabled}
-        clickAction={() => publishDraft(null)}
+        clickAction={() => publishDraft(revision)}
       />
       <HStack gap={2} align="end" wrap="wrap">
         <DateTimeInput
@@ -89,7 +59,7 @@ export function PublishNoteControls({
           isDisabled={isDisabled || scheduledAt.kind !== 'future'}
           clickAction={() =>
             scheduledAt.kind === 'future'
-              ? publishDraft(scheduledAt.scheduledAt)
+              ? publishDraft(revision, scheduledAt.scheduledAt)
               : Promise.resolve()
           }
         />

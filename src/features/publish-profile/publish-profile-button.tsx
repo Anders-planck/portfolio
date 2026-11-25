@@ -1,18 +1,9 @@
 import { Button } from '@astryxdesign/core/Button'
 import { VStack } from '@astryxdesign/core/Stack'
-import { useMutation } from 'convex/react'
-import { useRef, useState } from 'react'
 
-import { api } from '../../../convex/_generated/api'
 import { PROFILE_DOCUMENT } from '../../entities/profile/profile-draft'
-import {
-  PublishOutcomeBanner,
-  type PublishState,
-} from '../../entities/release/publish-outcome-banner'
-import {
-  type PublishRequest,
-  toPublishRequest,
-} from '../../entities/release/publish-request'
+import { PublishOutcomeBanner } from '../../entities/release/publish-outcome-banner'
+import { usePublishDraft } from '../../entities/release/use-publish-draft'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 
 const PUBLISH_COPY = CMS_MESSAGES.publish
@@ -29,29 +20,7 @@ export function PublishProfileButton({
   revision: number | null
   isDisabled: boolean
 }) {
-  const publish = useMutation(api.content.publish)
-  const unconfirmed = useRef<PublishRequest | null>(null)
-  const [publishState, setPublishState] = useState<PublishState>({
-    kind: 'idle',
-  })
-
-  const publishDraft = async (draftRevision: number) => {
-    const request = toPublishRequest(unconfirmed.current, draftRevision, () =>
-      crypto.randomUUID(),
-    )
-    unconfirmed.current = request
-    try {
-      const outcome = await publish({
-        selection: [{ ...PROFILE_DOCUMENT, revision: request.revision }],
-        note: '',
-        requestId: request.requestId,
-      })
-      unconfirmed.current = null
-      setPublishState({ kind: 'answered', outcome })
-    } catch {
-      setPublishState({ kind: 'unconfirmed' })
-    }
-  }
+  const { publishState, publishDraft } = usePublishDraft(PROFILE_DOCUMENT)
 
   return (
     <VStack gap={3}>

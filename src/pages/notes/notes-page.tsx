@@ -11,10 +11,8 @@ import { Text } from '@astryxdesign/core/Text'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
-import {
-  formatNoteCount,
-  formatNoteDate,
-} from '../../entities/note/format-note-date'
+import { formatNoteCount } from '../../entities/note/format-note-count'
+import { formatNoteDate } from '../../entities/note/format-note-date'
 import {
   type NoteTopic,
   publishedNotesQueryOptions,

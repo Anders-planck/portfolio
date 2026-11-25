@@ -13,16 +13,16 @@ import type {
   NoteEdit,
   NoteFields,
 } from '../../entities/note/note-draft'
+import { isNoteTopic, NOTE_TOPICS } from '../../entities/note/note-topics'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 
 const NOTES_COPY = CMS_MESSAGES.notes
 const FIELD_COPY = NOTES_COPY.editor.fields
 
-type Topic = NoteFields['topic']
-
-const TOPIC_OPTIONS = (['ai', 'mobile', 'architecture'] as const).map(
-  (topic) => ({ value: topic, label: NOTES_COPY.topics[topic] }),
-)
+const TOPIC_OPTIONS = NOTE_TOPICS.map((topic) => ({
+  value: topic,
+  label: NOTES_COPY.topics[topic],
+}))
 
 /** A project the note can be linked to. */
 export interface LinkableProject {
@@ -105,11 +105,8 @@ export function NoteEditor({
             options={TOPIC_OPTIONS}
             value={fields.topic}
             onChange={(value) => {
-              const topic = TOPIC_OPTIONS.find(
-                (option) => option.value === value,
-              )
-              if (topic !== undefined) {
-                editFields({ topic: topic.value satisfies Topic })
+              if (isNoteTopic(value)) {
+                editFields({ topic: value })
               }
             }}
           />

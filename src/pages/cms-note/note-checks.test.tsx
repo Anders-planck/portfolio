@@ -25,9 +25,9 @@ test('blocking and warning findings are worded, with field and language', () => 
   )
 
   expect(screen.getByText('Un’altra nota usa già questo slug.')).toBeDefined()
-  expect(screen.getByText('slug · tutte le lingue')).toBeDefined()
+  expect(screen.getByText('Slug · tutte le lingue')).toBeDefined()
   expect(screen.getByText('Regola non rispettata: some-new-rule')).toBeDefined()
-  expect(screen.getByText('slug · DE')).toBeDefined()
+  expect(screen.getByText('Slug · DE')).toBeDefined()
 })
 
 test('a draft that breaks no rule can be published', () => {

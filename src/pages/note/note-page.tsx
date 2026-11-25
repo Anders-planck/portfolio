@@ -49,7 +49,7 @@ export function NotePage({ slug }: { slug: string }) {
 
   return (
     <Stack gap={6} padding={8}>
-      <Stack className="sticky top-0 z-10 bg-(--color-background-body)">
+      <Stack className="sticky top-header z-10 bg-body">
         <ProgressBar
           label={notes.progressLabel}
           value={percentRead}
@@ -57,7 +57,10 @@ export function NotePage({ slug }: { slug: string }) {
         />
       </Stack>
       <Stack gap={10} className="lg:grid lg:grid-cols-4">
-        <Stack gap={4} className="lg:sticky lg:top-8 lg:self-start">
+        <Stack
+          gap={4}
+          className="lg:sticky lg:top-header lg:self-start lg:pt-6"
+        >
           <Link href={toPathnameInLocale('/note', locale)}>
             {notes.backToNotes}
           </Link>

@@ -124,7 +124,7 @@ test('a rule the draft breaks is worded for the owner', async () => {
       'C’è un numero scritto a mano: usa un riferimento {{m:chiave}}.',
     ),
   ).toBeDefined()
-  expect(screen.getByText('body · IT')).toBeDefined()
+  expect(screen.getByText('Testo · IT')).toBeDefined()
 })
 
 test('an unknown note key says the note does not exist', async () => {

@@ -8,6 +8,7 @@ import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 
 const NOTES_COPY = CMS_MESSAGES.notes
 const FINDING_COPY: Readonly<Record<string, string>> = NOTES_COPY.findings
+const FIELD_COPY: Readonly<Record<string, string>> = NOTES_COPY.findingFields
 
 /**
  * The publish rules on the draft now (the same code publish runs), worded
@@ -35,7 +36,7 @@ export function NoteChecks({ findings }: { findings: NoteFinding[] }) {
           description={
             <Text type="supporting" color="secondary">
               {NOTES_COPY.findingWhere(
-                finding.field,
+                FIELD_COPY[finding.field] ?? finding.field,
                 finding.locale === null
                   ? NOTES_COPY.sharedField
                   : CMS_MESSAGES.profile.locales[finding.locale],

@@ -4,6 +4,7 @@ import { StatusDot } from '@astryxdesign/core/StatusDot'
 import { Table, type TableColumn } from '@astryxdesign/core/Table'
 import { Text } from '@astryxdesign/core/Text'
 
+import { formatNoteCount } from '../../entities/note/format-note-count'
 import type { NoteRow } from '../../entities/note/note-draft'
 import { toPublicationLabel } from '../../entities/note/to-publication-label'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
@@ -11,8 +12,6 @@ import { CMS_PATHNAME } from '../../shared/router/is-cms-pathname'
 
 const NOTES_COPY = CMS_MESSAGES.notes
 const { columns } = NOTES_COPY
-
-const NUMBER_FORMAT = new Intl.NumberFormat('it-IT', { useGrouping: 'always' })
 
 const COLUMNS: TableColumn<NoteRow>[] = [
   {
@@ -56,7 +55,7 @@ const COLUMNS: TableColumn<NoteRow>[] = [
     renderCell: (row) =>
       row.readingMinutes === null
         ? NOTES_COPY.noReading
-        : NOTES_COPY.readingTime(NUMBER_FORMAT.format(row.readingMinutes)),
+        : NOTES_COPY.readingTime(formatNoteCount(row.readingMinutes, 'it')),
   },
 ]
 

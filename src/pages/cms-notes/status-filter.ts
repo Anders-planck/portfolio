@@ -14,12 +14,12 @@ export function isStatusFilter(value: string): value is StatusFilter {
   return STATUS_FILTERS.some((filter) => filter === value)
 }
 
-/** How many notes a filter shows. */
-export function countRowsByStatus(
+/** The notes a filter shows. */
+export function filterRowsByStatus(
   rows: readonly NoteRow[],
   filter: StatusFilter,
-): number {
+): NoteRow[] {
   return rows.filter(
     (row) => filter === 'all' || row.publication.kind === filter,
-  ).length
+  )
 }
