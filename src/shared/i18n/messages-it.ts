@@ -28,7 +28,7 @@ export const MESSAGES_IT: Messages = {
   },
   notFound: {
     documentTitle: (siteName) => `Pagina non trovata · ${siteName}`,
-    eyebrow: 'Errore 404',
+    eyebrow: 'Pagina non trovata',
     title: 'Questa pagina non esiste, o non più.',
     body: 'Il blocco si è smontato. Torniamo dove le cose sono al loro posto.',
     homeLink: 'Torna alla home',

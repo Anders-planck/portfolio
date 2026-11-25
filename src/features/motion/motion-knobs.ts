@@ -1,5 +1,3 @@
-import type { Appearance } from '../../entities/appearance/appearance'
-
 /**
  * The site's own motion knobs, beside Astryx tempo and character (user
  * story 36). Durations and curves are not here: they are the theme's
@@ -36,11 +34,9 @@ export const DEFAULT_MOTION_KNOBS: MotionKnobs = {
  * The knobs at the published tempo: tempo scales every theme duration, so it
  * scales the stagger delay too, and the reveal keeps its rhythm.
  */
-export function toMotionKnobsFromMotion(
-  motion: Appearance['motion'],
-): MotionKnobs {
+export function toMotionKnobsFromTempo(tempo: number): MotionKnobs {
   return {
     ...DEFAULT_MOTION_KNOBS,
-    staggerDelayMs: DEFAULT_MOTION_KNOBS.staggerDelayMs * motion.tempo,
+    staggerDelayMs: DEFAULT_MOTION_KNOBS.staggerDelayMs * tempo,
   }
 }

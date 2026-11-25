@@ -3,7 +3,7 @@ import { Text } from '@astryxdesign/core/Text'
 import { useEffect, useRef } from 'react'
 
 import { followPointer } from './follow-pointer'
-import { canFollowPointer, useMotion } from './use-motion'
+import { canFollowPointer, useMotionSettings } from './use-motion-settings'
 
 /**
  * The attribute on `<body>` that hides the system cursor while this one
@@ -19,7 +19,7 @@ const CUSTOM_CURSOR_ATTRIBUTE = 'data-custom-cursor'
  * a fine pointer and without reduced motion.
  */
 export function Cursor() {
-  const motion = useMotion()
+  const motion = useMotionSettings()
   if (!canFollowPointer(motion)) {
     return null
   }

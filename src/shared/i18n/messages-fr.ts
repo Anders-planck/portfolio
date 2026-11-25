@@ -28,7 +28,7 @@ export const MESSAGES_FR: Messages = {
   },
   notFound: {
     documentTitle: (siteName) => `Page introuvable · ${siteName}`,
-    eyebrow: 'Erreur 404',
+    eyebrow: 'Page introuvable',
     title: 'Cette page n’existe pas, ou plus.',
     body: 'Le bloc s’est défait. Revenons là où tout est à sa place.',
     homeLink: 'Retour à l’accueil',

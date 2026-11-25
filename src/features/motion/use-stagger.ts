@@ -1,7 +1,7 @@
 import { type RefCallback, useCallback } from 'react'
 
 import { revealOnEntry } from './reveal-on-entry'
-import { useMotion } from './use-motion'
+import { useMotionSettings } from './use-motion-settings'
 
 /**
  * Stagger: the children of the list this ref is on come in one after
@@ -9,7 +9,7 @@ import { useMotion } from './use-motion'
  * there.
  */
 export function useStagger<Target extends HTMLElement>(): RefCallback<Target> {
-  const { mode, knobs } = useMotion()
+  const { mode, knobs } = useMotionSettings()
   const { entryDistancePx, staggerDelayMs } = knobs
   return useCallback(
     (element: Target | null) => {

@@ -1,9 +1,9 @@
 import { use } from 'react'
 
-import { type Motion, MotionContext } from './motion-provider'
+import { type MotionSettings, MotionSettingsContext } from './motion-provider'
 
-export function useMotion(): Motion {
-  return use(MotionContext)
+export function useMotionSettings(): MotionSettings {
+  return use(MotionSettingsContext)
 }
 
 /**
@@ -11,6 +11,6 @@ export function useMotion(): Motion {
  * may run: only with a fine pointer and without reduced motion (ADR 0008,
  * resolution 8). Otherwise the system cursor and still controls stay.
  */
-export function canFollowPointer({ mode, pointer }: Motion): boolean {
+export function canFollowPointer({ mode, pointer }: MotionSettings): boolean {
   return mode === 'animated' && pointer === 'fine'
 }
