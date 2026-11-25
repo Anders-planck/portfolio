@@ -4,8 +4,8 @@ import {
   toBlockTransform,
   type ViewportPointer,
 } from './to-block-transform'
+import { toFrontFaceIndex, toTurnYawDegAtFace } from './to-turn-yaw-deg-at-face'
 import { trackBlockDrag } from './track-block-drag'
-import { toFrontFaceIndex, turnBlockToFace } from './turn-block-to-face'
 
 /** The two elements of a driven Block. */
 export interface BlockElements {
@@ -46,7 +46,7 @@ export function driveBlock(
   { handle, block }: BlockElements,
   { readScrollPose, onFrontFaceChange }: BlockDriveOptions,
 ): BlockDrive {
-  let frame = 0
+  let pendingFrameId = 0
   let frontFaceIndex: number | undefined
   const motion: Omit<BlockMotionState, 'scrollPose'> = {
     turnYawDeg: 0,
@@ -56,7 +56,7 @@ export function driveBlock(
   }
 
   const draw = () => {
-    frame = 0
+    pendingFrameId = 0
     const scrollPose = readScrollPose()
     block.style.transform = toBlockTransform({ ...motion, scrollPose })
     const front = toFrontFaceIndex(scrollPose.yawDeg + motion.turnYawDeg)
@@ -66,12 +66,12 @@ export function driveBlock(
     }
   }
   const scheduleDraw = () => {
-    if (frame === 0) {
-      frame = requestAnimationFrame(draw)
+    if (pendingFrameId === 0) {
+      pendingFrameId = requestAnimationFrame(draw)
     }
   }
   const turnToFace = (step: number) => {
-    motion.turnYawDeg = turnBlockToFace(
+    motion.turnYawDeg = toTurnYawDegAtFace(
       { scrollYawDeg: readScrollPose().yawDeg, turnYawDeg: motion.turnYawDeg },
       step,
     )
@@ -112,7 +112,7 @@ export function driveBlock(
       window.removeEventListener('scroll', scheduleDraw)
       window.removeEventListener('resize', scheduleDraw)
       window.removeEventListener('pointermove', leanToPointer)
-      cancelAnimationFrame(frame)
+      cancelAnimationFrame(pendingFrameId)
       block.style.removeProperty('transform')
     },
   }

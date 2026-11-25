@@ -4,11 +4,10 @@ import { VisuallyHidden } from '@astryxdesign/core/VisuallyHidden'
 import { type KeyboardEvent, useId } from 'react'
 
 import { useMessages } from '../../shared/i18n/use-messages'
-import type { BlockFaces } from './block-face'
+import { BLOCK_FACE_COUNT, type BlockFaces } from './block-face'
 import type { BlockPose } from './block-pose'
 import { BlockShape } from './block-shape'
 import { toFaceNumber } from './to-face-number'
-import { BLOCK_FACE_COUNT } from './turn-block-to-face'
 import { useBlockDrive } from './use-block-drive'
 
 /** Keyboard ‹ ›: the arrow keys bring the previous or next face to the front. */

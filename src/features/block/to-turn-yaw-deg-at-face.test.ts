@@ -1,21 +1,21 @@
 import { expect, test } from 'vitest'
 
-import { toFrontFaceIndex, turnBlockToFace } from './turn-block-to-face'
+import { toFrontFaceIndex, toTurnYawDegAtFace } from './to-turn-yaw-deg-at-face'
 
 test('a turn snaps to the nearest face of the Block as scroll has it', () => {
   // Scroll has the Block at 20°; a drag of 50° leaves it at 70°, nearest 90°.
-  expect(turnBlockToFace({ scrollYawDeg: 20, turnYawDeg: 50 }, 0)).toBe(70)
+  expect(toTurnYawDegAtFace({ scrollYawDeg: 20, turnYawDeg: 50 }, 0)).toBe(70)
   // A drag of 20° leaves it at 40°, nearest 0°.
-  expect(turnBlockToFace({ scrollYawDeg: 20, turnYawDeg: 20 }, 0)).toBe(-20)
+  expect(toTurnYawDegAtFace({ scrollYawDeg: 20, turnYawDeg: 20 }, 0)).toBe(-20)
 })
 
 test('one step forward brings the next face to the front', () => {
-  const turnYawDeg = turnBlockToFace({ scrollYawDeg: 0, turnYawDeg: 0 }, 1)
+  const turnYawDeg = toTurnYawDegAtFace({ scrollYawDeg: 0, turnYawDeg: 0 }, 1)
   expect(toFrontFaceIndex(turnYawDeg)).toBe(1)
 })
 
 test('one step back from the first face brings the last face to the front', () => {
-  const turnYawDeg = turnBlockToFace({ scrollYawDeg: 0, turnYawDeg: 0 }, -1)
+  const turnYawDeg = toTurnYawDegAtFace({ scrollYawDeg: 0, turnYawDeg: 0 }, -1)
   expect(toFrontFaceIndex(turnYawDeg)).toBe(3)
 })
 

@@ -12,13 +12,13 @@ export function useAnchorAcrossLayouts(
   isImmersive: boolean,
   chapterIds: readonly string[],
 ) {
-  const previousLayoutRef = useRef(isImmersive)
+  const wasImmersiveRef = useRef(isImmersive)
 
   useLayoutEffect(() => {
-    if (previousLayoutRef.current === isImmersive) {
+    if (wasImmersiveRef.current === isImmersive) {
       return
     }
-    previousLayoutRef.current = isImmersive
+    wasImmersiveRef.current = isImmersive
     const anchoredChapterId = chapterIds.find(
       (chapterId) => window.location.hash === `#${chapterId}`,
     )

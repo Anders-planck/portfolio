@@ -53,6 +53,7 @@ export function BlockShape({
             className={`absolute inset-0 translate-z-24 rounded-inner border border-border ${FACE_TONE_CLASSES[face.tone]}`}
           >
             <Stack direction="horizontal" justify="between">
+              {/* A bare ordinal, the same in every locale: no copy to translate. */}
               <Text type="code" color="inherit">
                 {toFaceNumber(faceIndex)}
               </Text>

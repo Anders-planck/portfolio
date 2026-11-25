@@ -1,5 +1,6 @@
-/** The Block has four faces (GLOSSARY), a quarter turn apart. */
-export const BLOCK_FACE_COUNT = 4
+import { BLOCK_FACE_COUNT } from './block-face'
+
+/** The faces are a quarter turn apart. */
 const FACE_ANGLE_DEG = 360 / BLOCK_FACE_COUNT
 
 /** The Block's turn: the part scroll gives it and the part the reader adds. */
@@ -14,7 +15,7 @@ export interface BlockTurn {
  * next face to the front, -1 the previous one, 0 just snaps). Returned as
  * the reader's part, so scroll keeps adding its own.
  */
-export function turnBlockToFace(
+export function toTurnYawDegAtFace(
   { scrollYawDeg, turnYawDeg }: BlockTurn,
   step: number,
 ): number {

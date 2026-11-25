@@ -13,4 +13,6 @@ export interface BlockFace {
 }
 
 /** The Block has exactly four faces (GLOSSARY). */
+export const BLOCK_FACE_COUNT = 4
+
 export type BlockFaces = readonly [BlockFace, BlockFace, BlockFace, BlockFace]
