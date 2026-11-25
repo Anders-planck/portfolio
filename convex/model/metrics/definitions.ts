@@ -34,8 +34,17 @@ export const manualCountOutcomeValidator = v.union(
 )
 export type ManualCountOutcome = Infer<typeof manualCountOutcomeValidator>
 
+/** The values a metric definition is made of. */
+type DefinitionValue =
+  | string
+  | number
+  | boolean
+  | null
+  | DefinitionValue[]
+  | { [field: string]: DefinitionValue }
+
 /** JSON with object keys sorted, so the order fields arrived in never matters. */
-function toCanonicalJson(value: unknown): string {
+function toCanonicalJson(value: DefinitionValue): string {
   if (Array.isArray(value)) {
     return `[${value.map(toCanonicalJson).join(',')}]`
   }
