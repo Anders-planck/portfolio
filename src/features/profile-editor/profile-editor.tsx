@@ -13,6 +13,7 @@ import type {
   ProfileFields,
 } from '../../entities/profile/profile-draft'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
+import { type CvChoice, ProfileCvField } from './profile-cv-field'
 import { ProfileLinksEditor } from './profile-links-editor'
 
 const PROFILE_COPY = CMS_MESSAGES.profile
@@ -34,10 +35,13 @@ const SKILLS: readonly Skill[] = ['frontend', 'backend', 'infra']
 export function ProfileEditor({
   initialFields,
   initialContent,
+  cvChoices,
   onEdit,
 }: {
   initialFields: ProfileFields
   initialContent: ProfileContent
+  /** The PDFs in Media the CV can be. */
+  cvChoices: readonly CvChoice[]
   onEdit: (edit: ProfileEdit) => void
 }) {
   const [fields, setFields] = useState(initialFields)
@@ -66,6 +70,8 @@ export function ProfileEditor({
         name={fields.name}
         email={fields.email}
         links={fields.links}
+        cvMediaId={fields.cvMediaId ?? null}
+        cvChoices={cvChoices}
         contactLabel={content.contactLabel}
         onFieldsChange={editFields}
         onContactLabelChange={(contactLabel) => {
@@ -167,6 +173,8 @@ function ProfileContactSection({
   name,
   email,
   links,
+  cvMediaId,
+  cvChoices,
   contactLabel,
   onFieldsChange,
   onContactLabelChange,
@@ -174,6 +182,8 @@ function ProfileContactSection({
   name: string
   email: string
   links: ProfileFields['links']
+  cvMediaId: CvChoice['mediaId'] | null
+  cvChoices: readonly CvChoice[]
   contactLabel: string
   onFieldsChange: (edit: Partial<ProfileFields>) => void
   onContactLabelChange: (contactLabel: string) => void
@@ -206,6 +216,13 @@ function ProfileContactSection({
           links={links}
           onChange={(nextLinks) => {
             onFieldsChange({ links: nextLinks })
+          }}
+        />
+        <ProfileCvField
+          cvMediaId={cvMediaId}
+          cvChoices={cvChoices}
+          onCvChange={(nextCvMediaId) => {
+            onFieldsChange({ cvMediaId: nextCvMediaId })
           }}
         />
       </FormLayout>

@@ -34,6 +34,7 @@ function renderEditor() {
     <ProfileEditor
       initialFields={FIELDS}
       initialContent={CONTENT}
+      cvChoices={[]}
       onEdit={onEdit}
     />,
   )

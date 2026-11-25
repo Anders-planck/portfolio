@@ -11,6 +11,7 @@ export const CMS_MESSAGES = {
     quality: 'Qualità',
     overview: 'Panoramica',
     profile: 'Profilo',
+    media: 'Media',
     sources: 'Fonti dei numeri',
     viewSite: 'Vedi il sito',
   },
@@ -64,6 +65,13 @@ export const CMS_MESSAGES = {
       backend: 'Backend',
       infra: 'Infra',
       languages: 'Lingue',
+    },
+    cv: {
+      label: 'CV',
+      description:
+        'Il PDF a cui portano i pulsanti «CV» del sito, scelto tra i file in Media.',
+      placeholder: 'Nessun CV',
+      empty: 'Nessun PDF in Media: caricalo lì.',
     },
     links: {
       title: 'Link social',

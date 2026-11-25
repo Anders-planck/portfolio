@@ -9,10 +9,12 @@ import { Text } from '@astryxdesign/core/Text'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { mediaLibraryQueryOptions } from '../../entities/media/media-library-query-options'
 import {
   type EditableProfileDraft,
   profileDraftQueryOptions,
 } from '../../entities/profile/profile-draft'
+import type { CvChoice } from '../../features/profile-editor/profile-cv-field'
 import { ProfileEditor } from '../../features/profile-editor/profile-editor'
 import { SaveStatus } from '../../features/profile-editor/save-status'
 import { useProfileAutosave } from '../../features/profile-editor/use-profile-autosave'
@@ -31,6 +33,11 @@ const PROFILE_COPY = CMS_MESSAGES.profile
 export function CmsProfilePage() {
   const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const draft = useQuery(profileDraftQueryOptions(locale))
+  // The CV choices; while Media cannot be read the list is just empty.
+  const { data: library } = useQuery(mediaLibraryQueryOptions())
+  const cvChoices: CvChoice[] = (library?.media ?? [])
+    .filter((entry) => entry.mime === 'application/pdf')
+    .map(({ mediaId, fileName }) => ({ mediaId, fileName }))
 
   return (
     <VStack gap={6}>
@@ -54,6 +61,7 @@ export function CmsProfilePage() {
           key={locale}
           draft={draft.data}
           locale={locale}
+          cvChoices={cvChoices}
           onLocaleChange={setLocale}
         />
       )}
@@ -68,10 +76,12 @@ export function CmsProfilePage() {
 function ProfileDraftWorkspace({
   draft,
   locale,
+  cvChoices,
   onLocaleChange,
 }: {
   draft: EditableProfileDraft
   locale: Locale
+  cvChoices: readonly CvChoice[]
   onLocaleChange: (locale: Locale) => void
 }) {
   const { saveState, queueEdit, retry } = useProfileAutosave(
@@ -110,6 +120,7 @@ function ProfileDraftWorkspace({
       <ProfileEditor
         initialFields={draft.fields}
         initialContent={draft.content}
+        cvChoices={cvChoices}
         onEdit={queueEdit}
       />
     </VStack>

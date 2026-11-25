@@ -25,8 +25,9 @@ const CONTENT_SCREENS: readonly CmsScreen[] = [
   { href: `${CMS_PATHNAME}/profilo`, label: NAVIGATION_COPY.profile },
 ]
 
-/** CMS screens of the Qualità group (mockup `cms-fonti`). */
+/** CMS screens of the Qualità group, in the mockups' order. */
 const QUALITY_SCREENS: readonly CmsScreen[] = [
+  { href: `${CMS_PATHNAME}/media`, label: NAVIGATION_COPY.media },
   { href: `${CMS_PATHNAME}/fonti`, label: NAVIGATION_COPY.sources },
 ]
 

@@ -20,12 +20,6 @@ export const SITE_SECTIONS: readonly SiteSection[] = [
   { path: '/percorso', labelKey: 'careerPath' },
 ]
 
-/**
- * Where the CV button points. A placeholder until the CV file is uploaded to
- * media (ticket 12, #20); the address shows the 404 page meanwhile.
- */
-export const CV_PATH = '/cv'
-
 /** Whether the page on screen is the section or one of its pages. */
 export function isInSection(
   unprefixedPathname: string,
