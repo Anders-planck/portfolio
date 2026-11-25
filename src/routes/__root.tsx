@@ -1,61 +1,40 @@
-import { Theme } from '@astryxdesign/core/theme'
 import type { QueryClient } from '@tanstack/react-query'
-import {
-  createRootRouteWithContext,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from '@tanstack/react-router'
+import { createRootRouteWithContext, Outlet } from '@tanstack/react-router'
 
-import { defaultThemeSlug, themes } from '../astryx-themes'
-import { toHtmlDataThemeFromMode } from '../entities/appearance/appearance'
-import { loadAppearance } from '../entities/appearance/load-appearance'
-import { useAppearance } from '../entities/appearance/use-appearance'
+import { applyRedirectRules } from '../entities/redirect/apply-redirect-rules'
+import { FIXED_REDIRECT_RULES } from '../entities/redirect/redirect-rule'
+import { NotFoundPage } from '../pages/not-found/not-found-page'
+import { redirectFromDefaultLocalePrefix } from '../shared/i18n/guard-locale-segment'
+import { DEFAULT_LOCALE } from '../shared/i18n/locale'
 import globalsCss from '../styles/globals.css?url'
+import { loadSiteShell } from '../widgets/site-shell/load-site-shell'
+import { SiteDocument } from '../widgets/site-shell/site-document'
+import { toShellHead } from '../widgets/site-shell/to-shell-head'
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
 }>()({
+  beforeLoad: ({ location }) => {
+    applyRedirectRules(location, FIXED_REDIRECT_RULES)
+    redirectFromDefaultLocalePrefix(location)
+  },
   // On the server, so the first paint already has the params (ADR 0010).
-  loader: ({ context }) => loadAppearance(context.queryClient),
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Anders Planck' },
-    ],
+  loader: ({ context, location }) =>
+    loadSiteShell(context.queryClient, location.pathname),
+  head: ({ matches, loaderData }) => ({
+    ...toShellHead(matches, loaderData?.locale ?? DEFAULT_LOCALE),
     // globals.css must be the first stylesheet: it declares the cascade-layer
     // order. The theme CSS imported by astryx-themes is linked after it.
     links: [{ rel: 'stylesheet', href: globalsCss }],
   }),
+  notFoundComponent: NotFoundPage,
   component: RootDocument,
 })
 
-const SITE_THEME = themes[defaultThemeSlug]
-
 function RootDocument() {
-  const { appearance, css } = useAppearance()
-  const { mode } = appearance.theme
   return (
-    // The mode is on <html> from the server; <Theme> keeps it in sync.
-    <html
-      lang="it"
-      data-astryx-theme={SITE_THEME.name}
-      data-theme={toHtmlDataThemeFromMode(mode)}
-    >
-      <head>
-        <HeadContent />
-        {/* After the built theme stylesheet, so the params win by order. */}
-        {css === undefined ? null : (
-          <style data-appearance="" dangerouslySetInnerHTML={{ __html: css }} />
-        )}
-      </head>
-      <body>
-        <Theme theme={SITE_THEME} mode={mode}>
-          <Outlet />
-        </Theme>
-        <Scripts />
-      </body>
-    </html>
+    <SiteDocument>
+      <Outlet />
+    </SiteDocument>
   )
 }

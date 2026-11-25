@@ -14,7 +14,7 @@ export function HelloPage() {
   return (
     <Layout
       content={
-        <LayoutContent role="main" padding={8}>
+        <LayoutContent padding={8}>
           <Heading level={1}>{data.message}</Heading>
         </LayoutContent>
       }
