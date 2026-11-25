@@ -1,4 +1,4 @@
-# 0012 · Media: presigned uploads to R2, EXIF stripped in the CMS, variants by URL
+# 0014 · Media: presigned uploads to R2, EXIF stripped in the CMS, variants by URL
 
 Status: accepted · 2026-11-25 (ticket 12)
 

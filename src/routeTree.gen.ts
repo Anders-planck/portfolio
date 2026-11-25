@@ -17,6 +17,7 @@ import { Route as CmsMediaRouteImport } from './routes/cms/media'
 import { Route as CmsProfiloRouteImport } from './routes/cms/profilo'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125SplatRouteImport } from './routes/{-$locale}/$'
+import { Route as Char123LocaleChar125DemoRouteImport } from './routes/{-$locale}/demo'
 
 const CmsRouteRoute = CmsRouteRouteImport.update({
   id: '/cms',
@@ -61,6 +62,12 @@ const Char123LocaleChar125SplatRoute =
     path: '/$',
     getParentRoute: () => Char123LocaleChar125RouteRoute,
   } as any)
+const Char123LocaleChar125DemoRoute =
+  Char123LocaleChar125DemoRouteImport.update({
+    id: '/demo',
+    path: '/demo',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/cms': typeof CmsRouteRouteWithChildren
@@ -69,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/cms/media': typeof CmsMediaRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms/': typeof CmsIndexRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
@@ -77,6 +85,7 @@ export interface FileRoutesByTo {
   '/cms/media': typeof CmsMediaRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms': typeof CmsIndexRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
 }
@@ -88,6 +97,7 @@ export interface FileRoutesById {
   '/cms/media': typeof CmsMediaRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms/': typeof CmsIndexRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
 }
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/cms/media'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms/'
     | '/{-$locale}/'
   fileRoutesByTo: FileRoutesByTo
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/cms/media'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms'
     | '/{-$locale}'
   id:
@@ -118,6 +130,7 @@ export interface FileRouteTypes {
     | '/cms/media'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms/'
     | '/{-$locale}/'
   fileRoutesById: FileRoutesById
@@ -185,6 +198,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125SplatRouteImport
       parentRoute: typeof Char123LocaleChar125RouteRoute
     }
+    '/{-$locale}/demo': {
+      id: '/{-$locale}/demo'
+      path: '/demo'
+      fullPath: '/{-$locale}/demo'
+      preLoaderRoute: typeof Char123LocaleChar125DemoRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
   }
 }
 
@@ -208,12 +228,14 @@ const CmsRouteRouteWithChildren = CmsRouteRoute._addFileChildren(
 
 interface Char123LocaleChar125RouteRouteChildren {
   Char123LocaleChar125SplatRoute: typeof Char123LocaleChar125SplatRoute
+  Char123LocaleChar125DemoRoute: typeof Char123LocaleChar125DemoRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
 }
 
 const Char123LocaleChar125RouteRouteChildren: Char123LocaleChar125RouteRouteChildren =
   {
     Char123LocaleChar125SplatRoute: Char123LocaleChar125SplatRoute,
+    Char123LocaleChar125DemoRoute: Char123LocaleChar125DemoRoute,
     Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
   }
 

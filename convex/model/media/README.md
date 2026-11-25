@@ -1,6 +1,6 @@
 # Media
 
-Domain code behind `convex/media.ts` (ADR 0012, story 41): images and files on R2, their alt text per locale, where they are used. The functions there are thin: owner check, one call here, return.
+Domain code behind `convex/media.ts` (ADR 0014, story 41): images and files on R2, their alt text per locale, where they are used. The functions there are thin: owner check, one call here, return.
 
 ## Flow
 

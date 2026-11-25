@@ -209,7 +209,7 @@ banner "Portfolio v3: R2 bucket and keys for Media (ticket 12)"
 
 stage "Convex: which deployment gets the bucket"
 say "Media uploads go from the CMS straight to an R2 bucket, through a URL the"
-say "Convex backend signs with an R2 API token (docs/adr/0012). The token and"
+say "Convex backend signs with an R2 API token (docs/adr/0014). The token and"
 say "the bucket go into the Convex env of the cloud dev deployment in .env.local."
 CONVEX_DEPLOYMENT_NAME=$(grep -E '^CONVEX_DEPLOYMENT=' "$ENV_FILE" 2>/dev/null | head -n 1 | cut -d= -f2- | cut -d'#' -f1 | tr -d " '\"" || true)
 if [[ "$CONVEX_DEPLOYMENT_NAME" != dev:* ]]; then

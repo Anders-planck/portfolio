@@ -19,3 +19,12 @@ test('a page head takes its copy in the locale of its path', () => {
     },
   ])
 })
+
+test('a page outside the public content asks search engines not to index it', () => {
+  const { meta } = toPageHead(
+    '/',
+    ({ site }) => ({ title: site.name, description: site.description }),
+    { isListed: false },
+  )
+  expect(meta).toContainEqual({ name: 'robots', content: 'noindex' })
+})

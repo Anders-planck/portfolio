@@ -9,6 +9,7 @@ Domain words for the portfolio and its CMS. Code identifiers use the English ter
 | Slab | lastra | A project card in 3D: the Home gallery chapter and the Lavori gallery are made of slabs. One slab per project. |
 | Immersive page | pagina immersiva | Home, Lavori, Percorso and every project page: window-scroll chapters with a sticky scene on wide screens with a fine pointer; a linear layout otherwise. |
 | Chapter | capitolo | A section of an immersive page bound to a scroll range. Always rendered in the DOM, linkable by anchor. |
+| Stage | scena | The engine of an immersive page: its chapters and the Block, laid out immersive (pinned scene) or linear. Not a Project stage. |
 | Chapter index | indice dei capitoli | The list of chapters on the right of an immersive page (Astryx `Stepper`). |
 | Project | progetto | A piece of work shown on the site. Has a kind, a visibility and per-locale content. |
 | Project kind | tipo | lavoro · open source · cliente · personale · prototipo. Not a status. |
