@@ -23,8 +23,9 @@ export async function readPublishedDocument(
   if (pointer === null) {
     return null
   }
-  const version = await ctx.db.get(pointer.versionId)
-  return version === null
+  // A pointer always names a version; readVersions throws if one is missing.
+  const [version] = await readVersions(ctx, [pointer.versionId])
+  return version === undefined
     ? null
     : toLocalizedDocumentFromSnapshot(version.snapshot, locale)
 }

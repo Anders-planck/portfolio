@@ -2,7 +2,7 @@ import { ConvexError, type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
-import { type Locale, localeValidator } from './locales'
+import { type Locale, LOCALES, localeValidator } from './locales'
 import { verifyPreviewToken } from './preview'
 import {
   EMPTY_PROFILE_CONTENT_FIELDS,
@@ -19,8 +19,8 @@ import {
   toLocalizedDocumentFromSnapshot,
 } from './snapshot'
 
-/** Upper bound of locale records per document (four site locales). */
-const MAX_LOCALE_RECORDS = 8
+/** A document has at most one content record per site locale. */
+const MAX_LOCALE_RECORDS = LOCALES.length
 
 /**
  * A live-save edit to one document: some shared fields and/or some fields of
