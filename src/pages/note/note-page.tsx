@@ -17,8 +17,8 @@ import { TranslationFallbackNotice } from '../../shared/i18n/translation-fallbac
 import { useLocale } from '../../shared/i18n/use-locale'
 import { useMessages } from '../../shared/i18n/use-messages'
 import { NextNoteCard } from './next-note-card'
-import { NOTE_COPY } from './note-copy'
 import { NoteMeta } from './note-meta'
+import { NOTE_PAGE_COPY } from './note-page-copy'
 import { useReadingProgress } from './use-reading-progress'
 
 /**
@@ -30,7 +30,7 @@ import { useReadingProgress } from './use-reading-progress'
 export function NotePage({ slug }: { slug: string }) {
   const locale = useLocale()
   const { notFound } = useMessages()
-  const copy = NOTE_COPY[locale]
+  const notePageCopy = NOTE_PAGE_COPY[locale]
   const { data: note } = useSuspenseQuery(publishedNoteQueryOptions(slug))
   const articleRef = useRef<HTMLElement>(null)
   const percentRead = useReadingProgress(articleRef)
@@ -53,7 +53,7 @@ export function NotePage({ slug }: { slug: string }) {
     <Stack gap={6} padding={8}>
       <Stack className="sticky top-header z-10 bg-body">
         <ProgressBar
-          label={copy.progressLabel}
+          label={notePageCopy.progressLabel}
           value={percentRead}
           isLabelHidden
         />
@@ -64,11 +64,11 @@ export function NotePage({ slug }: { slug: string }) {
           className="lg:sticky lg:top-header lg:self-start lg:pt-6"
         >
           <Link href={toPathnameInLocale('/note', locale)}>
-            {copy.backToNotes}
+            {notePageCopy.backToNotes}
           </Link>
           {translation.outline.length > 0 && (
             <Outline
-              label={copy.outlineLabel}
+              label={notePageCopy.outlineLabel}
               items={translation.outline}
               density="compact"
             />

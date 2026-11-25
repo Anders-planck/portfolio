@@ -21,7 +21,7 @@ import { NoteRuns } from '../../entities/note/note-runs'
 import { toPathnameInLocale } from '../../shared/i18n/locale'
 import { useLocale } from '../../shared/i18n/use-locale'
 import { useMessages } from '../../shared/i18n/use-messages'
-import { NOTES_COPY } from './notes-copy'
+import { NOTE_LIST_COPY } from './note-list-copy'
 import {
   ALL_TOPICS,
   countNotesByTopic,
@@ -37,7 +37,7 @@ import {
 export function NotesPage() {
   const locale = useLocale()
   const { notes } = useMessages()
-  const copy = NOTES_COPY[locale]
+  const noteListCopy = NOTE_LIST_COPY[locale]
   const { data: cards } = useSuspenseQuery(publishedNotesQueryOptions())
   const [topic, setTopic] = useState<TopicFilter>(ALL_TOPICS)
   const entries = toNoteListEntries(cards, locale)
@@ -58,11 +58,11 @@ export function NotesPage() {
             </Text>
           </Stack>
           {entries.length === 0 ? (
-            <EmptyState title={copy.emptyTitle} headingLevel={2} />
+            <EmptyState title={noteListCopy.emptyTitle} headingLevel={2} />
           ) : (
             <Stack gap={6}>
               <SegmentedControl
-                label={copy.topicFilterLabel}
+                label={noteListCopy.topicFilterLabel}
                 value={topic}
                 onChange={(value) => {
                   setTopic(toTopicFilter(value, counts))
@@ -70,8 +70,8 @@ export function NotesPage() {
               >
                 <SegmentedControlItem
                   value={ALL_TOPICS}
-                  label={copy.topicOption(
-                    copy.allTopics,
+                  label={noteListCopy.topicOption(
+                    noteListCopy.allTopics,
                     formatCount(entries.length),
                   )}
                 />
@@ -79,7 +79,7 @@ export function NotesPage() {
                   <SegmentedControlItem
                     key={noteTopic}
                     value={noteTopic}
-                    label={copy.topicOption(
+                    label={noteListCopy.topicOption(
                       notes.topics[noteTopic],
                       formatCount(count),
                     )}
@@ -87,7 +87,10 @@ export function NotesPage() {
                 ))}
               </SegmentedControl>
               {shown.length === 0 ? (
-                <EmptyState title={copy.emptyTopicTitle} headingLevel={2} />
+                <EmptyState
+                  title={noteListCopy.emptyTopicTitle}
+                  headingLevel={2}
+                />
               ) : (
                 <List hasDividers>
                   {shown.map((entry) => (

@@ -1,7 +1,7 @@
 import type { Locale } from '../../shared/i18n/locale'
 
 /** The Note list's own copy, kept in its route chunk (ADR 0013). */
-export interface NotesCopy {
+export interface NoteListCopy {
   topicFilterLabel: string
   allTopics: string
   topicOption: (label: string, count: string) => string
@@ -9,7 +9,7 @@ export interface NotesCopy {
   emptyTopicTitle: string
 }
 
-export const NOTES_COPY: Record<Locale, NotesCopy> = {
+export const NOTE_LIST_COPY: Record<Locale, NoteListCopy> = {
   it: {
     topicFilterLabel: 'Filtra per tema',
     allTopics: 'Tutte',

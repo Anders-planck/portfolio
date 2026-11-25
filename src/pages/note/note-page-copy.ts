@@ -1,7 +1,7 @@
 import type { Locale } from '../../shared/i18n/locale'
 
 /** The Nota page's own copy, kept in its route chunk (ADR 0013). */
-export interface NoteCopy {
+export interface NotePageCopy {
   backToNotes: string
   outlineLabel: string
   progressLabel: string
@@ -9,7 +9,7 @@ export interface NoteCopy {
   alsoIn: string
 }
 
-export const NOTE_COPY: Record<Locale, NoteCopy> = {
+export const NOTE_PAGE_COPY: Record<Locale, NotePageCopy> = {
   it: {
     backToNotes: 'Tutte le note',
     outlineLabel: 'In questa nota',
