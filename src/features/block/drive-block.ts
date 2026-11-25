@@ -4,7 +4,8 @@ import {
   toBlockTransform,
   type ViewportPointer,
 } from './to-block-transform'
-import { toFrontFaceIndex, toTurnYawDegAtFace } from './to-turn-yaw-deg-at-face'
+import { toFrontFaceIndex } from './to-front-face-index'
+import { toTurnYawDegAtFace } from './to-turn-yaw-deg-at-face'
 import { trackBlockDrag } from './track-block-drag'
 import { watchOnScreen } from './watch-on-screen'
 

@@ -1,7 +1,4 @@
-import { BLOCK_FACE_COUNT } from './block-face'
-
-/** The faces are a quarter turn apart. */
-const FACE_ANGLE_DEG = 360 / BLOCK_FACE_COUNT
+import { FACE_ANGLE_DEG } from './block-face'
 
 /** The Block's turn: the part scroll gives it and the part the reader adds. */
 export interface BlockTurn {
@@ -22,13 +19,4 @@ export function toTurnYawDegAtFace(
   const nearestFaceYawDeg =
     Math.round((scrollYawDeg + turnYawDeg) / FACE_ANGLE_DEG) * FACE_ANGLE_DEG
   return nearestFaceYawDeg - step * FACE_ANGLE_DEG - scrollYawDeg
-}
-
-/**
- * Which face (0-based) looks at the reader when the Block is turned by
- * `yawDeg`. Face n sits at n quarter turns, so a turn of -90° shows face 1.
- */
-export function toFrontFaceIndex(yawDeg: number): number {
-  const turns = Math.round(-yawDeg / FACE_ANGLE_DEG)
-  return ((turns % BLOCK_FACE_COUNT) + BLOCK_FACE_COUNT) % BLOCK_FACE_COUNT
 }

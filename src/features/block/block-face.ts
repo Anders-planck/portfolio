@@ -14,5 +14,7 @@ export interface BlockFace {
 
 /** The Block has exactly four faces (GLOSSARY). */
 export const BLOCK_FACE_COUNT = 4
+/** The faces are a quarter turn apart. */
+export const FACE_ANGLE_DEG = 360 / BLOCK_FACE_COUNT
 
 export type BlockFaces = readonly [BlockFace, BlockFace, BlockFace, BlockFace]

@@ -23,7 +23,7 @@ export function StageScene({
   onGoToChapter,
   onGoToAdjacentChapter,
 }: {
-  chapters: readonly StageChapter[]
+  chapters: readonly Pick<StageChapter, 'id' | 'eyebrow'>[]
   faces: BlockFaces
   activeChapterIndex: number
   /** Given only once JS knows the layout is immersive: the Block moves. */
