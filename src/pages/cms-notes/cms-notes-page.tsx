@@ -102,13 +102,13 @@ function CreateNoteButton() {
   const createAndOpen = async () => {
     pendingKey.current ??= crypto.randomUUID()
     try {
-      const created = await createNote({ key: pendingKey.current })
+      const creation = await createNote({ key: pendingKey.current })
       pendingKey.current = null
-      if (created.kind === 'limit-reached') {
+      if (creation.kind === 'limit-reached') {
         setProblem('limit-reached')
         return
       }
-      await navigate({ to: `${CMS_PATHNAME}/note/${created.key}` })
+      await navigate({ to: `${CMS_PATHNAME}/note/${creation.key}` })
     } catch {
       setProblem('failed')
     }

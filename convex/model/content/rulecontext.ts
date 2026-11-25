@@ -1,7 +1,7 @@
 import type { QueryCtx } from '../../_generated/server'
 import { MAX_METRICS } from '../metrics/tables'
+import { readNoteDrafts } from '../notes/drafts'
 import { type NoteSlugClaim, readNoteSlugClaims } from '../notes/slugclaims'
-import { MAX_NOTES } from '../notes/tables'
 
 /**
  * What the publish rules know beyond the document: the metric keys that
@@ -17,10 +17,10 @@ export interface RuleContext {
 
 export async function readRuleContext(ctx: QueryCtx): Promise<RuleContext> {
   const metrics = await ctx.db.query('metrics').take(MAX_METRICS)
-  const notes = await ctx.db.query('notes').take(MAX_NOTES + 1)
+  const notes = await readNoteDrafts(ctx)
   return {
     metricKeys: new Set(metrics.map((metric) => metric.key)),
-    noteSlugClaims: await readNoteSlugClaims(ctx),
+    noteSlugClaims: await readNoteSlugClaims(ctx, notes),
     noteCount: notes.length,
   }
 }

@@ -25,8 +25,10 @@ export async function recordNoteFirstPublications(
 }
 
 /**
- * When the note first went live; `livePublishedAt` (its live release) for a
- * note published before first publications were recorded.
+ * When the note first went live. `livePublishedAt` (its live release) stands
+ * in for a note without a record: one published on a backend that ran this
+ * branch before the record existed (local e2e backends keep their data
+ * between runs, and the seed note does not publish twice).
  */
 export async function readNoteFirstPublishedAt(
   ctx: QueryCtx,

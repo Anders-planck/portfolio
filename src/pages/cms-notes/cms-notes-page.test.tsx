@@ -16,6 +16,10 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
+// A retry after a lost answer re-renders twice; the full suite runs files in
+// parallel, so give it longer than the one-second default.
+const BUSY_SUITE_WAIT = { timeout: 5000 }
+
 function renderList(rows: typeof NOTE_ROWS) {
   const queryClient = new QueryClient()
   queryClient.setQueryData(noteRowsQueryOptions().queryKey, rows)
@@ -59,25 +63,29 @@ test('a create whose answer was lost is retried with the same note key', async (
 
   fireEvent.click(button)
   expect(
-    await screen.findByText('Non riesco a creare la nota: riprova.'),
+    await screen.findByText(
+      'Non riesco a creare la nota: riprova.',
+      {},
+      BUSY_SUITE_WAIT,
+    ),
   ).toBeDefined()
+  // The button ignores clicks while its first action is still settling.
+  await waitFor(() => {
+    expect(button.getAttribute('aria-busy')).toBeNull()
+  }, BUSY_SUITE_WAIT)
   fireEvent.click(button)
 
   await waitFor(() => {
     expect(createNote).toHaveBeenCalledTimes(2)
-  })
+  }, BUSY_SUITE_WAIT)
   const [[first], [second]] = createNote.mock.calls as [
     [{ key: string }],
     [{ key: string }],
   ]
   expect(second.key).toBe(first.key)
-  // Navigation can take a moment while the whole suite runs in parallel.
-  await waitFor(
-    () => {
-      expect(router.state.location.pathname).toBe(`/cms/note/${first.key}`)
-    },
-    { timeout: 5000 },
-  )
+  await waitFor(() => {
+    expect(router.state.location.pathname).toBe(`/cms/note/${first.key}`)
+  }, BUSY_SUITE_WAIT)
 })
 
 test('past the note limit the list says so and opens nothing', async () => {

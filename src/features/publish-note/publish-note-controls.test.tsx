@@ -18,6 +18,10 @@ beforeEach(() => {
 })
 afterEach(cleanup)
 
+// A retry after a lost answer re-renders twice; the full suite runs files in
+// parallel, so give it longer than the one-second default.
+const BUSY_SUITE_WAIT = { timeout: 5000 }
+
 function renderControls(isDisabled = false) {
   render(
     <PublishNoteControls
@@ -61,13 +65,21 @@ test('a publish whose answer was lost is sent again with the same request id', a
 
   fireEvent.click(button)
   expect(
-    await screen.findByText('Pubblicazione non confermata: riprova.'),
+    await screen.findByText(
+      'Pubblicazione non confermata: riprova.',
+      {},
+      BUSY_SUITE_WAIT,
+    ),
   ).toBeDefined()
+  // The button ignores clicks while its first action is still settling.
+  await waitFor(() => {
+    expect(button.getAttribute('aria-busy')).toBeNull()
+  }, BUSY_SUITE_WAIT)
   fireEvent.click(button)
 
   await waitFor(() => {
     expect(publish).toHaveBeenCalledTimes(2)
-  })
+  }, BUSY_SUITE_WAIT)
   const [[first], [second]] = publish.mock.calls as [
     [{ requestId: string }],
     [{ requestId: string }],

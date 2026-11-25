@@ -51,11 +51,17 @@ export function checkNoteKey(key: string) {
   }
 }
 
-/** Whether another note may be created: reads list at most `MAX_NOTES`. */
-export async function hasRoomForNote(ctx: QueryCtx) {
-  const notes = await ctx.db.query('notes').take(MAX_NOTES)
-  return notes.length < MAX_NOTES
+/**
+ * Every note draft, one past `MAX_NOTES` so a count can tell the cap was
+ * passed (reads elsewhere list at most `MAX_NOTES`).
+ */
+export function readNoteDrafts(ctx: QueryCtx) {
+  return ctx.db.query('notes').take(MAX_NOTES + 1)
 }
+
+/** A create: the note (new or already there), or no room under the cap. */
+export type NoteCreation =
+  { kind: 'created'; note: Doc<'notes'> } | { kind: 'limit-reached' }
 
 export function findNote(ctx: QueryCtx, key: string) {
   return ctx.db
@@ -66,17 +72,21 @@ export function findNote(ctx: QueryCtx, key: string) {
 
 /**
  * Creates an empty note under `key` (chosen by the editor, so a repeated
- * create is the same note, DATA-06); an existing note is left as it is.
+ * create is the same note, DATA-06); an existing note is left as it is. A
+ * new note past `MAX_NOTES` is not created.
  */
 export async function createNoteDraft(
   ctx: MutationCtx,
   key: string,
   now: number,
-): Promise<Doc<'notes'>> {
+): Promise<NoteCreation> {
   checkNoteKey(key)
   const existing = await findNote(ctx, key)
   if (existing !== null) {
-    return existing
+    return { kind: 'created', note: existing }
+  }
+  if ((await readNoteDrafts(ctx)).length >= MAX_NOTES) {
+    return { kind: 'limit-reached' }
   }
   const note = {
     key,
@@ -86,7 +96,7 @@ export async function createNoteDraft(
     updatedAt: now,
   }
   const noteId = await ctx.db.insert('notes', note)
-  return { _id: noteId, _creationTime: now, ...note }
+  return { kind: 'created', note: { _id: noteId, _creationTime: now, ...note } }
 }
 
 /** Applies a live-save edit, creating the note if needed. */
@@ -95,7 +105,12 @@ export async function saveNoteDraftEdit(
   edit: NoteDraftEdit,
   savedAt: number,
 ) {
-  const note = await createNoteDraft(ctx, edit.key, savedAt)
+  const creation = await createNoteDraft(ctx, edit.key, savedAt)
+  if (creation.kind === 'limit-reached') {
+    // The editor saves only notes `createNote` made, so this is a broken call.
+    throw new ConvexError({ kind: 'note-limit' })
+  }
+  const { note } = creation
   const revision = note.revision + 1
   await ctx.db.patch(note._id, { ...edit.fields, revision, updatedAt: savedAt })
   if (edit.localeEdit !== undefined) {

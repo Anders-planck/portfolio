@@ -9,10 +9,7 @@ import {
   readEditableNote,
 } from './model/notes/cms'
 import {
-  checkNoteKey,
   createNoteDraft,
-  findNote,
-  hasRoomForNote,
   noteDraftEditValidator,
   saveNoteDraftEdit,
 } from './model/notes/drafts'
@@ -66,12 +63,10 @@ export const createNote = mutation({
   ),
   handler: async (ctx, { key }) => {
     await requireOwner(ctx)
-    checkNoteKey(key)
-    if ((await findNote(ctx, key)) === null && !(await hasRoomForNote(ctx))) {
-      return { kind: 'limit-reached' as const }
-    }
-    await createNoteDraft(ctx, key, Date.now())
-    return { kind: 'created' as const, key }
+    const creation = await createNoteDraft(ctx, key, Date.now())
+    return creation.kind === 'created'
+      ? { kind: 'created' as const, key }
+      : creation
   },
 })
 

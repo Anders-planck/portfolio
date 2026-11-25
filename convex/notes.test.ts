@@ -22,9 +22,8 @@ interface NoteDraft {
   locale?: Locale
 }
 
-/** Creates a note and saves its copy; returns the revision to publish. */
-async function writeNote(backend: Backend, draft: NoteDraft) {
-  await backend.mutation(api.notes.createNote, { key: draft.key })
+/** Saves a note's copy (the save creates it if needed); returns the revision. */
+function saveNote(backend: Backend, draft: NoteDraft) {
   return backend.mutation(api.notes.saveDraft, {
     key: draft.key,
     fields: { slug: draft.slug, topic: 'ai' },
@@ -37,6 +36,12 @@ async function writeNote(backend: Backend, draft: NoteDraft) {
       },
     },
   })
+}
+
+/** Creates a note as the CMS does, then saves its copy. */
+async function writeNote(backend: Backend, draft: NoteDraft) {
+  await backend.mutation(api.notes.createNote, { key: draft.key })
+  return saveNote(backend, draft)
 }
 
 function publishNote(
@@ -297,40 +302,6 @@ describe('the CMS', () => {
 // Notes across releases: slugs no two notes may share (live, scheduled or
 // draft), a public date that publishing again never moves, editor keys.
 
-async function saveNote(backend: Backend, key: string, slug: string) {
-  return backend.mutation(api.notes.saveDraft, {
-    key,
-    fields: { slug, topic: 'ai' },
-    localeEdit: {
-      locale: 'it',
-      content: { title: `Nota ${slug}`, summary: 'Sintesi.', body: 'Testo.' },
-    },
-  })
-}
-
-async function publishNoteAt(
-  backend: Backend,
-  key: string,
-  revision: number,
-  scheduledAt?: number,
-) {
-  return backend.mutation(api.content.publish, {
-    selection: [{ collection: 'note', key, revision }],
-    note: '',
-    requestId: crypto.randomUUID(),
-    ...(scheduledAt === undefined ? {} : { scheduledAt }),
-  })
-}
-
-async function saveAndPublishNote(backend: Backend, key: string, slug: string) {
-  const { revision } = await saveNote(backend, key, slug)
-  const outcome = await publishNoteAt(backend, key, revision)
-  if (outcome.status !== 'published') {
-    throw new Error(`Expected a published note, got ${outcome.status}`)
-  }
-  return outcome.releaseId
-}
-
 async function readPublishedDates(backend: Backend) {
   const cards = await backend.query(api.notes.listPublished, {})
   return cards.map(({ slug, publishedAt }) => [slug, publishedAt])
@@ -339,11 +310,14 @@ async function readPublishedDates(backend: Backend) {
 describe('slugs', () => {
   test('a live slug stays taken after its note’s draft is renamed', async () => {
     const backend = await createOwnerBackend()
-    await saveAndPublishNote(backend, 'note-first', 'condiviso')
-    await saveNote(backend, 'note-first', 'rinominato')
+    await writeAndPublishNote(backend, { key: 'note-first', slug: 'condiviso' })
+    await saveNote(backend, { key: 'note-first', slug: 'rinominato' })
 
-    const { revision } = await saveNote(backend, 'note-second', 'condiviso')
-    const outcome = await publishNoteAt(backend, 'note-second', revision)
+    const { revision } = await saveNote(backend, {
+      key: 'note-second',
+      slug: 'condiviso',
+    })
+    const outcome = await publishNote(backend, 'note-second', revision)
 
     expect(outcome).toMatchObject({
       status: 'blocked',
@@ -353,17 +327,23 @@ describe('slugs', () => {
 
   test('a slug in a pending scheduled release is taken', async () => {
     const backend = await createOwnerBackend()
-    const scheduled = await saveNote(backend, 'note-later', 'domani')
+    const scheduled = await saveNote(backend, {
+      key: 'note-later',
+      slug: 'domani',
+    })
     await publishNote(
       backend,
       'note-later',
       scheduled.revision,
       Date.now() + ONE_DAY_MS,
     )
-    await saveNote(backend, 'note-later', 'rinominato')
+    await saveNote(backend, { key: 'note-later', slug: 'rinominato' })
 
-    const { revision } = await saveNote(backend, 'note-now', 'domani')
-    const outcome = await publishNoteAt(backend, 'note-now', revision)
+    const { revision } = await saveNote(backend, {
+      key: 'note-now',
+      slug: 'domani',
+    })
+    const outcome = await publishNote(backend, 'note-now', revision)
 
     expect(outcome).toMatchObject({
       status: 'blocked',
@@ -376,17 +356,16 @@ describe('public date', () => {
   test('publishing an edit or rolling back keeps the first date and the order', async () => {
     vi.useFakeTimers()
     const backend = await createOwnerBackend()
-    const firstRelease = await saveAndPublishNote(
-      backend,
-      'note-old',
-      'vecchia',
-    )
+    const { releaseId: firstRelease } = await writeAndPublishNote(backend, {
+      key: 'note-old',
+      slug: 'vecchia',
+    })
     vi.advanceTimersByTime(ONE_DAY_MS)
-    await saveAndPublishNote(backend, 'note-new', 'nuova')
+    await writeAndPublishNote(backend, { key: 'note-new', slug: 'nuova' })
     const datesBefore = await readPublishedDates(backend)
 
     vi.advanceTimersByTime(ONE_DAY_MS)
-    await saveAndPublishNote(backend, 'note-old', 'vecchia')
+    await writeAndPublishNote(backend, { key: 'note-old', slug: 'vecchia' })
     expect(await readPublishedDates(backend)).toEqual(datesBefore)
 
     vi.advanceTimersByTime(ONE_DAY_MS)
@@ -402,9 +381,12 @@ describe('public date', () => {
   test('a scheduled note is dated when it went live, not when it was scheduled', async () => {
     vi.useFakeTimers()
     const backend = await createOwnerBackend()
-    const { revision } = await saveNote(backend, 'note-later', 'domani')
+    const { revision } = await saveNote(backend, {
+      key: 'note-later',
+      slug: 'domani',
+    })
     const scheduledAt = Date.now() + ONE_DAY_MS
-    await publishNoteAt(backend, 'note-later', revision, scheduledAt)
+    await publishNote(backend, 'note-later', revision, scheduledAt)
 
     vi.advanceTimersByTime(ONE_DAY_MS)
     await backend.finishInProgressScheduledFunctions()
@@ -418,7 +400,9 @@ describe('note keys and limits', () => {
   test('saving under a key the editor never makes is refused', async () => {
     const backend = await createOwnerBackend()
 
-    await expect(saveNote(backend, 'Not a key!', 'nota')).rejects.toThrow()
+    await expect(
+      saveNote(backend, { key: 'Not a key!', slug: 'nota' }),
+    ).rejects.toThrow()
   })
 
   test('creating a note past the limit is refused as a result the CMS shows', async () => {

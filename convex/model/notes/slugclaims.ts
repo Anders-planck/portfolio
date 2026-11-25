@@ -1,3 +1,4 @@
+import type { Doc } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
 import { readVersions } from '../content/versions'
 import { readScheduledReleases } from './publication'
@@ -17,8 +18,8 @@ export interface NoteSlugClaim {
  */
 export async function readNoteSlugClaims(
   ctx: QueryCtx,
+  drafts: readonly Doc<'notes'>[],
 ): Promise<NoteSlugClaim[]> {
-  const drafts = await ctx.db.query('notes').take(MAX_NOTES)
   const pointers = await ctx.db
     .query('publishedPointers')
     .withIndex('by_collection_and_key', (query) =>
