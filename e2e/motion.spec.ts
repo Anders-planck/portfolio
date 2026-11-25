@@ -15,17 +15,14 @@ function readFooterOpacity(page: Page) {
   return page
     .getByRole('contentinfo')
     .getByRole('link', { name: 'anders/planck' })
-    .evaluate((link) => {
-      let opacity = 1
-      for (
-        let element: Element | null = link;
-        element !== null;
-        element = element.parentElement
-      ) {
-        opacity *= Number(getComputedStyle(element).opacity)
-      }
-      return opacity
-    })
+    .locator('xpath=ancestor-or-self::*')
+    .evaluateAll((chain) =>
+      chain.reduce(
+        (opacity, element) =>
+          opacity * Number(getComputedStyle(element).opacity),
+        1,
+      ),
+    )
 }
 
 /** Moves the mouse a little off the centre of the CV button. */
