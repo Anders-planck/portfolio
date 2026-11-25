@@ -40,7 +40,8 @@ function toViewportPointer(event: PointerEvent): ViewportPointer {
  * and snaps it to a face on release. Each frame writes the transform
  * straight to the element; nothing goes through React state, and
  * `onFrontFaceChange` fires only when the front face changes. Returns the
- * keyboard turn and the cleanup.
+ * keyboard turn and the cleanup. One closure on purpose: draw, turn, lean
+ * and drag share the same frame state.
  */
 export function driveBlock(
   { handle, block }: BlockElements,

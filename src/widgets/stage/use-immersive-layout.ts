@@ -16,5 +16,6 @@ const WIDE_SCREEN_QUERY = '(min-width: 1024px)'
  */
 export function useImmersiveLayout(): boolean {
   const isWideScreen = useMediaQuery(WIDE_SCREEN_QUERY, false)
-  return isWideScreen && canFollowPointer(useMotionSettings())
+  const motion = useMotionSettings()
+  return isWideScreen && canFollowPointer(motion)
 }
