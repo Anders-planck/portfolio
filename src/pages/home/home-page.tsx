@@ -14,7 +14,7 @@ import { convexQueryOptions } from '../../shared/convex/convex-query-options'
  * (`/en`, `/fr`, `/de`) and the immersive Home arrive with later tickets.
  * The route loader awaits the query, so the page never renders pending; the
  * error and pending screens (with their copy from the locale messages) come
- * with the site shell ticket, for every route at once.
+ * with the site shell ticket (06, #14), for every route at once.
  */
 export const homeProfileQueryOptions = convexQueryOptions(
   api.content.getPublished,
