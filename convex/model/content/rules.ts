@@ -2,6 +2,8 @@ import { type Infer, v } from 'convex/values'
 
 import { localeValidator } from './locales'
 import { numeralRule } from './numeralrule'
+import { referenceRule } from './referencerule'
+import type { RuleContext } from './rulecontext'
 import { collectionValidator, type Snapshot } from './snapshot'
 
 /**
@@ -28,18 +30,19 @@ export const documentFindingValidator = findingValidator.extend({
 })
 export type DocumentFinding = Infer<typeof documentFindingValidator>
 
-export type Rule = (snapshot: Snapshot) => Finding[]
+export type Rule = (snapshot: Snapshot, context: RuleContext) => Finding[]
 
 /** The server-side rule set; the other rules land with ticket 15a (#22). */
-export const PUBLISH_RULES: readonly Rule[] = [numeralRule]
+export const PUBLISH_RULES: readonly Rule[] = [numeralRule, referenceRule]
 
 export function runPublishRules(
   snapshots: Snapshot[],
   rules: readonly Rule[],
+  context: RuleContext,
 ): DocumentFinding[] {
   return snapshots.flatMap((snapshot) =>
     rules.flatMap((rule) =>
-      rule(snapshot).map((finding) => ({
+      rule(snapshot, context).map((finding) => ({
         ...finding,
         collection: snapshot.collection,
         key: snapshot.key,

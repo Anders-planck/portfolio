@@ -59,7 +59,7 @@ test('a source read fine last time is ok', () => {
   })
 })
 
-test('a daily source is due a day after its last read, a weekly one a week after', () => {
+test('a daily source is due a day after its last verified reading, a weekly one a week after', () => {
   const daily = { kind: 'npm', packageName: 'pkg', cadence: 'daily' } as const
   const weekly = { ...daily, cadence: 'weekly' } as const
 

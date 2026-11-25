@@ -28,10 +28,38 @@ test('a metric reference is not a free numeral', () => {
   expect(findFreeNumerals('{{m:sdk-commits}} commit e {{m:top10}}')).toEqual([])
 })
 
-test('digits inside a word or a technical name are not figures', () => {
+test('known technical names with digits are not figures', () => {
   expect(
-    findFreeNumerals('i18n, OAuth2, ES2015, Cloudflare R2, scena 3D'),
+    findFreeNumerals(
+      'i18n, a11y, OAuth2, ES2015, Cloudflare R2, V8, v8.4, scena 3D',
+    ),
   ).toEqual([])
+})
+
+test('a year with a unit, a magnitude or a percent glued to it is a figure', () => {
+  expect(findFreeNumerals('2000k, 1999M, 2050x e 2024%')).toEqual([
+    '2000',
+    '1999',
+    '2050',
+    '2024',
+  ])
+})
+
+test('a figure glued to a word or a mark is still a figure', () => {
+  expect(
+    findFreeNumerals(
+      'Esperienza.10 anni, React,5 anni, _500_ utenti, x10 faster',
+    ),
+  ).toEqual(['10', '5', '500', '10'])
+})
+
+test('digits of any script, superscripts and numeral letters are figures', () => {
+  expect(findFreeNumerals('٣٠٠ utenti, ３００ utenti, m² e Ⅻ')).toEqual([
+    '٣٠٠',
+    '３００',
+    '²',
+    'Ⅻ',
+  ])
 })
 
 test('a figure next to a metric reference is still found', () => {

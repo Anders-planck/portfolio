@@ -93,11 +93,12 @@ test('a lost connection is a failure', async () => {
   expect(reading).toEqual({ kind: 'failed', reason: { kind: 'network' } })
 })
 
-test('GitHub commits count the author against all contributors, with the token', async () => {
+test('GitHub commits count the author against all contributors, anonymous ones too', async () => {
   const fetchMock = stubFetch(
     toJsonResponse([
       { login: 'anders-planck', contributions: 150 },
-      { login: 'someone-else', contributions: 7 },
+      { login: 'someone-else', contributions: 5 },
+      { type: 'Anonymous', contributions: 2 },
     ]),
   )
 
@@ -106,7 +107,7 @@ test('GitHub commits count the author against all contributors, with the token',
       kind: 'github-commits',
       repos: ['a-cube-io/ereceipts-js-sdk'],
       login: 'Anders-planck',
-      needsToken: false,
+      needsToken: true,
       cadence: DAILY,
     },
     TOKEN,
@@ -115,12 +116,30 @@ test('GitHub commits count the author against all contributors, with the token',
   expect(reading).toEqual({ kind: 'ok', figure: { value: 150, total: 157 } })
   const [url] = fetchMock.mock.calls[0] ?? []
   expect(url).toBe(
-    'https://api.github.com/repos/a-cube-io/ereceipts-js-sdk/contributors?per_page=100&page=1',
+    'https://api.github.com/repos/a-cube-io/ereceipts-js-sdk/contributors?per_page=100&page=1&anon=1',
   )
   expect(toHeaders(fetchMock.mock.calls[0]).get('Authorization')).toBe(
     `Bearer ${TOKEN}`,
   )
   expect(toHeaders(fetchMock.mock.calls[0]).get('User-Agent')).not.toBeNull()
+})
+
+test('a public source is read without the token, so it never counts private data', async () => {
+  const fetchMock = stubFetch(
+    toJsonResponse({ total_count: 3, incomplete_results: false, items: [] }),
+  )
+
+  await readSource(
+    {
+      kind: 'github-search',
+      query: 'is:pr',
+      needsToken: false,
+      cadence: DAILY,
+    },
+    TOKEN,
+  )
+
+  expect(toHeaders(fetchMock.mock.calls[0]).get('Authorization')).toBeNull()
 })
 
 test('GitHub commits are summed over several repositories', async () => {

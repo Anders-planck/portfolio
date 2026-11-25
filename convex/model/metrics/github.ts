@@ -11,7 +11,8 @@ const MAX_CONTRIBUTOR_PAGES = 10
 
 const contributorsSchema = z.array(
   z.object({
-    // Anonymous contributors have no login; they still count in the total.
+    // With `anon=1` GitHub also lists commits by emails linked to no account:
+    // they have no login, and they count in the total.
     login: z.string().optional(),
     contributions: z.number().int().nonnegative(),
   }),
@@ -46,7 +47,7 @@ async function readContributorPages(
   const contributors: Contributor[] = []
   for (let page = 1; page <= MAX_CONTRIBUTOR_PAGES; page += 1) {
     const response = await fetchJson(
-      `${GITHUB_API_URL}/repos/${repo}/contributors?per_page=${String(PAGE_SIZE)}&page=${String(page)}`,
+      `${GITHUB_API_URL}/repos/${repo}/contributors?per_page=${String(PAGE_SIZE)}&page=${String(page)}&anon=1`,
       headers,
       contributorsSchema,
     )
@@ -131,8 +132,10 @@ async function readSearchCount(
 }
 
 /**
- * Reads a GitHub source. A private one (`needsToken`) is never read without
- * the token: GitHub would answer with only the public part, a wrong figure.
+ * Reads a GitHub source. The token goes only to a private one (`needsToken`),
+ * which is never read without it (GitHub would answer with only the public
+ * part, a wrong figure); a public one never sends it, so it never counts
+ * private data.
  */
 export async function readGithubSource(
   source: GithubSource,
@@ -141,7 +144,7 @@ export async function readGithubSource(
   if (source.needsToken && token === null) {
     return { kind: 'failed', reason: { kind: 'missing-token' } }
   }
-  const headers = toGithubHeaders(token)
+  const headers = toGithubHeaders(source.needsToken ? token : null)
   switch (source.kind) {
     case 'github-commits': {
       return readCommits(source, headers)

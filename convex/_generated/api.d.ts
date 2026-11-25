@@ -20,9 +20,12 @@ import type * as model_content_numeralrule from "../model/content/numeralrule.js
 import type * as model_content_pointers from "../model/content/pointers.js";
 import type * as model_content_preview from "../model/content/preview.js";
 import type * as model_content_profile from "../model/content/profile.js";
+import type * as model_content_prose from "../model/content/prose.js";
+import type * as model_content_referencerule from "../model/content/referencerule.js";
 import type * as model_content_releases from "../model/content/releases.js";
 import type * as model_content_requests from "../model/content/requests.js";
 import type * as model_content_rollback from "../model/content/rollback.js";
+import type * as model_content_rulecontext from "../model/content/rulecontext.js";
 import type * as model_content_rules from "../model/content/rules.js";
 import type * as model_content_seed from "../model/content/seed.js";
 import type * as model_content_snapshot from "../model/content/snapshot.js";
@@ -69,9 +72,12 @@ declare const fullApi: ApiFromModules<{
   "model/content/pointers": typeof model_content_pointers;
   "model/content/preview": typeof model_content_preview;
   "model/content/profile": typeof model_content_profile;
+  "model/content/prose": typeof model_content_prose;
+  "model/content/referencerule": typeof model_content_referencerule;
   "model/content/releases": typeof model_content_releases;
   "model/content/requests": typeof model_content_requests;
   "model/content/rollback": typeof model_content_rollback;
+  "model/content/rulecontext": typeof model_content_rulecontext;
   "model/content/rules": typeof model_content_rules;
   "model/content/seed": typeof model_content_seed;
   "model/content/snapshot": typeof model_content_snapshot;

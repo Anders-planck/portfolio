@@ -8,6 +8,12 @@ import type { LargeNumberStyle } from './format'
  * becomes a reading; a failed read only moves the metric's `lastAttempt`.
  */
 
+/**
+ * A second read within this window ("Aggiorna ora" twice, or with the cron)
+ * writes no second reading: one figure per source per window.
+ */
+const READING_WINDOW_MS = 10 * 60 * 1000
+
 /** Rounding the site starts with: the mockup's «10k+» above ten thousand. */
 const DEFAULT_LARGE_NUMBER_STYLE: LargeNumberStyle = 'compact'
 
@@ -44,13 +50,18 @@ export async function recordReading(
     })
     return
   }
-  await ctx.db.insert('metricReadings', {
-    metricId,
-    ...reading.figure,
-    verifiedAt: attemptedAt,
-    evidence: null,
-    recordedAt: attemptedAt,
-  })
+  const latest = await readLatestReading(ctx, metricId)
+  const isWithinWindow =
+    latest !== null && attemptedAt - latest.verifiedAt < READING_WINDOW_MS
+  if (!isWithinWindow) {
+    await ctx.db.insert('metricReadings', {
+      metricId,
+      ...reading.figure,
+      verifiedAt: attemptedAt,
+      evidence: null,
+      recordedAt: attemptedAt,
+    })
+  }
   await ctx.db.patch(metricId, {
     lastAttempt: { attemptedAt, outcome: { kind: 'ok' } },
   })

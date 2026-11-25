@@ -34,3 +34,21 @@ export function parseMetricReferences(text: string): ReferenceSegment[] {
     (segment) => segment.kind === 'reference' || segment.text !== '',
   )
 }
+
+// Anything in double braces: a reference, or text that tried to be one.
+const BRACED_PATTERN = /\{\{[^{}]*\}\}/g
+
+/** Double-braced text that is not a valid reference (`{{ m:sdk }}`, `{{M:sdk}}`). */
+export function findMalformedReferences(text: string): string[] {
+  return [...text.matchAll(BRACED_PATTERN)]
+    .map(([braced]) => braced)
+    .filter((braced) => parseMetricReferences(braced)[0]?.kind !== 'reference')
+}
+
+/** The metric keys a text refers to, each once, in reading order. */
+export function listReferencedMetricKeys(text: string): string[] {
+  const keys = parseMetricReferences(text).flatMap((segment) =>
+    segment.kind === 'reference' ? [segment.key] : [],
+  )
+  return [...new Set(keys)]
+}

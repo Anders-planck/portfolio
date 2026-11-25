@@ -59,7 +59,9 @@ export function formatMetricFigure(
       if (figure.total === null) {
         return count.text
       }
-      return `${count.text}/${formatNumber(figure.total, locale, style).text}`
+      // The total is what the count is out of, not a lower bound: never «k+».
+      const total = formatNumber(figure.total, locale, 'exact')
+      return `${count.text}/${total.text}`
     }
     case 'at-least': {
       return count.isLowerBound ? count.text : `${count.text}+`

@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 
 import type { QueryCtx } from '../../_generated/server'
+import { readLatestReading } from './readings'
 import { automatedSourceValidator } from './sources'
 import { MAX_METRICS } from './tables'
 
@@ -8,20 +9,20 @@ import { MAX_METRICS } from './tables'
 export const refreshTargetValidator = v.object({
   metricId: v.id('metrics'),
   source: automatedSourceValidator,
-  lastAttemptedAt: v.union(v.number(), v.null()),
+  /** The last verified reading: a failed read leaves the source due. */
+  lastVerifiedAt: v.union(v.number(), v.null()),
 })
 
 export async function listAutomatedMetrics(ctx: QueryCtx) {
   const metrics = await ctx.db.query('metrics').take(MAX_METRICS)
-  return metrics.flatMap((metric) =>
-    metric.source.kind === 'manual'
-      ? []
-      : [
-          {
-            metricId: metric._id,
-            source: metric.source,
-            lastAttemptedAt: metric.lastAttempt?.attemptedAt ?? null,
-          },
-        ],
+  const targets = await Promise.all(
+    metrics.map(async ({ _id: metricId, source }) => {
+      if (source.kind === 'manual') {
+        return []
+      }
+      const reading = await readLatestReading(ctx, metricId)
+      return [{ metricId, source, lastVerifiedAt: reading?.verifiedAt ?? null }]
+    }),
   )
+  return targets.flat()
 }

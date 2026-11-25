@@ -66,3 +66,14 @@ test('compact rounding of a large count shows the thousands separator', () => {
     ),
   ).toBe('1.234k+')
 })
+
+test('compact rounding rounds the count of a total but keeps the total exact', () => {
+  expect(
+    formatMetricFigure(
+      { value: 12_999, total: 25_300 },
+      'count-of-total',
+      'it',
+      COMPACT,
+    ),
+  ).toBe('12k+/25.300')
+})

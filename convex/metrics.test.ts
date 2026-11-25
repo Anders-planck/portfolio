@@ -133,6 +133,35 @@ test('the scheduled refresh reads only the sources that are due', async () => {
   expect(fetchMock).toHaveBeenCalledTimes(2)
 })
 
+test('a weekly source that failed is read again on the next daily run', async () => {
+  const backend = createBackend()
+  await createNpmMetric(backend, 'weekly')
+  const fetchMock = stubFetchRoutes({
+    [NPM_URL]: () => toJsonResponse({ error: 'down' }, 503),
+  })
+
+  await backend.action(internal.metrics.refreshDueSources, {})
+  vi.setSystemTime(NOW + DAY_MS)
+  await backend.action(internal.metrics.refreshDueSources, {})
+
+  expect(fetchMock).toHaveBeenCalledTimes(2)
+})
+
+test('reading the sources twice in a row records one reading', async () => {
+  const backend = createBackend()
+  await createNpmMetric(backend)
+  stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ downloads: 8489 }) })
+
+  await backend.action(internal.metrics.refreshNow, {})
+  vi.setSystemTime(NOW + 60 * 1000)
+  await backend.action(internal.metrics.refreshNow, {})
+
+  const readings = await backend.run((ctx) =>
+    ctx.db.query('metricReadings').take(10),
+  )
+  expect(readings).toHaveLength(1)
+})
+
 test('a private source is not read without the GitHub token', async () => {
   const backend = createBackend()
   vi.stubEnv('GITHUB_TOKEN', '')
@@ -281,4 +310,29 @@ test('the rounding choice changes how large figures are shown', async () => {
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
     display: '25.300',
   })
+})
+
+async function publishSubtitle(backend: Backend, subtitle: string) {
+  const { revision } = await backend.mutation(internal.content.saveDraft, {
+    collection: 'profile',
+    key: 'main',
+    localeEdit: { locale: 'it', content: { subtitle } },
+  })
+  return backend.mutation(internal.content.publish, {
+    selection: [{ collection: 'profile', key: 'main', revision }],
+    note: 'Sottotitolo',
+    requestId: `publish:${subtitle}`,
+  })
+}
+
+test('copy can be published only with references to metrics that exist', async () => {
+  const backend = createBackend()
+  await createNpmMetric(backend)
+
+  expect(
+    await publishSubtitle(backend, '{{m:missing}} download'),
+  ).toMatchObject({ status: 'blocked', findings: [{ rule: 'unknown-metric' }] })
+  expect(
+    await publishSubtitle(backend, '{{m:downloads}} download'),
+  ).toMatchObject({ status: 'published' })
 })

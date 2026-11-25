@@ -12,6 +12,7 @@ import {
   readLiveVersionIdsAfter,
 } from './pointers'
 import { findRepeatedRequest, requestKindValidator } from './requests'
+import { readRuleContext } from './rulecontext'
 import {
   type DocumentFinding,
   documentFindingValidator,
@@ -131,7 +132,11 @@ export async function publishSelection(
     return { status: 'stale', documents: staleDocuments }
   }
   const snapshots = await readSelectedDrafts(ctx, selection)
-  const findings = runPublishRules(snapshots, PUBLISH_RULES)
+  const findings = runPublishRules(
+    snapshots,
+    PUBLISH_RULES,
+    await readRuleContext(ctx),
+  )
   if (hasBlockingFinding(findings)) {
     return { status: 'blocked', findings }
   }
@@ -187,6 +192,7 @@ export async function publishScheduledRelease(
   const findings = runPublishRules(
     versions.map(({ snapshot }) => snapshot),
     PUBLISH_RULES,
+    await readRuleContext(ctx),
   )
   const releaseFields = { versionIds, note, requestId, requestKind, findings }
   const conflicts = await findMovedPointers(ctx, release.expectedPointers)

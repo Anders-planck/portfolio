@@ -20,7 +20,7 @@ export async function refreshSources(
   const selected = targets.filter(
     (target) =>
       scope === 'all' ||
-      isRefreshDue(target.source, target.lastAttemptedAt, now),
+      isRefreshDue(target.source, target.lastVerifiedAt, now),
   )
   await Promise.all(
     selected.map(async ({ metricId, source }) => {

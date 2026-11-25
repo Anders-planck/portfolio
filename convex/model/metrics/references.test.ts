@@ -1,6 +1,10 @@
 import { expect, test } from 'vitest'
 
-import { parseMetricReferences } from './references'
+import {
+  findMalformedReferences,
+  listReferencedMetricKeys,
+  parseMetricReferences,
+} from './references'
 
 test('text without references is one text segment', () => {
   expect(parseMetricReferences('Frontend e full-stack.')).toEqual([
@@ -33,4 +37,20 @@ test('a malformed reference stays text', () => {
   expect(parseMetricReferences('{{m:Not A Key}} {{m:}} {m:key}')).toEqual([
     { kind: 'text', text: '{{m:Not A Key}} {{m:}} {m:key}' },
   ])
+})
+
+test('references that do not follow the grammar are found as written', () => {
+  expect(
+    findMalformedReferences(
+      'Ok {{m:sdk-commits}}, ma {{ m:sdk }}, {{M:sdk}}, {{m:Sdk_Commits}} e {{m:}}.',
+    ),
+  ).toEqual(['{{ m:sdk }}', '{{M:sdk}}', '{{m:Sdk_Commits}}', '{{m:}}'])
+})
+
+test('the keys a text refers to are listed once each', () => {
+  expect(
+    listReferencedMetricKeys(
+      '{{m:sdk-commits}} e {{m:downloads}}, {{m:sdk-commits}}',
+    ),
+  ).toEqual(['sdk-commits', 'downloads'])
 })

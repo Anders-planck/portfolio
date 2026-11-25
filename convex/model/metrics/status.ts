@@ -58,14 +58,18 @@ export function toMetricStatus(
   return { kind: 'ok' }
 }
 
+/**
+ * Due when the last verified reading is a cadence old, so a failed read is
+ * tried again on the next daily run, even for a weekly source.
+ */
 export function isRefreshDue(
   source: AutomatedSource,
-  lastAttemptedAt: number | null,
+  lastVerifiedAt: number | null,
   now: number,
 ) {
-  if (lastAttemptedAt === null) {
+  if (lastVerifiedAt === null) {
     return true
   }
   const interval = REFRESH_INTERVAL_MS[source.cadence]
-  return now - lastAttemptedAt >= interval - REFRESH_SLACK_MS
+  return now - lastVerifiedAt >= interval - REFRESH_SLACK_MS
 }
