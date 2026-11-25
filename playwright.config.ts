@@ -5,7 +5,15 @@ import { defineConfig, devices } from '@playwright/test'
 const convexUrl = process.env.VITE_CONVEX_URL ?? 'http://127.0.0.1:3210'
 const PORT = '4173'
 
-export default defineConfig({
+// The CMS tests sign in through the test-only sign-in (convex/e2e.ts), which
+// works only on a loopback backend; these values are not secrets.
+const e2eEnv = {
+  E2E_OWNER_GITHUB_ID: '1000001',
+  E2E_SIGN_IN_SECRET: 'local-e2e-sign-in-secret-loopback-only',
+}
+
+// The options `e2e/cms-test.ts` declares (config may not import e2e code).
+export default defineConfig<{ convexUrl: string; testSignInSecret: string }>({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -14,14 +22,17 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${PORT}`,
     trace: 'on-first-retry',
+    convexUrl,
+    testSignInSecret: e2eEnv.E2E_SIGN_IN_SECRET,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: [
     {
-      // `seed:publishSeedProfile` publishes the seed profile once (a no-op afterwards).
+      // Sets the local backend's env (refuses any other deployment), then
+      // `seed:publishSeedProfile` publishes the seed profile once.
       command:
-        'bunx convex dev --tail-logs disable --run seed:publishSeedProfile',
-      env: { CONVEX_AGENT_MODE: 'anonymous' },
+        'bun scripts/e2e/prepare-local-convex.ts && bunx convex dev --tail-logs disable --run seed:publishSeedProfile',
+      env: { CONVEX_AGENT_MODE: 'anonymous', ...e2eEnv },
       url: `${convexUrl}/version`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

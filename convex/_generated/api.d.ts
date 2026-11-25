@@ -9,7 +9,9 @@
  */
 
 import type * as appearance from "../appearance.js";
+import type * as auth from "../auth.js";
 import type * as content from "../content.js";
+import type * as e2e from "../e2e.js";
 import type * as model_appearance from "../model/appearance.js";
 import type * as model_content_drafts from "../model/content/drafts.js";
 import type * as model_content_limits from "../model/content/limits.js";
@@ -24,9 +26,12 @@ import type * as model_content_rules from "../model/content/rules.js";
 import type * as model_content_seed from "../model/content/seed.js";
 import type * as model_content_snapshot from "../model/content/snapshot.js";
 import type * as model_content_versions from "../model/content/versions.js";
+import type * as model_e2e from "../model/e2e.js";
 import type * as model_env from "../model/env.js";
 import type * as model_owner from "../model/owner.js";
+import type * as model_users from "../model/users.js";
 import type * as seed from "../seed.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -36,7 +41,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   appearance: typeof appearance;
+  auth: typeof auth;
   content: typeof content;
+  e2e: typeof e2e;
   "model/appearance": typeof model_appearance;
   "model/content/drafts": typeof model_content_drafts;
   "model/content/limits": typeof model_content_limits;
@@ -51,9 +58,12 @@ declare const fullApi: ApiFromModules<{
   "model/content/seed": typeof model_content_seed;
   "model/content/snapshot": typeof model_content_snapshot;
   "model/content/versions": typeof model_content_versions;
+  "model/e2e": typeof model_e2e;
   "model/env": typeof model_env;
   "model/owner": typeof model_owner;
+  "model/users": typeof model_users;
   seed: typeof seed;
+  users: typeof users;
 }>;
 
 /**
@@ -82,4 +92,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  auth: import("@convex-dev/auth/_generated/component.js").ComponentApi<"auth">;
+  authGithub: import("@convex-dev/auth/components/github/_generated/component.js").ComponentApi<"authGithub">;
+};

@@ -11,6 +11,8 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    /* @convex-dev/auth ships its convex-test helpers as .ts source. */
+    "allowImportingTsExtensions": true,
 
     /* Owner standards, TS-02 (CODING_STANDARDS.md). */
     "noUncheckedIndexedAccess": true,

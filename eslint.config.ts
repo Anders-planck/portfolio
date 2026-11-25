@@ -19,10 +19,12 @@ const CONVEX_ENV_CONFIG_MODULE = 'convex/model/env.ts'
 const SERVER_LOG_MODULE = 'src/shared/server/log.ts'
 
 const TEST_FILES = ['**/*.test.{ts,tsx}', 'e2e/**']
+// Test setup shared by several test files; only tests import them.
+const FIXTURE_FILES = ['**/*.fixture.{ts,tsx}']
 const SIZE_EXEMPT_FILES = [
   ...TEST_FILES,
   '**/fixtures/**',
-  '**/*.fixture.{ts,tsx}',
+  ...FIXTURE_FILES,
   '**/seed/**',
   '**/seed.ts',
 ]
@@ -262,6 +264,8 @@ export default defineConfig(
                 '**/test-utils',
                 '**/test-utils/**',
                 '**/fixtures/**',
+                '**/*.fixture',
+                '**/*.fixture.*',
               ],
               message:
                 'App code never imports mocks or test utilities (ARC-02).',
@@ -303,7 +307,7 @@ export default defineConfig(
   },
 
   {
-    files: [...TEST_FILES, ...TOOLING_FILES],
+    files: [...TEST_FILES, ...FIXTURE_FILES, ...TOOLING_FILES],
     rules: { 'no-restricted-imports': 'off' },
   },
   // Tooling configs run in Node outside the app; they read the process

@@ -5,13 +5,16 @@ import {
   action,
   internalMutation,
   internalQuery,
+  mutation,
   query,
 } from './_generated/server'
 import {
   draftEditValidator,
+  editableDraftValidator,
   type PreviewOutcome,
   previewOutcomeValidator,
   readDraftPreview,
+  readEditableDraft,
   saveDraftEdit,
 } from './model/content/drafts'
 import { localeValidator } from './model/content/locales'
@@ -33,17 +36,16 @@ import { requireOwner } from './model/owner'
 
 /**
  * Content store (ADR 0003): `saveDraft`, `publish`, `rollback`,
- * `getPublished`, `getDraft`. The CMS functions are internal until owner auth
- * exists (ticket 04, see `model/owner.ts`); the public site and preview only
- * read.
+ * `getPublished`, `getDraft`. The CMS functions start with `requireOwner`
+ * (ADR 0005); the public site and preview only read.
  */
 
 /** Live-saves an edit; the returned revision is what publish checks against. */
-export const saveDraft = internalMutation({
+export const saveDraft = mutation({
   args: draftEditValidator,
   returns: v.object({ savedAt: v.number(), revision: v.number() }),
   handler: async (ctx, edit) => {
-    await requireOwner()
+    await requireOwner(ctx)
     const savedAt = Date.now()
     const { revision } = await saveDraftEdit(ctx, edit, savedAt)
     return { savedAt, revision }
@@ -54,7 +56,7 @@ export const saveDraft = internalMutation({
  * Publishes the selected drafts now, or schedules them for `scheduledAt` (epoch ms).
  * `requestId` makes it idempotent: repeating it returns the first release.
  */
-export const publish = internalMutation({
+export const publish = mutation({
   args: {
     selection: v.array(reviewedDraftValidator),
     note: v.string(),
@@ -63,7 +65,7 @@ export const publish = internalMutation({
   },
   returns: publishOutcomeValidator,
   handler: async (ctx, request) => {
-    await requireOwner()
+    await requireOwner(ctx)
     return publishSelection(ctx, request, Date.now())
   },
 })
@@ -83,17 +85,31 @@ export const publishScheduled = internalMutation({
  * (documents first published later are unpublished), as a new release.
  * `requestId` makes it idempotent: repeating it returns the first rollback.
  */
-export const rollback = internalMutation({
+export const rollback = mutation({
   args: { releaseId: v.id('releases'), requestId: v.string() },
   returns: v.object({ releaseId: v.id('releases') }),
   handler: async (ctx, { releaseId: targetId, requestId }) => {
-    await requireOwner()
+    await requireOwner(ctx)
     const releaseId = await rollBackToRelease(
       ctx,
       { targetId, requestId },
       Date.now(),
     )
     return { releaseId }
+  },
+})
+
+/** What the CMS editor opens: the draft in one locale, with its revision. */
+export const getEditableDraft = query({
+  args: {
+    collection: collectionValidator,
+    key: v.string(),
+    locale: localeValidator,
+  },
+  returns: editableDraftValidator,
+  handler: async (ctx, target) => {
+    await requireOwner(ctx)
+    return readEditableDraft(ctx, target)
   },
 })
 
@@ -109,15 +125,15 @@ export const getPublished = query({
 })
 
 /** A preview link for one document in one locale, valid for an hour. */
-export const createPreviewToken = internalMutation({
+export const createPreviewToken = mutation({
   args: {
     collection: collectionValidator,
     key: v.string(),
     locale: localeValidator,
   },
   returns: v.object({ token: v.string(), expiresAt: v.number() }),
-  handler: async (_ctx, target) => {
-    await requireOwner()
+  handler: async (ctx, target) => {
+    await requireOwner(ctx)
     return issuePreviewToken(target, {
       secret: readPreviewTokenSecret(),
       now: Date.now(),

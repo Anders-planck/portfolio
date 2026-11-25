@@ -12,6 +12,7 @@ import {
   collectionValidator,
   snapshotValidator,
 } from './model/content/snapshot'
+import { userFieldsValidator } from './model/users'
 
 export default defineSchema({
   // One row: the published theme and motion params (ADR 0010). A stand-in
@@ -57,4 +58,7 @@ export default defineSchema({
     versionId: v.id('versions'),
     releaseId: v.id('releases'),
   }).index('by_collection_and_key', ['collection', 'key']),
+
+  // CMS users (ADR 0005). Their sessions live in the Convex Auth component.
+  users: defineTable(userFieldsValidator).index('by_github_id', ['githubId']),
 })

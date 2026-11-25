@@ -10,33 +10,60 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CmsRouteRouteImport } from './routes/cms/route'
+import { Route as CmsIndexRouteImport } from './routes/cms/index'
+import { Route as CmsProfiloRouteImport } from './routes/cms/profilo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CmsRouteRoute = CmsRouteRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CmsIndexRoute = CmsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => CmsRouteRoute,
+} as any)
+const CmsProfiloRoute = CmsProfiloRouteImport.update({
+  id: '/profilo',
+  path: '/profilo',
+  getParentRoute: () => CmsRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/cms': typeof CmsRouteRouteWithChildren
+  '/cms/profilo': typeof CmsProfiloRoute
+  '/cms/': typeof CmsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/cms/profilo': typeof CmsProfiloRoute
+  '/cms': typeof CmsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/cms': typeof CmsRouteRouteWithChildren
+  '/cms/profilo': typeof CmsProfiloRoute
+  '/cms/': typeof CmsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/cms' | '/cms/profilo' | '/cms/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/cms/profilo' | '/cms'
+  id: '__root__' | '/' | '/cms' | '/cms/profilo' | '/cms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CmsRouteRoute: typeof CmsRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +75,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/cms': {
+      id: '/cms'
+      path: '/cms'
+      fullPath: '/cms'
+      preLoaderRoute: typeof CmsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cms/': {
+      id: '/cms/'
+      path: '/'
+      fullPath: '/cms/'
+      preLoaderRoute: typeof CmsIndexRouteImport
+      parentRoute: typeof CmsRouteRoute
+    }
+    '/cms/profilo': {
+      id: '/cms/profilo'
+      path: '/profilo'
+      fullPath: '/cms/profilo'
+      preLoaderRoute: typeof CmsProfiloRouteImport
+      parentRoute: typeof CmsRouteRoute
+    }
   }
 }
 
+interface CmsRouteRouteChildren {
+  CmsProfiloRoute: typeof CmsProfiloRoute
+  CmsIndexRoute: typeof CmsIndexRoute
+}
+
+const CmsRouteRouteChildren: CmsRouteRouteChildren = {
+  CmsProfiloRoute: CmsProfiloRoute,
+  CmsIndexRoute: CmsIndexRoute,
+}
+
+const CmsRouteRouteWithChildren = CmsRouteRoute._addFileChildren(
+  CmsRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CmsRouteRoute: CmsRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
