@@ -73,7 +73,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-test('with motion allowed, blocks below the fold wait to come in', () => {
+test('with motion allowed, blocks below the fold wait to come in and the button leans to the mouse', () => {
   stubReaderSettings({ isReducedMotion: false, hasFinePointer: true })
   const { getByLabelText, getByRole } = render(<Blocks />, {
     wrapper: MotionProvider,

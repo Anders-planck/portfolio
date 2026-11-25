@@ -10,7 +10,10 @@ export interface CursorParts {
 /** Below this distance in px the ring is where the pointer is. */
 const SETTLED_DISTANCE_PX = 0.4
 
-function toTranslate({ left, top }: ViewportPosition): string {
+function toTranslateFromViewportPosition({
+  left,
+  top,
+}: ViewportPosition): string {
   return `translate3d(${String(left)}px, ${String(top)}px, 0)`
 }
 
@@ -54,7 +57,9 @@ export function followPointer(
       pointer.top - ringPosition.top,
     )
     const isSettled = distance < SETTLED_DISTANCE_PX
-    parts.ring.style.transform = toTranslate(isSettled ? pointer : ringPosition)
+    parts.ring.style.transform = toTranslateFromViewportPosition(
+      isSettled ? pointer : ringPosition,
+    )
     frame = isSettled ? 0 : requestAnimationFrame(moveRing)
   }
   const trackPointer = (event: PointerEvent) => {
@@ -65,7 +70,7 @@ export function followPointer(
     pointer = { left: event.clientX, top: event.clientY }
     // The ring appears under the pointer, not flying in from a corner.
     ringPosition = isFirstMove ? pointer : ringPosition
-    parts.dot.style.transform = toTranslate(pointer)
+    parts.dot.style.transform = toTranslateFromViewportPosition(pointer)
     showTarget(parts, event.target instanceof Element ? event.target : null)
     if (frame === 0) {
       frame = requestAnimationFrame(moveRing)
