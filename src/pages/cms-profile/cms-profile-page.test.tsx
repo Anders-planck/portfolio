@@ -17,7 +17,7 @@ afterEach(cleanup)
 // happy-dom rejects the `finished` promise of the animations the locale
 // switch (SegmentedControl) cancels on unmount, and nothing handles it there.
 // Without Web Animations the control does not animate.
-const { animate } = Element.prototype
+const animate = Object.getOwnPropertyDescriptor(Element.prototype, 'animate')
 beforeAll(() => {
   Object.defineProperty(Element.prototype, 'animate', {
     value: undefined,
@@ -25,10 +25,9 @@ beforeAll(() => {
   })
 })
 afterAll(() => {
-  Object.defineProperty(Element.prototype, 'animate', {
-    value: animate,
-    configurable: true,
-  })
+  if (animate !== undefined) {
+    Object.defineProperty(Element.prototype, 'animate', animate)
+  }
 })
 
 const SAVED_DRAFT: EditableProfileDraft = {
@@ -72,9 +71,11 @@ test('the Profile opens on the saved draft, with when it was saved', () => {
     )
   })
 
-  expect(screen.getByRole('heading', { level: 1, name: 'Profilo' })).toBeDefined()
   expect(
-    (screen.getByLabelText('Testo del pulsante di contatto') as HTMLInputElement)
+    screen.getByRole('heading', { level: 1, name: 'Profilo' }),
+  ).toBeDefined()
+  expect(
+    screen.getByLabelText<HTMLInputElement>('Testo del pulsante di contatto')
       .value,
   ).toBe('Scrivimi')
   expect(screen.getByText('Salvato · 10:42')).toBeDefined()
@@ -94,12 +95,14 @@ test('an unsaved edit holds back publish and the locale switch', () => {
 
   expect(screen.getByText('Modifiche da salvare…')).toBeDefined()
   expect(
-    screen.getByRole('button', { name: 'Pubblica' }).getAttribute('aria-disabled'),
+    screen
+      .getByRole('button', { name: 'Pubblica' })
+      .getAttribute('aria-disabled'),
   ).toBe('true')
 })
 
 test('while the draft loads the page says so', () => {
-  renderPage(() => {})
+  renderPage(() => undefined)
 
   expect(screen.getByText('Caricamento della bozza…')).toBeDefined()
 })

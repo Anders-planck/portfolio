@@ -29,3 +29,4 @@ Domain words for the portfolio and its CMS. Code identifiers use the English ter
 | Motion | movimento | How the site moves: tempo (speed) and character (crisp, standard, expressive). Reduced motion always wins over it. |
 | Appearance | aspetto | The published theme and motion together: what the site looks and moves like. |
 | Owner | proprietario | The only CMS user (GitHub account on the allowlist). |
+| Session | sessione | One signed-in browser of the owner (Convex Auth). Ends on sign-out, on expiry, or at once when the owner's id leaves the allowlist. |

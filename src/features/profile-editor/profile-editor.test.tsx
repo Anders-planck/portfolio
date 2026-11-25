@@ -47,10 +47,10 @@ function typeInto(label: string, value: string) {
 test('the form opens on the saved values', () => {
   renderEditor()
 
-  expect(
-    (screen.getByLabelText('Sottotitolo') as HTMLTextAreaElement).value,
-  ).toBe(CONTENT.subtitle)
-  expect((screen.getByLabelText('Email') as HTMLInputElement).value).toBe(
+  expect(screen.getByLabelText<HTMLTextAreaElement>('Sottotitolo').value).toBe(
+    CONTENT.subtitle,
+  )
+  expect(screen.getByLabelText<HTMLInputElement>('Email').value).toBe(
     FIELDS.email,
   )
 })
@@ -61,9 +61,9 @@ test('a locale field edit is handed on as locale content', () => {
   typeInto('Titolo · riga 1', 'Senior')
 
   expect(onEdit).toHaveBeenCalledWith({ content: { titleLine1: 'Senior' } })
-  expect(
-    (screen.getByLabelText('Titolo · riga 1') as HTMLInputElement).value,
-  ).toBe('Senior')
+  expect(screen.getByLabelText<HTMLInputElement>('Titolo · riga 1').value).toBe(
+    'Senior',
+  )
 })
 
 test('shared fields are handed on as fields; skills go whole', () => {

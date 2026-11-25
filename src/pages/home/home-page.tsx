@@ -1,65 +1,65 @@
+import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { Link } from '@astryxdesign/core/Link'
 import { Stack } from '@astryxdesign/core/Stack'
 import { StatusDot } from '@astryxdesign/core/StatusDot'
 import { Text } from '@astryxdesign/core/Text'
-import { useSuspenseQuery } from '@tanstack/react-query'
 
-import { api } from '../../../convex/_generated/api'
-import { convexQueryOptions } from '../../shared/convex/convex-query-options'
+import { useProfileTranslation } from '../../entities/profile/use-profile-translation'
+import { TranslationFallbackNotice } from '../../shared/i18n/translation-fallback-notice'
+import { useLocale } from '../../shared/i18n/use-locale'
+import { useMessages } from '../../shared/i18n/use-messages'
 
 /**
- * Bare Home: the published Profile in the default locale. Locale routing
- * (`/en`, `/fr`, `/de`) and the immersive Home arrive with later tickets.
- * The route loader awaits the query, so the page never renders pending; the
- * error and pending screens (with their copy from the locale messages) come
- * with the site shell ticket (06, #14), for every route at once.
+ * Bare Home: the published Profile in the locale of the address, or in the
+ * locale it falls back to, with a notice (user story 19). The immersive Home
+ * arrives with ticket 08. The route loader awaits the queries, so the page
+ * never renders pending. The shell gives `<main>`.
  */
-export const homeProfileQueryOptions = convexQueryOptions(
-  api.content.getPublished,
-  { collection: 'profile', key: 'main', locale: 'it' },
-)
-
 export function HomePage() {
-  const { data: profile } = useSuspenseQuery(homeProfileQueryOptions)
+  const profile = useProfileTranslation(useLocale())
+  const { home } = useMessages()
 
-  return (
-    <Layout
-      content={
-        <LayoutContent role="main" padding={8}>
-          {/* Nothing published yet in this locale: the page stays empty. */}
-          {profile?.content == null ? null : (
-            <Stack gap={6}>
-              <Stack direction="horizontal" gap={2} align="center">
-                {profile.fields.isAvailable && (
-                  <StatusDot
-                    variant="success"
-                    label={profile.content.availabilityLabel}
-                  />
-                )}
-                <Text type="label">{profile.content.statusLabel}</Text>
-              </Stack>
-              <Heading level={1}>
-                {profile.content.titleLine1} {profile.content.titleLine2}
-              </Heading>
-              <Text type="large" as="p">
-                {profile.content.subtitle}
-              </Text>
-              <Stack direction="horizontal" gap={4}>
-                <Link href={`mailto:${profile.fields.email}`}>
-                  {profile.content.contactLabel}
-                </Link>
-                {profile.fields.links.map((link) => (
-                  <Link key={link.href} href={link.href}>
-                    {link.label}
-                  </Link>
-                ))}
-              </Stack>
-            </Stack>
-          )}
+  if (profile.kind === 'missing') {
+    return (
+      <Layout height="auto">
+        <LayoutContent padding={8}>
+          <EmptyState title={home.emptyTitle} headingLevel={1} />
         </LayoutContent>
-      }
-    />
+      </Layout>
+    )
+  }
+  const { fields, content } = profile.content
+  return (
+    <Layout height="auto">
+      <LayoutContent padding={8}>
+        <Stack gap={6}>
+          {profile.kind === 'fallback' && (
+            <TranslationFallbackNotice shownLocale={profile.locale} />
+          )}
+          <Stack direction="horizontal" gap={2} align="center">
+            {fields.isAvailable && (
+              <StatusDot variant="success" label={content.availabilityLabel} />
+            )}
+            <Text type="label">{content.statusLabel}</Text>
+          </Stack>
+          <Heading level={1}>
+            {content.titleLine1} {content.titleLine2}
+          </Heading>
+          <Text type="large" as="p">
+            {content.subtitle}
+          </Text>
+          <Stack direction="horizontal" gap={4}>
+            <Link href={`mailto:${fields.email}`}>{content.contactLabel}</Link>
+            {fields.links.map((link) => (
+              <Link key={link.href} href={link.href}>
+                {link.label}
+              </Link>
+            ))}
+          </Stack>
+        </Stack>
+      </LayoutContent>
+    </Layout>
   )
 }

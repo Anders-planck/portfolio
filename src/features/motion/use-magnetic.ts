@@ -1,0 +1,27 @@
+import { type RefCallback, useCallback } from 'react'
+
+import { attractToPointer } from './attract-to-pointer'
+import { canFollowPointer, useMotionSettings } from './use-motion-settings'
+
+/**
+ * Magnetic: the control this ref is on leans toward a mouse pointer near
+ * it. Off on touch and with reduced motion (ADR 0008). Give the control a
+ * transform transition (theme duration and move curve) so it eases.
+ */
+export function useMagnetic<Target extends HTMLElement>(): RefCallback<Target> {
+  const motion = useMotionSettings()
+  const isMagnetic = canFollowPointer(motion)
+  const { magneticRadiusPx, magneticStrength } = motion.knobs
+  return useCallback(
+    (element: Target | null) => {
+      if (element === null || !isMagnetic) {
+        return undefined
+      }
+      return attractToPointer(element, {
+        radiusPx: magneticRadiusPx,
+        strength: magneticStrength,
+      })
+    },
+    [isMagnetic, magneticRadiusPx, magneticStrength],
+  )
+}

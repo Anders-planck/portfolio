@@ -8,14 +8,19 @@ afterEach(cleanup)
 
 test('a saved draft shows "Salvato · hh:mm" in a status region', () => {
   const savedAt = new Date(2026, 10, 25, 9, 5).getTime()
-  render(<SaveStatus saveState={{ kind: 'saved', savedAt }} onRetry={vi.fn()} />)
+  render(
+    <SaveStatus saveState={{ kind: 'saved', savedAt }} onRetry={vi.fn()} />,
+  )
 
   expect(screen.getByRole('status').textContent).toBe('Salvato · 09:05')
 })
 
 test('every other state says where the edits are', () => {
   const { rerender } = render(
-    <SaveStatus saveState={{ kind: 'saved', savedAt: null }} onRetry={vi.fn()} />,
+    <SaveStatus
+      saveState={{ kind: 'saved', savedAt: null }}
+      onRetry={vi.fn()}
+    />,
   )
   expect(screen.getByRole('status').textContent).toBe('Nessuna bozza salvata')
 

@@ -13,6 +13,9 @@ test('Panoramica is empty and says so', () => {
     screen.getByRole('heading', { level: 1, name: 'Panoramica' }),
   ).toBeDefined()
   expect(
-    screen.getByRole('heading', { level: 2, name: 'Ancora niente da mostrare' }),
+    screen.getByRole('heading', {
+      level: 2,
+      name: 'Ancora niente da mostrare',
+    }),
   ).toBeDefined()
 })

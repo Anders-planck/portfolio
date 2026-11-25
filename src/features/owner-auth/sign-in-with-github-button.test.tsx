@@ -15,7 +15,10 @@ afterEach(() => {
 })
 
 test('starts the GitHub sign-in', async () => {
-  signIn.mockResolvedValue({ status: 'redirect', redirect: new URL('https://github.com') })
+  signIn.mockResolvedValue({
+    status: 'redirect',
+    redirect: new URL('https://github.com'),
+  })
   render(<SignInWithGithubButton />)
 
   fireEvent.click(screen.getByRole('button', { name: 'Accedi con GitHub' }))
@@ -35,5 +38,7 @@ test('a sign-in that cannot start says so', async () => {
 
   fireEvent.click(screen.getByRole('button', { name: 'Accedi con GitHub' }))
 
-  expect(await screen.findByText('Accesso non riuscito: riprova.')).toBeDefined()
+  expect(
+    await screen.findByText('Accesso non riuscito: riprova.'),
+  ).toBeDefined()
 })

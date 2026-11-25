@@ -47,6 +47,25 @@ if (deployment !== null && !deployment.startsWith(LOCAL_DEPLOYMENT_PREFIX)) {
   )
 }
 
+// `convex env set` starts the local backend on the ports its state file
+// remembers and has no port flag; point it at E2E_CONVEX_PORT, the port
+// `convex dev` is about to use, so it never meets another worktree's backend.
+const LOCAL_STATE_FILE = '.convex/local/default/config.json'
+const cloudPort = Number(readRequiredEnv('E2E_CONVEX_PORT'))
+if (existsSync(LOCAL_STATE_FILE)) {
+  const state: unknown = JSON.parse(readFileSync(LOCAL_STATE_FILE, 'utf8'))
+  if (typeof state !== 'object' || state === null || !('ports' in state)) {
+    throw new Error(`${LOCAL_STATE_FILE} has no ports`)
+  }
+  writeFileSync(
+    LOCAL_STATE_FILE,
+    JSON.stringify({
+      ...state,
+      ports: { cloud: cloudPort, site: cloudPort + 1 },
+    }),
+  )
+}
+
 const localEnv = {
   // Placeholders: the local backend never talks to GitHub.
   AUTH_GITHUB_ID: 'local-placeholder',

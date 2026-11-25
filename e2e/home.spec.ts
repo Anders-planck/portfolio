@@ -41,11 +41,32 @@ test('Home shows the published profile and has no axe violations', async ({
   await expect(
     page.getByRole('heading', { level: 1, name: 'Software Engineer.' }),
   ).toBeVisible()
-  await expect(page.getByRole('link', { name: 'GitHub' })).toHaveAttribute(
-    'href',
-    'https://github.com/Anders-planck',
-  )
+  await expect(
+    page.getByRole('main').getByRole('link', { name: 'GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/Anders-planck')
 
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
+})
+
+test('an untranslated locale shows the Italian profile with a notice', async ({
+  page,
+}) => {
+  // The seed publishes Italian only, so English falls back to it.
+  await page.goto('/en')
+  await expect(
+    page.getByText(
+      'This page is not translated yet: you are reading it in Italiano.',
+    ),
+  ).toBeVisible()
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Software Engineer.' }),
+  ).toBeVisible()
+})
+
+test('the footer carries the published contacts', async ({ page }) => {
+  await page.goto('/de')
+  await expect(
+    page.getByRole('contentinfo').getByRole('link', { name: 'GitHub' }),
+  ).toHaveAttribute('href', 'https://github.com/Anders-planck')
 })

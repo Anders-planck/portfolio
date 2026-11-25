@@ -38,6 +38,8 @@ test('the current screen is the selected item', () => {
     screen.getByRole('link', { name: 'Profilo' }).getAttribute('aria-current'),
   ).toBe('page')
   expect(
-    screen.getByRole('link', { name: 'Panoramica' }).getAttribute('aria-current'),
+    screen
+      .getByRole('link', { name: 'Panoramica' })
+      .getAttribute('aria-current'),
   ).toBeNull()
 })

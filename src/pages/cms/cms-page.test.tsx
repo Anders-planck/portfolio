@@ -6,8 +6,8 @@ import { afterEach, expect, test, vi } from 'vitest'
 import type { ViewerState } from '../../features/owner-auth/use-viewer'
 import { CmsPage } from './cms-page'
 
-const viewer = vi.hoisted(() => ({
-  current: { status: 'loading' } as ViewerState,
+const viewer = vi.hoisted((): { current: ViewerState } => ({
+  current: { status: 'loading' },
 }))
 vi.mock('../../features/owner-auth/use-viewer', () => ({
   useViewer: () => viewer.current,
@@ -26,6 +26,10 @@ vi.mock('../../widgets/cms-shell/cms-shell', () => ({
 vi.mock('@tanstack/react-router', () => ({
   Outlet: () => <p>Schermata del CMS</p>,
 }))
+vi.mock('../../shared/i18n/astryx-locale-provider', () => ({
+  AstryxLocaleProvider: ({ children }: { children: ReactNode }) => children,
+}))
+vi.mock('../../shared/router/router-link', () => ({ RouterLink: () => null }))
 
 afterEach(cleanup)
 

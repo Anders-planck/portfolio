@@ -83,7 +83,8 @@ describe('useProfileAutosave', () => {
   })
 
   test('an edit typed while a save runs waits for the next save', async () => {
-    let finishFirstSave = (_saved: { savedAt: number; revision: number }) => {}
+    let finishFirstSave:
+      ((saved: { savedAt: number; revision: number }) => void) | undefined
     saveDraft.mockImplementationOnce(
       () =>
         new Promise((resolve) => {
@@ -103,7 +104,7 @@ describe('useProfileAutosave', () => {
     expect(saveDraft).toHaveBeenCalledOnce()
 
     await act(async () => {
-      finishFirstSave({ savedAt: SAVED_AT, revision: 1 })
+      finishFirstSave?.({ savedAt: SAVED_AT, revision: 1 })
       await vi.runAllTimersAsync()
     })
 
