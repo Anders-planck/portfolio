@@ -1,7 +1,8 @@
 import { type Infer, v } from 'convex/values'
 
-import { altRule } from './altrule'
+import { noteRule } from '../notes/noterule'
 import { localeValidator } from './locales'
+import { mediaRule } from './mediarule'
 import { numeralRule } from './numeralrule'
 import { referenceRule } from './referencerule'
 import type { RuleContext } from './rulecontext'
@@ -37,7 +38,8 @@ export type Rule = (snapshot: Snapshot, context: RuleContext) => Finding[]
 export const PUBLISH_RULES: readonly Rule[] = [
   numeralRule,
   referenceRule,
-  altRule,
+  mediaRule,
+  noteRule,
 ]
 
 export function runPublishRules(

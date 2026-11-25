@@ -33,6 +33,7 @@ export const CMS_MEDIA_MESSAGES = {
       mismatch: 'L’archivio ha ricevuto un file diverso. Riprova.',
       'not-configured': 'L’archivio R2 non è configurato.',
       'not-stored': 'L’archivio ha rifiutato il file. Riprova.',
+      'already-recorded': 'Questo file è già caricato.',
       interrupted: 'Caricamento interrotto. Riprova.',
       'unreadable-image':
         'Il browser non riesce a leggere questa immagine: esportala di nuovo e riprova.',
@@ -55,10 +56,14 @@ export const CMS_MEDIA_MESSAGES = {
     altMissing: (locales: string) => `manca: ${locales}`,
     altComplete: 'completo',
     altToReview: (locales: string) => `da rivedere: ${locales}`,
+    /** What a note writes to show the image (`::figure`). */
+    figureDirective: (mediaId: string) =>
+      `::figure[didascalia]{media="${mediaId}"}`,
+    figureDirectiveLabel: 'Per una nota',
   },
   usage: {
-    collections: { profile: 'Profilo' },
-    fields: { cvMediaId: 'CV' },
+    collections: { profile: 'Profilo', note: 'Nota' },
+    fields: { cvMediaId: 'CV', body: 'testo' },
     states: { draft: 'bozza', live: 'pubblicato' },
   },
   alt: {
@@ -68,6 +73,8 @@ export const CMS_MEDIA_MESSAGES = {
     fieldLabel: (localeName: string) => `Alt · ${localeName}`,
     saved: 'Salvato',
     saveFailed: 'Non salvato. Riprova.',
+    emptyRefused:
+      'Il testo alternativo non può essere vuoto: descrivi cosa mostra l’immagine.',
   },
   locales: { it: 'Italiano', en: 'English', fr: 'Français', de: 'Deutsch' },
 } as const

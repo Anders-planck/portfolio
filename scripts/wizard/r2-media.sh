@@ -201,7 +201,7 @@ finish() {
 
 run_wizard() {
 
-TOTAL_STAGES=7
+TOTAL_STAGES=9
 ENV_FILE=".env.local"
 cd "$(dirname "$0")/../.."
 
@@ -241,7 +241,7 @@ say "Bucket → Settings → Custom Domains → Add → a subdomain of a zone in
 say "account (for example media.<your domain>) → Connect domain."
 note "No zone yet? Settings → Public Development URL → Enable gives an r2.dev"
 note "URL: fine for dev, rate-limited, never for production. Image"
-note "transformations need the custom domain (stage 7)."
+note "transformations and the response headers need the custom domain."
 open_url "https://dash.cloudflare.com/?to=/:account/r2/overview"
 ask MEDIA_PUBLIC_ORIGIN "Public origin, https and no path (e.g. https://media.example.com):"
 
@@ -257,6 +257,28 @@ printf '\n%s\n\n' '[
     "MaxAgeSeconds": 3600
   }
 ]'
+pause
+
+stage "Cloudflare: expire uploads that were never completed"
+say "The CMS uploads under incoming/ and moves each file to media/ once it is"
+say "checked; anything left under incoming/ is an upload nobody completed."
+step "Bucket → Settings → Object lifecycle rules → Add rule"
+step "Rule name: expire-incoming · Prefix: incoming/ (with the slash)"
+step "Delete uploaded objects after 1 day → Save"
+note "Never set it on media/: those are the site's files."
+open_url "https://dash.cloudflare.com/?to=/:account/r2/overview"
+pause
+
+stage "Cloudflare: response headers on the media domain"
+say "On the zone of the media domain: Rules → Transform Rules → Response Header"
+say "Transform Rules (Modify Response Header) → Create rule. Make two:"
+step "1 · media-nosniff · Custom filter: Hostname equals the media host"
+step "    → Set static: X-Content-Type-Options = nosniff → Deploy"
+step "2 · media-pdf-download · Hostname equals the media host AND"
+step "    URI Path ends with .pdf → Set static: Content-Disposition = attachment → Deploy"
+note "Browsers then never guess a type, and the CV downloads instead of opening"
+note "inside the media origin. Skip while the bucket is on r2.dev (no zone rules)."
+open_url "https://dash.cloudflare.com/?to=/:account/:zone/rules/transform-rules"
 pause
 
 stage "Cloudflare: API token → Convex env"

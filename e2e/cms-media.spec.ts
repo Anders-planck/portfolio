@@ -137,3 +137,59 @@ test('a CV uploaded in Media and chosen in Profilo is the site’s CV button', a
     ownerPage.getByText('Profilo · CV · pubblicato').first(),
   ).toBeVisible()
 })
+
+test('a note with a figure shows the image from Media with its alt and caption', async ({
+  ownerPage,
+}) => {
+  const word = createUniqueWord()
+  const fileName = `figura-${word}.jpg`
+  await ownerPage.goto('/cms/media')
+  await uploadFile(ownerPage, {
+    name: fileName,
+    mimeType: 'image/jpeg',
+    buffer: await createJpegWithExif(ownerPage),
+  })
+  await ownerPage
+    .getByRole('button', { name: `Testo alternativo di ${fileName}` })
+    .click()
+  const italianAlt = ownerPage.getByRole('textbox', { name: 'Alt · Italiano' })
+  await italianAlt.fill('Un rettangolo verde acqua')
+  await italianAlt.blur()
+  await expect(
+    ownerPage.getByRole('dialog').getByText('Salvato', { exact: true }).first(),
+  ).toBeVisible()
+  await ownerPage.getByRole('button', { name: 'Chiudi' }).click()
+  const imageHref = await ownerPage
+    .getByRole('link', { name: fileName })
+    .getAttribute('href')
+  const directive = await ownerPage
+    .getByRole('row', { name: new RegExp(fileName) })
+    .getByText('::figure[didascalia]')
+    .textContent()
+
+  await ownerPage.goto('/cms/note')
+  await ownerPage.getByRole('button', { name: 'Nuova nota' }).click()
+  await ownerPage.getByLabel('Titolo').fill(`Nota con figura ${word}`)
+  await ownerPage.getByLabel('Sintesi').fill('Una nota con una figura.')
+  await ownerPage
+    .getByLabel('Testo in Markdown')
+    .fill(`Testo.\n\n${(directive ?? '').replace('didascalia', 'Il blocco')}\n`)
+  await ownerPage.getByLabel('Slug', { exact: true }).fill(`figura-${word}`)
+  await expect(
+    ownerPage.getByRole('status').filter({ hasText: 'Salvato ·' }),
+  ).toBeVisible()
+  await ownerPage.getByRole('button', { name: 'Pubblica ora' }).click()
+  await expect(
+    ownerPage.getByText('Pubblicato: il sito mostra la bozza.'),
+  ).toBeVisible()
+
+  await ownerPage.goto(`/note/figura-${word}`)
+  const figure = ownerPage.getByRole('figure')
+  await expect(
+    figure.getByRole('img', { name: 'Un rettangolo verde acqua' }),
+  ).toHaveAttribute('src', imageHref ?? '')
+  await expect(figure.getByText('Il blocco')).toBeVisible()
+  expect(
+    (await new AxeBuilder({ page: ownerPage }).analyze()).violations,
+  ).toEqual([])
+})

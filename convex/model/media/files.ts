@@ -63,6 +63,8 @@ export const uploadRefusalReasonValidator = v.union(
   v.literal('not-uploaded'),
   /** Storage holds another type or size than the CMS announced. */
   v.literal('mismatch'),
+  /** The request is already media: a new PUT could replace a published file. */
+  v.literal('already-recorded'),
 )
 export type UploadRefusalReason = Infer<typeof uploadRefusalReasonValidator>
 
@@ -129,21 +131,37 @@ function isPixelSide(side: number | null) {
   )
 }
 
+type UploadName = Pick<UploadRequest, 'requestId' | 'fileName'>
+
 /**
- * Where an upload lives in the bucket: one folder per request, so a retry
- * writes the same object and two files with one name never collide. The
- * name keeps only URL-safe characters; the original stays in `fileName`.
+ * Where a recorded upload lives in the bucket: one folder per request, so a
+ * retry writes the same object and two files with one name never collide.
  */
-export function toObjectKeyFromUpload({
-  requestId,
-  fileName,
-}: Pick<UploadRequest, 'requestId' | 'fileName'>) {
+export function toObjectKeyFromUpload(upload: UploadName) {
+  return `media/${toRequestPath(upload)}`
+}
+
+/**
+ * Where the browser's PUT lands. Completion copies it to the media key and
+ * removes it; the bucket's lifecycle rule expires anything left here (an
+ * upload never completed), so no unrecorded object stays public for long.
+ */
+export function toIncomingObjectKeyFromUpload(upload: UploadName) {
+  return `incoming/${toRequestPath(upload)}`
+}
+
+/**
+ * `<requestId>/<safe-name>`: the name keeps only URL-safe characters and
+ * never starts or ends with a dot or hyphen (no `.` or `..` segment); the
+ * original stays in `fileName`.
+ */
+function toRequestPath({ requestId, fileName }: UploadName) {
   const safeName = fileName
     .trim()
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9.]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-  return `media/${requestId}/${safeName === '' ? 'file' : safeName}`
+    .replace(/^[.-]+|[.-]+$/g, '')
+  return `${requestId}/${safeName === '' ? 'file' : safeName}`
 }

@@ -48,10 +48,11 @@ export async function toUploadableFile(
     }
     context.drawImage(bitmap, 0, 0)
     const body = await encodeCanvas(canvas, file.type)
-    // A browser that cannot encode the type (Safari and WebP) answers PNG.
+    // A browser that cannot encode the type (Safari and WebP) answers PNG;
+    // the name follows, so the stored file's extension matches its type.
     return {
       body,
-      fileName: file.name,
+      fileName: toFileNameForType(file.name, body.type),
       mime: body.type,
       widthPx: bitmap.width,
       heightPx: bitmap.height,
@@ -75,4 +76,24 @@ function encodeCanvas(canvas: HTMLCanvasElement, mime: string) {
       LOSSY_QUALITY,
     )
   })
+}
+
+const EXTENSIONS_BY_TYPE: Readonly<Record<string, string>> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+}
+
+/** `shot.webp` encoded as PNG becomes `shot.png`; a matching name is kept. */
+export function toFileNameForType(fileName: string, mime: string) {
+  const extension = EXTENSIONS_BY_TYPE[mime]
+  if (extension === undefined) {
+    return fileName
+  }
+  const dot = fileName.lastIndexOf('.')
+  const base = dot > 0 ? fileName.slice(0, dot) : fileName
+  const current = dot > 0 ? fileName.slice(dot + 1).toLowerCase() : ''
+  const isMatching =
+    current === extension || (extension === 'jpg' && current === 'jpeg')
+  return isMatching ? fileName : `${base}.${extension}`
 }

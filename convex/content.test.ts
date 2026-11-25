@@ -6,6 +6,7 @@ import type { Locale } from './model/content/locales'
 import { PREVIEW_TOKEN_TTL_MS } from './model/content/preview'
 import type * as rulesModule from './model/content/rules'
 import type { Finding, Rule } from './model/content/rules'
+import type { Snapshot } from './model/content/snapshot'
 import {
   createAuthBackend,
   createOwnerBackend,
@@ -96,16 +97,17 @@ function rollBack(
   })
 }
 
-function readPublishedProfile(
+async function readPublishedProfile(
   backend: Backend,
   locale: Locale = 'it',
   key: string = PROFILE.key,
 ) {
-  return backend.query(api.content.getPublished, {
+  const document = await backend.query(api.content.getPublished, {
     collection: 'profile',
     key,
     locale,
   })
+  return document?.collection === 'profile' ? document : null
 }
 
 async function readPublishedSubtitle(
@@ -441,10 +443,15 @@ describe('scheduled publish', () => {
   })
 })
 
+/** The profile content records of a snapshot; none for other collections. */
+function toProfileRecords(snapshot: Snapshot) {
+  return snapshot.collection === 'profile' ? snapshot.content : []
+}
+
 describe('rules at publish', () => {
   // A stand-in rule: placeholders `[...]` block, the word "TODO" warns.
   const placeholderRule: Rule = (snapshot) =>
-    snapshot.content.flatMap((record): Finding[] => [
+    toProfileRecords(snapshot).flatMap((record): Finding[] => [
       ...(/\[.*\]/.test(record.subtitle)
         ? [
             {

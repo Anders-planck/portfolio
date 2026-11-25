@@ -9,6 +9,7 @@ import {
 import {
   profileQueryOptions,
   type PublishedProfile,
+  toPublishedProfile,
 } from './profile-query-options'
 
 /** A Profile with its copy in one locale. */
@@ -41,7 +42,9 @@ function toTranslationsFromProfiles(
 export function useProfileTranslation(
   locale: Locale,
 ): PickedTranslation<TranslatedProfile> {
-  const { data: requested } = useSuspenseQuery(profileQueryOptions(locale))
+  const requested = toPublishedProfile(
+    useSuspenseQuery(profileQueryOptions(locale)).data,
+  )
   const fallbackLocales =
     requested?.content == null ? toFallbackLocales(locale) : []
   const fallbacks = useSuspenseQueries({
@@ -51,7 +54,7 @@ export function useProfileTranslation(
     [locale, requested],
     ...fallbackLocales.map(
       (fallbackLocale, index) =>
-        [fallbackLocale, fallbacks[index]?.data ?? null] as const,
+        [fallbackLocale, toPublishedProfile(fallbacks[index]?.data)] as const,
     ),
   ])
   return pickTranslation(translations, locale)

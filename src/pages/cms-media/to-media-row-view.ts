@@ -42,9 +42,16 @@ export function toMediaRowViewFromEntry(entry: MediaEntry): MediaRowView {
 /** Field labels by field path; a path without one is shown as it is. */
 const FIELD_LABELS: Readonly<Record<string, string>> = USAGE_COPY.fields
 
-function toUsageLabel({ collection, field, state }: MediaUsage) {
+function toUsageLabel({ collection, key, field, locale, state }: MediaUsage) {
   const fieldLabel = FIELD_LABELS[field] ?? field
-  return `${USAGE_COPY.collections[collection]} · ${fieldLabel} · ${USAGE_COPY.states[state]}`
+  const parts = [
+    collection === 'profile'
+      ? USAGE_COPY.collections.profile
+      : `${USAGE_COPY.collections[collection]} ${key}`,
+    locale === null ? fieldLabel : `${fieldLabel} ${locale.toUpperCase()}`,
+    USAGE_COPY.states[state],
+  ]
+  return parts.join(' · ')
 }
 
 function toLocaleList(locales: readonly Locale[]) {

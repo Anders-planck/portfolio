@@ -63,4 +63,19 @@ export const MESSAGES_DE: Messages = {
     homeLink: 'Zur Startseite',
     workLink: 'Zu den Projekten',
   },
+  notes: {
+    title: 'Notizen',
+    intro:
+      'Wie ich mit Agenten Software baue, ohne die Kontrolle zu verlieren, und was ich aus Projekten lerne. Geschrieben in Markdown, in vier Sprachen, wenn ich sie übersetze.',
+    topics: {
+      ai: 'KI',
+      mobile: 'Mobile',
+      architecture: 'Architektur',
+    },
+    readingTime: (minutes) => `${minutes} min`,
+    cardMeta: (topic, readingTime) => `${topic} · ${readingTime}`,
+    readCursor: 'Lesen',
+    metricVerifiedAt: (date) => `geprüft am ${date}`,
+    metricUnavailable: 'Wert nicht verfügbar',
+  },
 }

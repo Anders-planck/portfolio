@@ -3,7 +3,7 @@ import { vi } from 'vitest'
 /**
  * A stand-in R2 for convex-test: the media env of a configured backend and
  * an in-memory bucket behind a stubbed `fetch`, so the S3 calls the backend
- * signs (HEAD, DELETE) answer without a network.
+ * signs (HEAD, copy, DELETE) answer without a network.
  */
 
 export const TEST_R2_ENDPOINT =
@@ -38,6 +38,17 @@ export function stubR2Bucket() {
       return Promise.reject(new TypeError('fetch failed'))
     }
     requests.push({ method: input.method, objectKey })
+    const copySource = input.headers.get('x-amz-copy-source')
+    if (input.method === 'PUT' && copySource !== null) {
+      const source = objects.get(
+        decodeURIComponent(copySource).replace(`/${TEST_R2_BUCKET}/`, ''),
+      )
+      if (source === undefined) {
+        return Promise.resolve(new Response(null, { status: 404 }))
+      }
+      objects.set(objectKey, source)
+      return Promise.resolve(new Response(null, { status: 200 }))
+    }
     const stored = objects.get(objectKey)
     if (input.method === 'DELETE') {
       objects.delete(objectKey)

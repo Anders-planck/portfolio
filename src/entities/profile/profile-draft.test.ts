@@ -1,34 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { mergeProfileEdits, toDraftEditFromProfileEdit } from './profile-draft'
-
-describe('mergeProfileEdits', () => {
-  test('a later edit of the same field wins; other fields are kept', () => {
-    const merged = mergeProfileEdits(
-      { content: { subtitle: 'Prima', titleLine1: 'Software' } },
-      { content: { subtitle: 'Dopo' } },
-    )
-
-    expect(merged).toEqual({
-      content: { subtitle: 'Dopo', titleLine1: 'Software' },
-    })
-  })
-
-  test('shared fields and locale content merge side by side', () => {
-    expect(
-      mergeProfileEdits(
-        { fields: { name: 'Anders' } },
-        { content: { subtitle: 'Ciao' } },
-      ),
-    ).toEqual({ fields: { name: 'Anders' }, content: { subtitle: 'Ciao' } })
-  })
-
-  test('a shared-field edit adds no locale content', () => {
-    expect(mergeProfileEdits(null, { fields: { isAvailable: true } })).toEqual({
-      fields: { isAvailable: true },
-    })
-  })
-})
+import { toDraftEditFromProfileEdit } from './profile-draft'
 
 describe('toDraftEditFromProfileEdit', () => {
   test('locale content becomes the locale edit of the Profile document', () => {

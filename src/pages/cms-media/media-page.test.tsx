@@ -42,7 +42,9 @@ test('without transformations the page says images are served as uploaded', () =
 })
 
 test('the alt editor saves the alt of the image it was opened for', async () => {
-  const onSaveAlt = vi.fn(() => Promise.resolve({ savedAt: 1 }))
+  const onSaveAlt = vi.fn(() =>
+    Promise.resolve({ kind: 'saved' as const, savedAt: 1 }),
+  )
   renderPage(LIBRARY, onSaveAlt)
 
   fireEvent.click(

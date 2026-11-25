@@ -7,12 +7,15 @@ import {
   MEDIA_LIMITS,
   SCREENSHOT_ENTRY,
 } from '../../entities/media/media.fixture'
+import type { AltSaveOutcome } from '../../entities/media/media-library-query-options'
 import { RefusalBoundary } from '../../shared/convex/refusal-boundary.fixture'
 import { MediaAltDialog } from './media-alt-dialog'
 
 afterEach(cleanup)
 
-function renderDialog(onSaveAlt: () => Promise<void>) {
+const SAVED: AltSaveOutcome = { kind: 'saved', savedAt: 1 }
+
+function renderDialog(onSaveAlt: () => Promise<AltSaveOutcome>) {
   const onClose = vi.fn()
   render(
     <RefusalBoundary>
@@ -41,7 +44,7 @@ test('each locale opens with its saved alt', () => {
 })
 
 test('a changed alt saves when the field loses focus, and says so', async () => {
-  const onSaveAlt = vi.fn(() => Promise.resolve())
+  const onSaveAlt = vi.fn(() => Promise.resolve(SAVED))
   renderDialog(onSaveAlt)
   const english = screen.getByRole('textbox', { name: 'Alt · English' })
 
@@ -53,7 +56,7 @@ test('a changed alt saves when the field loses focus, and says so', async () => 
 })
 
 test('leaving a field unchanged saves nothing', () => {
-  const onSaveAlt = vi.fn(() => Promise.resolve())
+  const onSaveAlt = vi.fn(() => Promise.resolve(SAVED))
   renderDialog(onSaveAlt)
 
   fireEvent.blur(screen.getByRole('textbox', { name: 'Alt · Italiano' }))
@@ -90,4 +93,20 @@ test('a backend refusal goes to the error boundary, not to "Non salvato"', async
   expect(await screen.findByText('refused: not-owner')).toBeDefined()
   // The editor gave way to the boundary instead of offering a retry.
   expect(screen.queryByRole('textbox')).toBeNull()
+})
+
+test('an empty alt is refused and the field says why', async () => {
+  renderDialog(() =>
+    Promise.resolve<AltSaveOutcome>({ kind: 'refused', reason: 'empty' }),
+  )
+  const italian = screen.getByRole('textbox', { name: 'Alt · Italiano' })
+
+  fireEvent.change(italian, { target: { value: '  ' } })
+  fireEvent.blur(italian)
+
+  expect(
+    await screen.findByText(
+      'Il testo alternativo non può essere vuoto: descrivi cosa mostra l’immagine.',
+    ),
+  ).toBeDefined()
 })

@@ -9,7 +9,7 @@ import {
 } from './_generated/server'
 import { localeValidator } from './model/content/locales'
 import { readMediaStorageSettings } from './model/env'
-import { saveOwnerAlt } from './model/media/alts'
+import { altSaveOutcomeValidator, saveOwnerAlt } from './model/media/alts'
 import { publishedCvValidator, readPublishedCv } from './model/media/cv'
 import { mediaMimeValidator, uploadRequestValidator } from './model/media/files'
 import { mediaLibraryValidator, readMediaLibrary } from './model/media/library'
@@ -44,7 +44,7 @@ export const createUploadUrl = action({
   returns: uploadUrlOutcomeValidator,
   handler: async (ctx, request) => {
     await requireOwnerInAction(ctx)
-    return createSignedUpload(request, readMediaStorageSettings())
+    return createSignedUpload(ctx, request, readMediaStorageSettings())
   },
 })
 
@@ -61,7 +61,7 @@ export const completeUpload = action({
 /** The owner's alt text of an image in one locale. */
 export const saveAlt = mutation({
   args: { mediaId: v.id('media'), locale: localeValidator, alt: v.string() },
-  returns: v.object({ savedAt: v.number() }),
+  returns: altSaveOutcomeValidator,
   handler: async (ctx, edit) => {
     await requireOwner(ctx)
     return saveOwnerAlt(ctx, edit, Date.now())

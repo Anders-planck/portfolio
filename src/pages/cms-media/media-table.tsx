@@ -51,6 +51,11 @@ function toColumns(
           <Text type="supporting" color="secondary">
             {entry.view.details}
           </Text>
+          {entry.kind === 'image' && (
+            <Text type="code" color="secondary">
+              {TABLE_COPY.figureDirective(entry.mediaId)}
+            </Text>
+          )}
         </VStack>
       ),
     },

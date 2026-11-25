@@ -28,28 +28,6 @@ export function profileDraftQueryOptions(locale: Locale) {
   })
 }
 
-/**
- * Later edits win field by field. A part neither edit touched stays absent,
- * so a shared-field edit never creates an empty record for the locale.
- */
-export function mergeProfileEdits(
-  pending: ProfileEdit | null,
-  next: ProfileEdit,
-): ProfileEdit {
-  const fields =
-    pending?.fields === undefined && next.fields === undefined
-      ? undefined
-      : { ...pending?.fields, ...next.fields }
-  const content =
-    pending?.content === undefined && next.content === undefined
-      ? undefined
-      : { ...pending?.content, ...next.content }
-  return {
-    ...(fields === undefined ? {} : { fields }),
-    ...(content === undefined ? {} : { content }),
-  }
-}
-
 /** The `saveDraft` arguments for an edit of the Profile in `locale`. */
 export function toDraftEditFromProfileEdit(
   edit: ProfileEdit,

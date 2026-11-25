@@ -8,11 +8,13 @@ import {
   type AcceptedUpload,
   checkUploadRequest,
   MAX_MEDIA_BYTES,
+  toIncomingObjectKeyFromUpload,
   toObjectKeyFromUpload,
   uploadRefusalReasonValidator,
   type UploadRequest,
 } from './files'
 import {
+  copyStoredObject,
   deleteStoredObject,
   readStoredObject,
   signUploadUrl,
@@ -21,9 +23,10 @@ import {
 
 /**
  * An upload in two calls around the browser's PUT (README "Upload"):
- * `createUploadUrl` checks the request and signs a PUT for its object;
- * `completeUpload` checks what R2 now holds and records the media. Both
- * are keyed by the request id, so a retry of either repeats, not doubles.
+ * `createUploadUrl` checks the request and signs a PUT under `incoming/`
+ * (never for a request that is already media); `completeUpload` checks what
+ * R2 holds, moves it under `media/` and records it. Both are keyed by the
+ * request id, so a retry of either repeats, not doubles.
  */
 
 const notConfiguredValidator = v.object({ kind: v.literal('not-configured') })
@@ -44,25 +47,30 @@ export const uploadCompletionValidator = v.union(
   notConfiguredValidator,
 )
 export type UploadCompletion = Infer<typeof uploadCompletionValidator>
+export type UploadUrlOutcome = Infer<typeof uploadUrlOutcomeValidator>
 
 export async function createSignedUpload(
+  ctx: ActionCtx,
   request: UploadRequest,
   settings: MediaStorageSettings | null,
-) {
+): Promise<UploadUrlOutcome> {
   const checked = checkUploadRequest(request)
   if (checked.kind === 'refused') {
     return checked
   }
   if (settings === null) {
-    return { kind: 'not-configured' as const }
+    return { kind: 'not-configured' }
   }
   const { upload } = checked
+  if ((await findRecordedMedia(ctx, upload.requestId)) !== null) {
+    return { kind: 'refused', reason: 'already-recorded' }
+  }
   const uploadUrl = await signUploadUrl(
     settings,
-    toObjectKeyFromUpload(upload),
-    upload.mime,
+    toIncomingObjectKeyFromUpload(upload),
+    upload,
   )
-  return { kind: 'ready' as const, uploadUrl }
+  return { kind: 'ready', uploadUrl }
 }
 
 export async function recordStoredUpload(
@@ -78,35 +86,55 @@ export async function recordStoredUpload(
     return { kind: 'not-configured' }
   }
   const { upload } = checked
-  const recordedId: Id<'media'> | null = await ctx.runQuery(
-    internal.media.findUploadedMedia,
-    {
-      requestId: upload.requestId,
-    },
-  )
+  const recordedId = await findRecordedMedia(ctx, upload.requestId)
   if (recordedId !== null) {
     return { kind: 'recorded', mediaId: recordedId }
   }
-  const objectKey = toObjectKeyFromUpload(upload)
-  const stored = await readStoredObject(settings, objectKey)
-  if (stored === null) {
-    return { kind: 'refused', reason: 'not-uploaded' }
-  }
-  if (!isStoredAsAnnounced(stored, upload)) {
-    await deleteStoredObject(settings, objectKey)
-    return { kind: 'refused', reason: 'mismatch' }
+  const placement = await moveIncomingToMedia(settings, upload)
+  if (placement !== 'placed') {
+    return { kind: 'refused', reason: placement }
   }
   const mediaId: Id<'media'> = await ctx.runMutation(
     internal.media.recordUploadedMedia,
-    {
-      ...upload,
-      objectKey,
-    },
+    { ...upload, objectKey: toObjectKeyFromUpload(upload) },
   )
   return { kind: 'recorded', mediaId }
 }
 
-/** The presigned PUT fixes the type, not the size: both are checked here. */
+function findRecordedMedia(
+  ctx: ActionCtx,
+  requestId: string,
+): Promise<Id<'media'> | null> {
+  return ctx.runQuery(internal.media.findUploadedMedia, { requestId })
+}
+
+/**
+ * Checks the incoming object and moves it to the media key. A retry after a
+ * move whose answer was lost finds the media object already in place.
+ */
+async function moveIncomingToMedia(
+  settings: MediaStorageSettings,
+  upload: AcceptedUpload,
+): Promise<'placed' | 'not-uploaded' | 'mismatch'> {
+  const incomingKey = toIncomingObjectKeyFromUpload(upload)
+  const objectKey = toObjectKeyFromUpload(upload)
+  const incoming = await readStoredObject(settings, incomingKey)
+  if (incoming === null) {
+    const placed = await readStoredObject(settings, objectKey)
+    return placed !== null && isStoredAsAnnounced(placed, upload)
+      ? 'placed'
+      : 'not-uploaded'
+  }
+  if (!isStoredAsAnnounced(incoming, upload)) {
+    await deleteStoredObject(settings, incomingKey)
+    return 'mismatch'
+  }
+  await copyStoredObject(settings, { from: incomingKey, to: objectKey })
+  await deleteStoredObject(settings, incomingKey)
+  return 'placed'
+}
+
+/** The signature fixes type and size; both are checked again on the object. */
 function isStoredAsAnnounced(stored: StoredObject, upload: AcceptedUpload) {
   return (
     stored.contentType === upload.mime &&

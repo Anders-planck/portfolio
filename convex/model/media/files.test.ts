@@ -4,6 +4,7 @@ import {
   checkUploadRequest,
   MAX_IMAGE_SIDE_PX,
   MAX_MEDIA_BYTES,
+  toIncomingObjectKeyFromUpload,
   toObjectKeyFromUpload,
   type UploadRequest,
 } from './files'
@@ -97,4 +98,23 @@ test('the object key keeps one folder per request and a URL-safe name', () => {
   expect(
     toObjectKeyFromUpload({ requestId: REQUEST_ID, fileName: '***' }),
   ).toBe(`media/${REQUEST_ID}/file`)
+})
+
+test('a name of dots never becomes a `.` or `..` path segment', () => {
+  for (const fileName of ['.', '..', '...', '.hidden.']) {
+    const objectKey = toObjectKeyFromUpload({ requestId: REQUEST_ID, fileName })
+    const segments = objectKey.split('/')
+    expect(segments).not.toContain('.')
+    expect(segments).not.toContain('..')
+    expect(segments.at(-1)?.startsWith('.')).toBe(false)
+  }
+})
+
+test('the browser uploads under incoming, beside the media key it will get', () => {
+  const upload = { requestId: REQUEST_ID, fileName: 'shot.png' }
+
+  expect(toIncomingObjectKeyFromUpload(upload)).toBe(
+    `incoming/${REQUEST_ID}/shot.png`,
+  )
+  expect(toObjectKeyFromUpload(upload)).toBe(`media/${REQUEST_ID}/shot.png`)
 })

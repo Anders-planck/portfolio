@@ -4,7 +4,12 @@ import { EMPTY_PROFILE_CONTENT_FIELDS, EMPTY_PROFILE_FIELDS } from './profile'
 import { referenceRule } from './referencerule'
 import type { Snapshot } from './snapshot'
 
-const CONTEXT = { metricKeys: new Set(['sdk-commits']), media: new Map() }
+const CONTEXT = {
+  metricKeys: new Set(['sdk-commits']),
+  noteSlugClaims: [],
+  noteCount: 0,
+  media: new Map(),
+}
 
 function toProfileSnapshot(subtitle: string): Snapshot {
   return {
@@ -52,5 +57,28 @@ test('a malformed reference blocks', () => {
       severity: 'block',
       field: 'subtitle',
     },
+  ])
+})
+
+test('references in a note body are checked like any prose', () => {
+  const note: Snapshot = {
+    collection: 'note',
+    key: 'note-a',
+    fields: { slug: 'nota', topic: 'ai', linkedProjectKeys: [] },
+    content: [
+      {
+        locale: 'it',
+        title: '{{m:sdk-commits}} commit',
+        summary: '',
+        body: '## Con {{m:leco-commits}}\n\nE {{ m:sdk }} qui. `{{m:in-code}}`',
+      },
+    ],
+  }
+
+  expect(
+    referenceRule(note, CONTEXT).map(({ rule, field }) => [rule, field]),
+  ).toEqual([
+    ['unknown-metric', 'body'],
+    ['malformed-metric-reference', 'body'],
   ])
 })

@@ -38,8 +38,10 @@ Run `scripts/wizard/r2-media.sh` from the repo root of the checkout whose `.env.
 2. Copying the account ID (not secret).
 3. A public domain for the bucket: a custom domain such as `media.<your domain>` (needed for Image transformations), or the r2.dev development URL meanwhile.
 4. The bucket's CORS rule (printed by the wizard): `PUT`, `GET`, `HEAD` with header `Content-Type`, from `http://localhost:3000` and `https://portfolio.anders-jipwouo.workers.dev` (add the production origin later).
-5. An R2 API token with **Object Read & Write on this bucket only**; the Access Key ID and the Secret Access Key go straight to the Convex env (`R2_ACCOUNT_ID`, `R2_BUCKET`, `MEDIA_PUBLIC_ORIGIN`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`; the secret through stdin, nothing on disk).
-6. Later, with the production domain: Image transformations on that zone (Images → Transformations → Enable), its sources allowing the media domain, and `IMAGE_TRANSFORM_ORIGIN` (e.g. `https://example.com`). Until then images are served as uploaded.
+5. A lifecycle rule `expire-incoming`: prefix `incoming/`, delete objects after 1 day. The CMS uploads under `incoming/` and moves each checked file to `media/`, so this only removes uploads nobody completed. Never on `media/`.
+6. Two response-header Transform Rules on the media domain's zone (skip while on r2.dev): `X-Content-Type-Options: nosniff` for every response of the media host, and `Content-Disposition: attachment` for paths ending in `.pdf` (the CV downloads instead of opening inside the media origin).
+7. An R2 API token with **Object Read & Write on this bucket only**; the Access Key ID and the Secret Access Key go straight to the Convex env (`R2_ACCOUNT_ID`, `R2_BUCKET`, `MEDIA_PUBLIC_ORIGIN`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`; the secret through stdin, nothing on disk).
+8. Later, with the production domain: Image transformations on that zone (Images → Transformations → Enable), its sources allowing the media domain, and `IMAGE_TRANSFORM_ORIGIN` (e.g. `https://example.com`). Until then images are served as uploaded.
 
 The five storage values are all-or-none: with only some set, Media refuses to load. Production gets its own token (and may share the bucket or get its own) with the production deployment's ticket.
 

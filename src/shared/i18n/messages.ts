@@ -84,4 +84,17 @@ export interface Messages {
     homeLink: string
     workLink: string
   }
+  notes: {
+    /** The Note list's heading and browser tab title. */
+    title: string
+    intro: string
+    topics: { ai: string; mobile: string; architecture: string }
+    readingTime: (minutes: string) => string
+    /** Under a note in the list: its topic and reading time. */
+    cardMeta: (topic: string, readingTime: string) => string
+    /** The custom cursor's label over a note link. */
+    readCursor: string
+    metricVerifiedAt: (date: string) => string
+    metricUnavailable: string
+  }
 }

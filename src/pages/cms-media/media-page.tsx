@@ -4,6 +4,7 @@ import { Heading, Text } from '@astryxdesign/core/Text'
 import { useState } from 'react'
 
 import type {
+  AltSaveOutcome,
   MediaEntry,
   MediaLibrary,
 } from '../../entities/media/media-library-query-options'
@@ -24,7 +25,7 @@ export interface MediaPageProps {
     mediaId: MediaEntry['mediaId']
     locale: Locale
     alt: string
-  }) => Promise<{ savedAt: number }>
+  }) => Promise<AltSaveOutcome>
 }
 
 /**
@@ -76,10 +77,11 @@ export function MediaPage({
           <MediaAltDialog
             entry={altEntry}
             maxAltLength={library.limits.maxAltLength}
-            onSaveAlt={async (edit) => {
-              if (altEntry !== null) {
-                await onSaveAlt({ mediaId: altEntry.mediaId, ...edit })
+            onSaveAlt={(edit) => {
+              if (altEntry === null) {
+                throw new Error('No image is open in the alt editor')
               }
+              return onSaveAlt({ mediaId: altEntry.mediaId, ...edit })
             }}
             onClose={() => {
               setAltMediaId(null)

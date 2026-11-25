@@ -20,11 +20,11 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 | `snapshot.ts` | Collections, the snapshot of a whole document, its per-locale view. |
 | `drafts.ts` | Draft writes, draft reads as snapshots, draft reads for preview. |
 | `rules.ts` | The publish rules hook and finding shape (`{rule, severity, field, locale, message}`). |
-| `rulecontext.ts` | What rules know beyond the document: the metric keys that exist and the media the documents point at (read once per publish). |
+| `rulecontext.ts` | What rules know beyond the document: the metric keys that exist, every slug a note holds (draft, live, scheduled), the note count and the media the documents point at (read once per publish). |
 | `prose.ts` | The prose fields of a document, where figures must be metric references. |
 | `numeralrule.ts` | The free-numeral rule (ADR 0004); the finder is `model/metrics/numerals.ts`. |
 | `referencerule.ts` | Metric references must be well formed and name an existing metric. |
-| `altrule.ts` | Images a document points at have alt in each of its locales (`model/media/`). |
+| `mediarule.ts` | Media a document points at exist, are the kind the field shows (the CV a PDF) and, for images, have alt in the locales that show them (`model/media/`). |
 | `versions.ts` | Writing and reading immutable versions. |
 | `pointers.ts` | Published pointers, the public read, the live set of the whole site. |
 | `limits.ts` | Limits of one publish request (pure): size, duplicates, note length. |
@@ -45,4 +45,9 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 
 ## Adding a collection
 
-Add its literal to `collectionValidator`, a member to `snapshotValidator` and `localizedDocumentValidator`, widen `draftEditValidator`, add its draft tables to the schema, and a case to the draft read and write in `drafts.ts`.
+Add its literal to `collectionValidator`, a member to `snapshotValidator` and `localizedDocumentValidator` (and to `toLocalizedDocumentFromSnapshot`), add its draft tables to the schema, a case to `readDraftRevision` and `readDraftSnapshot` in `drafts.ts`, and its prose fields to `prose.ts`. A collection with its own editor saves through its own mutation with the same contract as `saveDraft` (`{savedAt, revision}`), as `note` does (`convex/notes.ts`, `model/notes/`); `saveDraft` and `getEditableDraft` stay the Profile's.
+
+## Pending rules
+
+- **Linked projects of a note** (TODO(#17)): when the projects collection lands (ticket 09), a publish rule blocks a note whose `linkedProjectKeys` name a project that does not exist. Until then the field is stored as picked.
+- **Per-locale slugs** (resolution 19): deferred to ticket 16 (#25); a note's slug is shared by every locale today.

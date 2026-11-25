@@ -4,7 +4,10 @@ import { Text } from '@astryxdesign/core/Text'
 import { TextArea } from '@astryxdesign/core/TextArea'
 import { useState } from 'react'
 
-import type { MediaEntry } from '../../entities/media/media-library-query-options'
+import type {
+  AltSaveOutcome,
+  MediaEntry,
+} from '../../entities/media/media-library-query-options'
 import { useBackendRefusal } from '../../shared/convex/use-backend-refusal'
 import { CMS_MEDIA_MESSAGES } from '../../shared/i18n/cms-media-messages'
 import { type Locale, LOCALES } from '../../shared/i18n/locale'
@@ -16,7 +19,7 @@ export interface MediaAltDialogProps {
   entry: MediaEntry | null
   /** The server's limit (`media.listMedia` limits). */
   maxAltLength: number
-  onSaveAlt: (edit: { locale: Locale; alt: string }) => Promise<void>
+  onSaveAlt: (edit: { locale: Locale; alt: string }) => Promise<AltSaveOutcome>
   onClose: () => void
 }
 
@@ -76,12 +79,15 @@ export function MediaAltDialog({
   )
 }
 
-type SaveState = 'unchanged' | 'saved' | 'failed'
+type SaveState = 'unchanged' | 'saved' | 'refused-empty' | 'failed'
 
 /** The field's status line for each save state (none before the first save). */
 const SAVE_STATUS_PROPS = {
   unchanged: {},
   saved: { status: { type: 'success', message: ALT_COPY.saved } },
+  'refused-empty': {
+    status: { type: 'error', message: ALT_COPY.emptyRefused },
+  },
   failed: { status: { type: 'error', message: ALT_COPY.saveFailed } },
 } as const satisfies Record<SaveState, object>
 
@@ -105,8 +111,8 @@ function AltField({
       return
     }
     try {
-      await onSaveAlt({ locale, alt })
-      setSaveState('saved')
+      const outcome = await onSaveAlt({ locale, alt })
+      setSaveState(outcome.kind === 'saved' ? 'saved' : 'refused-empty')
     } catch (error) {
       // Only a lost save is shown here; a backend refusal goes to the route.
       if (!takeRefusal(error)) {

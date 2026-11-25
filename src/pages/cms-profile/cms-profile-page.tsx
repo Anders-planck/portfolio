@@ -9,6 +9,7 @@ import { Text } from '@astryxdesign/core/Text'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { SaveStatus } from '../../entities/draft/save-status'
 import { mediaLibraryQueryOptions } from '../../entities/media/media-library-query-options'
 import {
   type EditableProfileDraft,
@@ -16,7 +17,6 @@ import {
 } from '../../entities/profile/profile-draft'
 import type { CvChoices } from '../../features/profile-editor/profile-cv-field'
 import { ProfileEditor } from '../../features/profile-editor/profile-editor'
-import { SaveStatus } from '../../features/profile-editor/save-status'
 import { useProfileAutosave } from '../../features/profile-editor/use-profile-autosave'
 import { PublishProfileButton } from '../../features/publish-profile/publish-profile-button'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'

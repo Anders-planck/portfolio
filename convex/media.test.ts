@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { api } from './_generated/api'
 import type { Id } from './_generated/dataModel'
-import { toObjectKeyFromUpload, type UploadRequest } from './model/media/files'
+import {
+  toIncomingObjectKeyFromUpload,
+  type UploadRequest,
+} from './model/media/files'
 import {
   stubMediaStorageEnv,
   stubR2Bucket,
@@ -15,6 +18,8 @@ import { createOwnerBackend, type SignedInBackend } from './owner.fixture'
 const NOW = Date.UTC(2026, 10, 25, 9)
 const REQUEST_ID = '0f8b3c52-6f0e-4a7e-9a59-1f9e8d6b2c11'
 const OBJECT_KEY = `media/${REQUEST_ID}/bussola-chat.png`
+/** Where the browser's PUT lands; completion moves it to `OBJECT_KEY`. */
+const INCOMING_KEY = `incoming/${REQUEST_ID}/bussola-chat.png`
 
 const SCREENSHOT: UploadRequest = {
   requestId: REQUEST_ID,
@@ -49,7 +54,7 @@ async function uploadMedia(
   request: UploadRequest = SCREENSHOT,
 ) {
   await owner.action(api.media.createUploadUrl, request)
-  bucket.putObject(toObjectKeyFromUpload(request), {
+  bucket.putObject(toIncomingObjectKeyFromUpload(request), {
     contentType: request.mime,
     contentLength: request.bytes,
   })
@@ -61,7 +66,7 @@ async function uploadMedia(
 }
 
 describe('upload URL', () => {
-  test('the owner gets a presigned PUT for the object, with its type signed', async () => {
+  test('the owner gets a short presigned PUT for the incoming object, type and size signed', async () => {
     const { owner } = await createConfiguredOwner()
 
     const outcome = await owner.action(api.media.createUploadUrl, SCREENSHOT)
@@ -70,14 +75,24 @@ describe('upload URL', () => {
     if (outcome.kind === 'ready') {
       const url = new URL(outcome.uploadUrl)
       expect(`${url.origin}${url.pathname}`).toBe(
-        `${TEST_R2_ENDPOINT}/${TEST_R2_BUCKET}/${OBJECT_KEY}`,
+        `${TEST_R2_ENDPOINT}/${TEST_R2_BUCKET}/${INCOMING_KEY}`,
       )
       expect(url.searchParams.get('X-Amz-SignedHeaders')).toBe(
-        'content-type;host',
+        'content-length;content-type;host',
       )
-      expect(url.searchParams.get('X-Amz-Expires')).toBe('900')
+      expect(url.searchParams.get('X-Amz-Expires')).toBe('300')
       expect(url.searchParams.get('X-Amz-Signature')).toMatch(/^[0-9a-f]{64}$/)
     }
+  })
+
+  test('a request that is already media gets no new URL', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+    await uploadMedia(owner, bucket)
+
+    expect(await owner.action(api.media.createUploadUrl, SCREENSHOT)).toEqual({
+      kind: 'refused',
+      reason: 'already-recorded',
+    })
   })
 
   test('a type outside the allowlist gets no URL', async () => {
@@ -125,6 +140,15 @@ describe('completing an upload', () => {
     })
   })
 
+  test('completion moves the upload out of incoming, where the lifecycle rule would expire it', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+
+    await uploadMedia(owner, bucket)
+
+    expect(bucket.hasObject(OBJECT_KEY)).toBe(true)
+    expect(bucket.hasObject(INCOMING_KEY)).toBe(false)
+  })
+
   test('with a transform origin the preview offers AVIF/WebP variants', async () => {
     const { owner, bucket } = await createConfiguredOwner()
     vi.stubEnv('IMAGE_TRANSFORM_ORIGIN', 'https://example.com')
@@ -149,7 +173,7 @@ describe('completing an upload', () => {
 
   test('an object of another size than announced is refused and removed', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    bucket.putObject(OBJECT_KEY, {
+    bucket.putObject(INCOMING_KEY, {
       contentType: 'image/png',
       contentLength: SCREENSHOT.bytes + 1,
     })
@@ -158,6 +182,7 @@ describe('completing an upload', () => {
       kind: 'refused',
       reason: 'mismatch',
     })
+    expect(bucket.hasObject(INCOMING_KEY)).toBe(false)
     expect(bucket.hasObject(OBJECT_KEY)).toBe(false)
   })
 
@@ -174,7 +199,7 @@ describe('completing an upload', () => {
 
   test('a lost connection to R2 fails the call; the retry records the upload', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    bucket.putObject(OBJECT_KEY, {
+    bucket.putObject(INCOMING_KEY, {
       contentType: 'image/png',
       contentLength: SCREENSHOT.bytes,
     })
@@ -208,6 +233,21 @@ describe('alt text', () => {
         reviewState: 'reviewed',
       },
     ])
+  })
+
+  test('an empty alt is refused and stores nothing', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+    const mediaId = await uploadMedia(owner, bucket)
+
+    expect(
+      await owner.mutation(api.media.saveAlt, {
+        mediaId,
+        locale: 'it',
+        alt: '   ',
+      }),
+    ).toEqual({ kind: 'refused', reason: 'empty' })
+    const [entry] = (await owner.query(api.media.listMedia, {})).media
+    expect(entry?.alts).toEqual([])
   })
 
   test('alt text over the limit is refused', async () => {
@@ -246,25 +286,45 @@ async function saveProfilePointingAt(
   })
 }
 
-function publishProfile(owner: SignedInBackend, revision: number) {
+/** Saves an Italian note whose body shows `mediaId` as a figure. */
+async function saveNoteWithFigure(owner: SignedInBackend, mediaId: string) {
+  await owner.mutation(api.notes.createNote, { key: 'figure-note' })
+  return owner.mutation(api.notes.saveDraft, {
+    key: 'figure-note',
+    fields: { slug: 'con-figura' },
+    localeEdit: {
+      locale: 'it',
+      content: {
+        title: 'Una figura',
+        summary: 'Una nota con una figura.',
+        body: `Testo.\n\n::figure[La chat]{media="${mediaId}"}\n`,
+      },
+    },
+  })
+}
+
+function publishDocument(
+  owner: SignedInBackend,
+  document: { collection: 'profile' | 'note'; key: string },
+  revision: number,
+) {
   return owner.mutation(api.content.publish, {
-    selection: [{ collection: 'profile', key: 'main', revision }],
+    selection: [{ ...document, revision }],
     note: '',
     requestId: crypto.randomUUID(),
   })
 }
 
 describe('publish and usage', () => {
-  // The CV slot is the only media field so far; the rule checks the media it
-  // points at, whatever the field.
-  test('a document pointing at an image without alt in its locale is blocked', async () => {
+  test('a note figure without alt in the note’s locale blocks; with alt it publishes', async () => {
     const { owner, bucket } = await createConfiguredOwner()
     const mediaId = await uploadMedia(owner, bucket)
-    const { revision } = await saveProfilePointingAt(owner, mediaId)
+    const { revision } = await saveNoteWithFigure(owner, mediaId)
+    const note = { collection: 'note', key: 'figure-note' } as const
 
-    expect(await publishProfile(owner, revision)).toMatchObject({
+    expect(await publishDocument(owner, note, revision)).toMatchObject({
       status: 'blocked',
-      findings: [{ rule: 'missing-alt', locale: 'it', field: 'cvMediaId' }],
+      findings: [{ rule: 'missing-alt', locale: 'it', field: 'body' }],
     })
 
     await owner.mutation(api.media.saveAlt, {
@@ -272,8 +332,58 @@ describe('publish and usage', () => {
       locale: 'it',
       alt: 'Chat di Bussola',
     })
-    expect(await publishProfile(owner, revision)).toMatchObject({
+    expect(await publishDocument(owner, note, revision)).toMatchObject({
       status: 'published',
+    })
+    const [entry] = (await owner.query(api.media.listMedia, {})).media
+    expect(entry?.usages).toEqual([
+      {
+        collection: 'note',
+        key: 'figure-note',
+        field: 'body',
+        locale: 'it',
+        state: 'draft',
+      },
+      {
+        collection: 'note',
+        key: 'figure-note',
+        field: 'body',
+        locale: 'it',
+        state: 'live',
+      },
+    ])
+  })
+
+  test('a figure naming no media blocks', async () => {
+    const { owner } = await createConfiguredOwner()
+    const { revision } = await saveNoteWithFigure(owner, 'not-a-media-id')
+
+    expect(
+      await publishDocument(
+        owner,
+        { collection: 'note', key: 'figure-note' },
+        revision,
+      ),
+    ).toMatchObject({
+      status: 'blocked',
+      findings: [{ rule: 'missing-media', locale: 'it', field: 'body' }],
+    })
+  })
+
+  test('a CV that is an image, not a PDF, blocks', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+    const mediaId = await uploadMedia(owner, bucket)
+    const { revision } = await saveProfilePointingAt(owner, mediaId)
+
+    expect(
+      await publishDocument(
+        owner,
+        { collection: 'profile', key: 'main' },
+        revision,
+      ),
+    ).toMatchObject({
+      status: 'blocked',
+      findings: [{ rule: 'wrong-media-kind', field: 'cvMediaId' }],
     })
   })
 
@@ -283,7 +393,11 @@ describe('publish and usage', () => {
     const cvMediaId = await uploadMedia(owner, bucket, CV)
     const { revision } = await saveProfilePointingAt(owner, cvMediaId)
 
-    await publishProfile(owner, revision)
+    await publishDocument(
+      owner,
+      { collection: 'profile', key: 'main' },
+      revision,
+    )
 
     expect(await owner.query(api.media.getPublishedCv, {})).toEqual({
       url: `${TEST_MEDIA_ORIGIN}/media/${CV.requestId}/cv-anders-planck.pdf`,
@@ -295,9 +409,16 @@ describe('publish and usage', () => {
         collection: 'profile',
         key: 'main',
         field: 'cvMediaId',
+        locale: null,
         state: 'draft',
       },
-      { collection: 'profile', key: 'main', field: 'cvMediaId', state: 'live' },
+      {
+        collection: 'profile',
+        key: 'main',
+        field: 'cvMediaId',
+        locale: null,
+        state: 'live',
+      },
     ])
   })
 })

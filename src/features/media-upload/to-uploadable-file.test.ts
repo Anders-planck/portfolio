@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { toUploadableFile } from './to-uploadable-file'
+import { toFileNameForType, toUploadableFile } from './to-uploadable-file'
 
 const ACCEPTED = ['image/png', 'application/pdf']
 
@@ -41,4 +41,11 @@ test('an accepted image is decoded to be re-encoded; one that cannot be read fai
   const png = new File(['not a png'], 'shot.png', { type: 'image/png' })
 
   await expect(toUploadableFile(png, ACCEPTED)).rejects.toThrow('undecodable')
+})
+
+test('a re-encoded image is named for the type it was encoded as', () => {
+  expect(toFileNameForType('shot.webp', 'image/png')).toBe('shot.png')
+  expect(toFileNameForType('photo.JPEG', 'image/jpeg')).toBe('photo.JPEG')
+  expect(toFileNameForType('photo', 'image/png')).toBe('photo.png')
+  expect(toFileNameForType('cv.pdf', 'application/pdf')).toBe('cv.pdf')
 })

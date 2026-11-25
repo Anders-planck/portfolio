@@ -62,4 +62,19 @@ export const MESSAGES_IT: Messages = {
     homeLink: 'Torna alla home',
     workLink: 'Vai ai lavori',
   },
+  notes: {
+    title: 'Note',
+    intro:
+      'Come costruisco software con gli agenti senza perdere il controllo, e cosa imparo dai progetti. Scritte in Markdown, in quattro lingue quando le traduco.',
+    topics: {
+      ai: 'AI',
+      mobile: 'Mobile',
+      architecture: 'Architettura',
+    },
+    readingTime: (minutes) => `${minutes} min`,
+    cardMeta: (topic, readingTime) => `${topic} · ${readingTime}`,
+    readCursor: 'Leggi',
+    metricVerifiedAt: (date) => `verificato il ${date}`,
+    metricUnavailable: 'dato non disponibile',
+  },
 }

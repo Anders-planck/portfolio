@@ -9,8 +9,8 @@ import type { MediaStorageSettings } from '../env'
  * straight to R2 with a presigned PUT; the backend only signs and checks.
  */
 
-/** Long enough to re-encode and send a large file on a slow connection. */
-const UPLOAD_URL_TTL_SECONDS = 15 * 60
+/** The browser PUTs right after signing; a leaked URL is short-lived. */
+const UPLOAD_URL_TTL_SECONDS = 5 * 60
 
 function toS3Client(settings: MediaStorageSettings) {
   return new AwsClient({
@@ -34,22 +34,37 @@ export function toPublicObjectUrl(publicOrigin: string, objectKey: string) {
 }
 
 /**
- * A presigned PUT for one object. `Content-Type` is part of the signature,
- * so R2 refuses an upload of another type than the one checked.
+ * A presigned PUT for one object. `Content-Type` and `Content-Length` are
+ * part of the signature, so R2 refuses an upload of another type or size
+ * than the one checked (the browser sets the length from the body).
  */
 export async function signUploadUrl(
   settings: MediaStorageSettings,
   objectKey: string,
-  mime: string,
+  { mime, bytes }: { mime: string; bytes: number },
 ): Promise<string> {
   const url = new URL(toObjectUrl(settings, objectKey))
   url.searchParams.set('X-Amz-Expires', String(UPLOAD_URL_TTL_SECONDS))
   const signed = await toS3Client(settings).sign(url.toString(), {
     method: 'PUT',
-    headers: { 'Content-Type': mime },
+    headers: { 'Content-Type': mime, 'Content-Length': String(bytes) },
     aws: { signQuery: true, allHeaders: true },
   })
   return signed.url
+}
+
+/** Copies an object inside the bucket (S3 CopyObject), server side. */
+export async function copyStoredObject(
+  settings: MediaStorageSettings,
+  { from, to }: { from: string; to: string },
+) {
+  const response = await toS3Client(settings).fetch(toObjectUrl(settings, to), {
+    method: 'PUT',
+    headers: { 'x-amz-copy-source': `/${settings.bucket}/${from}` },
+  })
+  if (!response.ok) {
+    throw new Error(`R2 answered ${String(response.status)} to a copy`)
+  }
 }
 
 const storedObjectHeadersSchema = z.object({

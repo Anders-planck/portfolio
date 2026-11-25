@@ -102,7 +102,8 @@ export const rollback = mutation({
 /** What the CMS editor opens: the draft in one locale, with its revision. */
 export const getEditableDraft = query({
   args: {
-    collection: collectionValidator,
+    // Notes have their own editor read (`notes.getEditableNote`).
+    collection: v.literal('profile'),
     key: v.string(),
     locale: localeValidator,
   },

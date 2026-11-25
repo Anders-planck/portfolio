@@ -23,6 +23,7 @@ interface CmsScreen {
 const CONTENT_SCREENS: readonly CmsScreen[] = [
   { href: CMS_PATHNAME, label: NAVIGATION_COPY.overview },
   { href: `${CMS_PATHNAME}/profilo`, label: NAVIGATION_COPY.profile },
+  { href: `${CMS_PATHNAME}/note`, label: NAVIGATION_COPY.notes },
 ]
 
 /** CMS screens of the Qualità group, in the mockups' order. */
@@ -52,7 +53,7 @@ export function CmsShell({ children }: { children: ReactNode }) {
                 key={screen.href}
                 label={screen.label}
                 href={screen.href}
-                isSelected={pathname === screen.href}
+                isSelected={isOnScreen(pathname, screen.href)}
               />
             ))}
           </SideNavSection>
@@ -65,7 +66,7 @@ export function CmsShell({ children }: { children: ReactNode }) {
                 key={screen.href}
                 label={screen.label}
                 href={screen.href}
-                isSelected={pathname === screen.href}
+                isSelected={isOnScreen(pathname, screen.href)}
               />
             ))}
           </SideNavSection>
@@ -74,5 +75,13 @@ export function CmsShell({ children }: { children: ReactNode }) {
     >
       {children}
     </AppShell>
+  )
+}
+
+/** Whether the page shows the screen or one of its pages (`/cms/note/…`). */
+function isOnScreen(pathname: string, screenHref: string) {
+  return (
+    pathname === screenHref ||
+    (screenHref !== CMS_PATHNAME && pathname.startsWith(`${screenHref}/`))
   )
 }

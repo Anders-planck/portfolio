@@ -1,5 +1,10 @@
 import { type Infer, v } from 'convex/values'
 
+import {
+  noteContentFieldsValidator,
+  noteFieldsValidator,
+  pickNoteContentFields,
+} from '../notes/fields'
 import { type Locale, localeValidator } from './locales'
 import {
   pickProfileContentFields,
@@ -8,7 +13,10 @@ import {
 } from './profile'
 
 /** Collections the store knows. Each one adds a literal and a snapshot shape. */
-export const collectionValidator = v.union(v.literal('profile'))
+export const collectionValidator = v.union(
+  v.literal('profile'),
+  v.literal('note'),
+)
 export type Collection = Infer<typeof collectionValidator>
 
 // Read from the validator, so a new collection literal is enough.
@@ -50,6 +58,14 @@ export const snapshotValidator = v.union(
       profileContentFieldsValidator.extend({ locale: localeValidator }),
     ),
   }),
+  v.object({
+    collection: v.literal('note'),
+    key: v.string(),
+    fields: noteFieldsValidator,
+    content: v.array(
+      noteContentFieldsValidator.extend({ locale: localeValidator }),
+    ),
+  }),
 )
 export type Snapshot = Infer<typeof snapshotValidator>
 
@@ -62,6 +78,13 @@ export const localizedDocumentValidator = v.union(
     fields: profileFieldsValidator,
     content: v.union(profileContentFieldsValidator, v.null()),
   }),
+  v.object({
+    collection: v.literal('note'),
+    key: v.string(),
+    locale: localeValidator,
+    fields: noteFieldsValidator,
+    content: v.union(noteContentFieldsValidator, v.null()),
+  }),
 )
 export type LocalizedDocument = Infer<typeof localizedDocumentValidator>
 
@@ -69,11 +92,14 @@ export function toLocalizedDocumentFromSnapshot(
   snapshot: Snapshot,
   locale: Locale,
 ): LocalizedDocument {
+  if (snapshot.collection === 'note') {
+    const { collection, key, fields } = snapshot
+    const record = snapshot.content.find((entry) => entry.locale === locale)
+    const content = record === undefined ? null : pickNoteContentFields(record)
+    return { collection, key, locale, fields, content }
+  }
   const { collection, key, fields } = snapshot
   const record = snapshot.content.find((entry) => entry.locale === locale)
-  if (record === undefined) {
-    return { collection, key, locale, fields, content: null }
-  }
-  const content = pickProfileContentFields(record)
+  const content = record === undefined ? null : pickProfileContentFields(record)
   return { collection, key, locale, fields, content }
 }

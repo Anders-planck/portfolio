@@ -1,8 +1,8 @@
 import { type Infer, v } from 'convex/values'
 
-import type { Id } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
 import { readAllDraftSnapshots } from '../content/drafts'
+import { localeValidator } from '../content/locales'
 import { readLiveSnapshots } from '../content/pointers'
 import { collectionValidator, type Snapshot } from '../content/snapshot'
 import { findMediaReferences } from './references'
@@ -18,6 +18,8 @@ export const mediaUsageValidator = v.object({
   collection: collectionValidator,
   key: v.string(),
   field: v.string(),
+  /** The locale whose content uses it; null for a shared field (the CV). */
+  locale: v.union(localeValidator, v.null()),
   /** `live`: the published site shows it; `draft`: the next publish would. */
   state: v.union(v.literal('draft'), v.literal('live')),
 })
@@ -25,7 +27,7 @@ export type MediaUsage = Infer<typeof mediaUsageValidator>
 
 export async function readMediaUsages(
   ctx: QueryCtx,
-): Promise<ReadonlyMap<Id<'media'>, MediaUsage[]>> {
+): Promise<ReadonlyMap<string, MediaUsage[]>> {
   const [drafts, live] = await Promise.all([
     readAllDraftSnapshots(ctx),
     readLiveSnapshots(ctx),
@@ -37,12 +39,18 @@ export async function readMediaUsages(
   return references.reduce((usagesByMedia, { mediaId, usage }) => {
     usagesByMedia.set(mediaId, [...(usagesByMedia.get(mediaId) ?? []), usage])
     return usagesByMedia
-  }, new Map<Id<'media'>, MediaUsage[]>())
+  }, new Map<string, MediaUsage[]>())
 }
 
 function toUsagesFromSnapshot(snapshot: Snapshot, state: MediaUsage['state']) {
-  return findMediaReferences(snapshot).map(({ mediaId, field }) => ({
+  return findMediaReferences(snapshot).map(({ mediaId, field, locale }) => ({
     mediaId,
-    usage: { collection: snapshot.collection, key: snapshot.key, field, state },
+    usage: {
+      collection: snapshot.collection,
+      key: snapshot.key,
+      field,
+      locale,
+      state,
+    },
   }))
 }

@@ -36,7 +36,13 @@ export const CV_ENTRY: MediaEntry = {
   alts: [],
   missingAltLocales: [],
   usages: [
-    { collection: 'profile', key: 'main', field: 'cvMediaId', state: 'live' },
+    {
+      collection: 'profile',
+      key: 'main',
+      field: 'cvMediaId',
+      locale: null,
+      state: 'live',
+    },
   ],
 }
 

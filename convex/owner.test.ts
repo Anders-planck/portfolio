@@ -85,11 +85,21 @@ function callEveryCmsFunction(
     caller.action(api.media.createUploadUrl, UPLOAD),
     caller.action(api.media.completeUpload, UPLOAD),
     caller.mutation(api.media.saveAlt, { mediaId, locale: 'it', alt: 'Chat' }),
+    caller.query(api.notes.listNotes, {}),
+    caller.mutation(api.notes.createNote, { key: 'note-owner-check' }),
+    caller.query(api.notes.getEditableNote, {
+      key: 'note-owner-check',
+      locale: 'it',
+    }),
+    caller.mutation(api.notes.saveDraft, {
+      key: 'note-owner-check',
+      fields: { slug: 'controllo' },
+    }),
   ]
 }
 
 /** How many CMS functions `callEveryCmsFunction` calls. */
-const CMS_FUNCTION_COUNT = 16
+const CMS_FUNCTION_COUNT = 20
 
 /** A backend with a published release and an image, and the owner’s session on it. */
 async function createBackendWithExistingRecords() {

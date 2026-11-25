@@ -1,4 +1,4 @@
-import { ConvexError } from 'convex/values'
+import { ConvexError, type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
@@ -12,6 +12,17 @@ import { toMediaKindFromMime } from './files'
 
 /** Screen readers read alt in one breath; longer belongs in a caption. */
 export const MAX_ALT_LENGTH = 300
+
+/**
+ * A blank alt is refused, not stored: an image shown with an empty alt says
+ * nothing to a screen reader. A decorative image would be an explicit flag
+ * of its own (not built yet).
+ */
+export const altSaveOutcomeValidator = v.union(
+  v.object({ kind: v.literal('saved'), savedAt: v.number() }),
+  v.object({ kind: v.literal('refused'), reason: v.literal('empty') }),
+)
+export type AltSaveOutcome = Infer<typeof altSaveOutcomeValidator>
 
 /** Locales whose alt text is written (not blank): the one test of "has alt". */
 export function listLocalesWithAlt(
@@ -34,13 +45,13 @@ export function readAltRecords(
 
 /**
  * Saves the owner's alt for one locale; saving the same text again is
- * harmless (DATA-06). Only images take alt text.
+ * harmless (DATA-06). Only images take alt text; a blank one is refused.
  */
 export async function saveOwnerAlt(
   ctx: MutationCtx,
   edit: { mediaId: Id<'media'>; locale: Locale; alt: string },
   now: number,
-) {
+): Promise<AltSaveOutcome> {
   const media = await ctx.db.get(edit.mediaId)
   if (media === null || toMediaKindFromMime(media.mime) !== 'image') {
     throw new ConvexError({
@@ -49,6 +60,9 @@ export async function saveOwnerAlt(
     })
   }
   const alt = edit.alt.trim()
+  if (alt === '') {
+    return { kind: 'refused', reason: 'empty' }
+  }
   if (alt.length > MAX_ALT_LENGTH) {
     throw new ConvexError({
       code: 'INVALID_ALT_EDIT',
@@ -71,5 +85,5 @@ export async function saveOwnerAlt(
   } else {
     await ctx.db.patch(record._id, fields)
   }
-  return { savedAt: now }
+  return { kind: 'saved', savedAt: now }
 }
