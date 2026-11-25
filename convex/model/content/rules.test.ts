@@ -11,7 +11,7 @@ const SNAPSHOT: Snapshot = {
   content: [{ ...EMPTY_PROFILE_CONTENT_FIELDS, locale: 'en' }],
 }
 
-const NO_METRICS = { metricKeys: new Set<string>() }
+const NO_METRICS = { metricKeys: new Set<string>(), media: new Map() }
 
 const emptySubtitleRule: Rule = (snapshot) =>
   snapshot.content

@@ -2,6 +2,8 @@ import { afterEach, describe, expect, test, vi } from 'vitest'
 
 import {
   readAuthRedirectOrigins,
+  readImageTransformOrigin,
+  readMediaStorageSettings,
   readOwnerGithubIds,
   readTestSignInSecret,
 } from './env'
@@ -81,5 +83,75 @@ describe('readTestSignInSecret', () => {
     vi.stubEnv('E2E_SIGN_IN_SECRET', 'short')
 
     expect(() => readTestSignInSecret()).toThrow('at least 32')
+  })
+})
+
+describe('readMediaStorageSettings', () => {
+  const ACCOUNT_ID = '0123456789abcdef0123456789abcdef'
+
+  function stubStorageEnv(publicOrigin = 'https://media.example.com') {
+    vi.stubEnv('R2_ACCOUNT_ID', ACCOUNT_ID)
+    vi.stubEnv('R2_BUCKET', 'portfolio-media')
+    vi.stubEnv('R2_ACCESS_KEY_ID', 'key-id')
+    vi.stubEnv('R2_SECRET_ACCESS_KEY', 'secret')
+    vi.stubEnv('MEDIA_PUBLIC_ORIGIN', publicOrigin)
+  }
+
+  test('nothing set means storage is not configured', () => {
+    expect(readMediaStorageSettings()).toBeNull()
+  })
+
+  test('the account id gives the S3 endpoint', () => {
+    stubStorageEnv()
+
+    expect(readMediaStorageSettings()).toEqual({
+      endpoint: `https://${ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      bucket: 'portfolio-media',
+      accessKeyId: 'key-id',
+      secretAccessKey: 'secret',
+      publicOrigin: 'https://media.example.com',
+    })
+  })
+
+  test('only some values set is a configuration error', () => {
+    vi.stubEnv('R2_BUCKET', 'portfolio-media')
+
+    expect(() => readMediaStorageSettings()).toThrow('or none')
+  })
+
+  test('a public origin with a path or over http is refused', () => {
+    stubStorageEnv('http://media.example.com')
+    expect(() => readMediaStorageSettings()).toThrow('MEDIA_PUBLIC_ORIGIN')
+
+    stubStorageEnv('https://media.example.com/media')
+    expect(() => readMediaStorageSettings()).toThrow('MEDIA_PUBLIC_ORIGIN')
+  })
+
+  test('a local fake endpoint is used only on a local backend', () => {
+    stubStorageEnv('http://127.0.0.1:3812')
+    vi.stubEnv('R2_ENDPOINT', 'http://127.0.0.1:3812')
+
+    vi.stubEnv('CONVEX_CLOUD_URL', 'https://happy-otter-123.convex.cloud')
+    expect(() => readMediaStorageSettings()).toThrow()
+
+    vi.stubEnv('CONVEX_CLOUD_URL', 'http://127.0.0.1:3210')
+    expect(readMediaStorageSettings()).toMatchObject({
+      endpoint: 'http://127.0.0.1:3812',
+      publicOrigin: 'http://127.0.0.1:3812',
+    })
+  })
+})
+
+describe('readImageTransformOrigin', () => {
+  test('unset means variants are off', () => {
+    expect(readImageTransformOrigin()).toBeNull()
+  })
+
+  test('a bare https origin is read; anything else is refused', () => {
+    vi.stubEnv('IMAGE_TRANSFORM_ORIGIN', 'https://example.com')
+    expect(readImageTransformOrigin()).toBe('https://example.com')
+
+    vi.stubEnv('IMAGE_TRANSFORM_ORIGIN', 'https://example.com/cdn-cgi/image')
+    expect(() => readImageTransformOrigin()).toThrow('IMAGE_TRANSFORM_ORIGIN')
   })
 })

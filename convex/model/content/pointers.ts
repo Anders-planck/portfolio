@@ -7,6 +7,7 @@ import {
   collectionValidator,
   type DocumentRef,
   type LocalizedDocument,
+  type Snapshot,
   toDocumentPath,
   toLocalizedDocumentFromSnapshot,
 } from './snapshot'
@@ -45,6 +46,16 @@ export async function readPublishedDocument(
     )
   }
   return toLocalizedDocumentFromSnapshot(version.snapshot, locale)
+}
+
+/** Every live document as a snapshot (what Media counts as live usage). */
+export async function readLiveSnapshots(ctx: QueryCtx): Promise<Snapshot[]> {
+  const pointers = await readAllPointers(ctx)
+  const versions = await readVersions(
+    ctx,
+    pointers.map((pointer) => pointer.versionId),
+  )
+  return versions.map((version) => version.snapshot)
 }
 
 export function findPublishedPointer(

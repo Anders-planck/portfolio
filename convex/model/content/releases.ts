@@ -135,7 +135,7 @@ export async function publishSelection(
   const findings = runPublishRules(
     snapshots,
     PUBLISH_RULES,
-    await readRuleContext(ctx),
+    await readRuleContext(ctx, snapshots),
   )
   if (hasBlockingFinding(findings)) {
     return { status: 'blocked', findings }
@@ -189,10 +189,11 @@ export async function publishScheduledRelease(
   }
   const { versionIds, note, requestId, requestKind, scheduledAt } = release
   const versions = await readVersions(ctx, versionIds)
+  const snapshots = versions.map(({ snapshot }) => snapshot)
   const findings = runPublishRules(
-    versions.map(({ snapshot }) => snapshot),
+    snapshots,
     PUBLISH_RULES,
-    await readRuleContext(ctx),
+    await readRuleContext(ctx, snapshots),
   )
   const releaseFields = { versionIds, note, requestId, requestKind, findings }
   const conflicts = await findMovedPointers(ctx, release.expectedPointers)

@@ -22,10 +22,26 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
+/** What the calls need to exist: a release to roll back, an image to describe. */
+interface ExistingRecords {
+  releaseId: Id<'releases'>
+  mediaId: Id<'media'>
+}
+
+/** An upload request; storage is not configured here, which is not a refusal. */
+const UPLOAD = {
+  requestId: '0f8b3c52-6f0e-4a7e-9a59-1f9e8d6b2c11',
+  fileName: 'bussola-chat.png',
+  mime: 'image/png',
+  bytes: 240_000,
+  widthPx: 1440,
+  heightPx: 900,
+}
+
 /** One call to every CMS function, as `caller` (ADR 0005: all of them). */
 function callEveryCmsFunction(
   caller: AuthBackend | SignedInBackend,
-  releaseId: Id<'releases'>,
+  { releaseId, mediaId }: ExistingRecords,
 ) {
   return [
     caller.mutation(api.content.saveDraft, {
@@ -65,11 +81,15 @@ function callEveryCmsFunction(
     caller.action(api.metrics.refreshNow, {}),
     caller.query(api.sessions.listSessions, {}),
     caller.mutation(api.sessions.revokeSession, { sessionId: 'elsewhere' }),
+    caller.query(api.media.listMedia, {}),
+    caller.action(api.media.createUploadUrl, UPLOAD),
+    caller.action(api.media.completeUpload, UPLOAD),
+    caller.mutation(api.media.saveAlt, { mediaId, locale: 'it', alt: 'Chat' }),
   ]
 }
 
 /** How many CMS functions `callEveryCmsFunction` calls. */
-const CMS_FUNCTION_COUNT = 12
+const CMS_FUNCTION_COUNT = 16
 
 /** A backend with one published release, and the owner's session on it. */
 async function createBackendWithRelease() {
@@ -93,7 +113,12 @@ async function publishFirstRelease(backend: AuthBackend) {
   if (outcome.status !== 'published') {
     throw new Error(`Expected a published release, got ${outcome.status}`)
   }
-  return { owner, releaseId: outcome.releaseId }
+  const mediaId = await backend.mutation(internal.media.recordUploadedMedia, {
+    ...UPLOAD,
+    mime: 'image/png',
+    objectKey: `media/${UPLOAD.requestId}/bussola-chat.png`,
+  })
+  return { owner, existing: { releaseId: outcome.releaseId, mediaId } }
 }
 
 async function expectEveryCallRefused(
@@ -115,10 +140,10 @@ async function expectEveryCallRefused(
 
 describe('requireOwner on every CMS function', () => {
   test('the owner can call every CMS function', async () => {
-    const { owner, releaseId } = await createBackendWithRelease()
+    const { owner, existing } = await createBackendWithRelease()
 
     const outcomes = await Promise.allSettled(
-      callEveryCmsFunction(owner, releaseId),
+      callEveryCmsFunction(owner, existing),
     )
 
     expect(outcomes.map((outcome) => outcome.status)).toEqual(
@@ -127,20 +152,20 @@ describe('requireOwner on every CMS function', () => {
   })
 
   test('an anonymous caller is refused by every CMS function', async () => {
-    const { backend, releaseId } = await createBackendWithRelease()
+    const { backend, existing } = await createBackendWithRelease()
 
     await expectEveryCallRefused(
-      callEveryCmsFunction(backend, releaseId),
+      callEveryCmsFunction(backend, existing),
       'signed-out',
     )
   })
 
   test('a signed-in account removed from the allowlist is refused at once', async () => {
-    const { owner, releaseId } = await createBackendWithRelease()
+    const { owner, existing } = await createBackendWithRelease()
     vi.stubEnv('OWNER_GITHUB_IDS', OTHER_GITHUB_ID)
 
     await expectEveryCallRefused(
-      callEveryCmsFunction(owner, releaseId),
+      callEveryCmsFunction(owner, existing),
       'not-owner',
     )
   })
@@ -151,7 +176,7 @@ describe('requireOwner on every CMS function', () => {
     const tokens = await backend.mutation(internal.e2e.signInAsTestOwner, {
       secret: TEST_SIGN_IN_SECRET,
     })
-    const { releaseId } = await publishFirstRelease(backend)
+    const { existing } = await publishFirstRelease(backend)
     await backend.mutation(api.auth.signOut, {
       refreshToken: tokens.refreshToken,
     })
@@ -159,19 +184,19 @@ describe('requireOwner on every CMS function', () => {
     await expectEveryCallRefused(
       callEveryCmsFunction(
         backend.withIdentity(sessionIdentity(tokens)),
-        releaseId,
+        existing,
       ),
       'signed-out',
     )
   })
 
   test('a forged identity without a session is refused', async () => {
-    const { backend, releaseId } = await createBackendWithRelease()
+    const { backend, existing } = await createBackendWithRelease()
 
     await expectEveryCallRefused(
       callEveryCmsFunction(
         backend.withIdentity({ subject: 'not-a-session' }),
-        releaseId,
+        existing,
       ),
       'signed-out',
     )

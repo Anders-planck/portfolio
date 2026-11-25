@@ -90,12 +90,29 @@ export async function readDraftSnapshot(
     )
     .take(MAX_LOCALE_RECORDS)
   const { name, email, links, isAvailable, skills } = profile
+  const cvMediaId = profile.cvMediaId ?? null
   return {
     collection,
     key,
-    fields: { name, email, links, isAvailable, skills },
+    fields: { name, email, links, isAvailable, skills, cvMediaId },
     content: records.map(toSnapshotContentFromProfileContent),
   }
+}
+
+/** Draft documents one read lists; well above the site's size. */
+const MAX_DRAFT_DOCUMENTS = 1000
+
+/** Every draft document as a snapshot (what Media counts as draft usage). */
+export async function readAllDraftSnapshots(
+  ctx: QueryCtx,
+): Promise<Snapshot[]> {
+  const profiles = await ctx.db.query('profile').take(MAX_DRAFT_DOCUMENTS)
+  const snapshots = await Promise.all(
+    profiles.map(({ key }) =>
+      readDraftSnapshot(ctx, { collection: 'profile', key }),
+    ),
+  )
+  return snapshots.filter((snapshot) => snapshot !== null)
 }
 
 function toSnapshotContentFromProfileContent(

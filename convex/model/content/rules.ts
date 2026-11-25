@@ -1,5 +1,6 @@
 import { type Infer, v } from 'convex/values'
 
+import { altRule } from './altrule'
 import { localeValidator } from './locales'
 import { numeralRule } from './numeralrule'
 import { referenceRule } from './referencerule'
@@ -33,7 +34,11 @@ export type DocumentFinding = Infer<typeof documentFindingValidator>
 export type Rule = (snapshot: Snapshot, context: RuleContext) => Finding[]
 
 /** The server-side rule set; the other rules land with ticket 15a (#22). */
-export const PUBLISH_RULES: readonly Rule[] = [numeralRule, referenceRule]
+export const PUBLISH_RULES: readonly Rule[] = [
+  numeralRule,
+  referenceRule,
+  altRule,
+]
 
 export function runPublishRules(
   snapshots: Snapshot[],

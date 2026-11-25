@@ -4,7 +4,7 @@ import { EMPTY_PROFILE_CONTENT_FIELDS, EMPTY_PROFILE_FIELDS } from './profile'
 import { referenceRule } from './referencerule'
 import type { Snapshot } from './snapshot'
 
-const CONTEXT = { metricKeys: new Set(['sdk-commits']) }
+const CONTEXT = { metricKeys: new Set(['sdk-commits']), media: new Map() }
 
 function toProfileSnapshot(subtitle: string): Snapshot {
   return {

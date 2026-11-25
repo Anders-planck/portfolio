@@ -101,6 +101,107 @@ export function readTestSignInSecret(): string | null {
   return secret
 }
 
+/** Where media live and how to reach them (`model/media/storage.ts`). */
+export interface MediaStorageSettings {
+  /** S3 API endpoint of the account, `https://<account>.r2.cloudflarestorage.com`. */
+  endpoint: string
+  bucket: string
+  accessKeyId: string
+  secretAccessKey: string
+  /** Bare origin that serves the bucket publicly (its custom domain). */
+  publicOrigin: string
+}
+
+const R2_ACCOUNT_ID_PATTERN = /^[0-9a-f]{32}$/
+const R2_BUCKET_PATTERN = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
+
+/**
+ * The R2 bucket and its keys: `R2_ACCOUNT_ID`, `R2_BUCKET`,
+ * `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` and `MEDIA_PUBLIC_ORIGIN`.
+ * Null while none is set (Media then says storage is not configured);
+ * throws when only some are, or one is malformed.
+ * `R2_ENDPOINT` replaces the account's endpoint only for a local fake on a
+ * loopback address, and only on a local backend (Playwright).
+ */
+export function readMediaStorageSettings(): MediaStorageSettings | null {
+  const raw = {
+    accountId: process.env.R2_ACCOUNT_ID ?? '',
+    bucket: process.env.R2_BUCKET ?? '',
+    accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
+    publicOrigin: process.env.MEDIA_PUBLIC_ORIGIN ?? '',
+  }
+  const values = Object.values(raw)
+  if (values.every((value) => value === '')) {
+    return null
+  }
+  if (values.some((value) => value === '')) {
+    throw new Error(
+      'Set all of R2_ACCOUNT_ID, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and MEDIA_PUBLIC_ORIGIN, or none',
+    )
+  }
+  if (!R2_ACCOUNT_ID_PATTERN.test(raw.accountId)) {
+    throw new Error('R2_ACCOUNT_ID must be the 32-character account id')
+  }
+  if (!R2_BUCKET_PATTERN.test(raw.bucket)) {
+    throw new Error('R2_BUCKET must be an R2 bucket name')
+  }
+  if (!isServingOrigin(raw.publicOrigin)) {
+    throw new Error('MEDIA_PUBLIC_ORIGIN must be a bare https origin')
+  }
+  const { accessKeyId, secretAccessKey, bucket } = raw
+  return {
+    endpoint: readR2Endpoint(raw.accountId),
+    bucket,
+    accessKeyId,
+    secretAccessKey,
+    publicOrigin: new URL(raw.publicOrigin).origin,
+  }
+}
+
+/** Whether this backend is a local one, where a local R2 fake may stand in. */
+function isLocalBackend() {
+  return isLoopbackDeploymentUrl(process.env.CONVEX_CLOUD_URL)
+}
+
+function readR2Endpoint(accountId: string) {
+  const override = process.env.R2_ENDPOINT
+  if (override === undefined || override === '') {
+    return `https://${accountId}.r2.cloudflarestorage.com`
+  }
+  if (!isLoopbackDeploymentUrl(override) || !isLocalBackend()) {
+    throw new Error('R2_ENDPOINT is only for a local fake on a local backend')
+  }
+  return new URL(override).origin
+}
+
+/** A bare https origin; on a local backend also the local fake's http one. */
+function isServingOrigin(entry: string) {
+  if (!isBareHttpOrigin(entry)) {
+    return false
+  }
+  return (
+    new URL(entry).protocol === 'https:' ||
+    (isLoopbackDeploymentUrl(entry) && isLocalBackend())
+  )
+}
+
+/**
+ * The bare origin of the zone with Image transformations on, which serves
+ * `/cdn-cgi/image/…` variants (`IMAGE_TRANSFORM_ORIGIN`, e.g. the site's
+ * custom domain). Null while unset: every variant is the original.
+ */
+export function readImageTransformOrigin(): string | null {
+  const origin = process.env.IMAGE_TRANSFORM_ORIGIN
+  if (origin === undefined || origin === '') {
+    return null
+  }
+  if (!isBareHttpOrigin(origin) || new URL(origin).protocol !== 'https:') {
+    throw new Error('IMAGE_TRANSFORM_ORIGIN must be a bare https origin')
+  }
+  return new URL(origin).origin
+}
+
 /**
  * GitHub token for metric sources (`model/metrics/github.ts`). Optional:
  * public repositories are read without it; a source marked private is not

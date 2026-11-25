@@ -12,6 +12,7 @@ import {
   collectionValidator,
   snapshotValidator,
 } from './model/content/snapshot'
+import { MEDIA_TABLES } from './model/media/tables'
 import { METRICS_TABLES } from './model/metrics/tables'
 import { userFieldsValidator } from './model/users'
 
@@ -65,4 +66,7 @@ export default defineSchema({
 
   // Metrics (ADR 0004): every number on the site, with its source and readings.
   ...METRICS_TABLES,
+
+  // Media on R2: uploads, their alt text per locale (story 41).
+  ...MEDIA_TABLES,
 })

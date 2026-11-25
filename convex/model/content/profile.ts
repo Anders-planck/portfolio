@@ -15,6 +15,12 @@ export const profileFieldsValidator = v.object({
     backend: v.string(),
     infra: v.string(),
   }),
+  /**
+   * The CV the header links to: a PDF in Media, or null. Optional because
+   * drafts and versions written before it existed lack it; readers turn a
+   * missing value into null.
+   */
+  cvMediaId: v.optional(v.union(v.id('media'), v.null())),
 })
 
 export const profileContentFieldsValidator = v.object({
@@ -58,6 +64,7 @@ export const EMPTY_PROFILE_FIELDS: ProfileFields = {
   links: [],
   isAvailable: false,
   skills: { frontend: '', backend: '', infra: '' },
+  cvMediaId: null,
 }
 
 export const EMPTY_PROFILE_CONTENT_FIELDS: ProfileContentFields = {
