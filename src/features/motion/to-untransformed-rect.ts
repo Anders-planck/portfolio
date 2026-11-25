@@ -2,13 +2,16 @@ export type Rect = Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>
 
 /** The translation of a computed `transform` (`none`, `matrix`, `matrix3d`). */
 function readTranslation(transform: string): { left: number; top: number } {
-  const values = /\(([^)]*)\)/.exec(transform)?.[1]?.split(',').map(Number)
-  if (values === undefined) {
+  const matrixValues = /\(([^)]*)\)/
+    .exec(transform)?.[1]
+    ?.split(',')
+    .map(Number)
+  if (matrixValues === undefined) {
     return { left: 0, top: 0 }
   }
   const [left, top] = transform.startsWith('matrix3d')
-    ? [values[12], values[13]]
-    : [values[4], values[5]]
+    ? [matrixValues[12], matrixValues[13]]
+    : [matrixValues[4], matrixValues[5]]
   return { left: left ?? 0, top: top ?? 0 }
 }
 

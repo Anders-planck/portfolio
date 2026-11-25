@@ -26,6 +26,9 @@ export const MESSAGES_FR: Messages = {
       `Cette page n’est pas encore traduite : vous la lisez en ${shownLanguage}.`,
     description: 'Les menus et la navigation restent dans la langue choisie.',
   },
+  home: {
+    emptyTitle: 'Le profil n’est pas encore publié.',
+  },
   notFound: {
     documentTitle: (siteName) => `Page introuvable · ${siteName}`,
     eyebrow: 'Page introuvable',

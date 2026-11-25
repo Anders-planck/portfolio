@@ -65,9 +65,13 @@ test('an untranslated locale shows the Italian profile with a notice in its own 
   ).toBeDefined()
 })
 
-test('Home stays empty when nothing is published in any locale', async () => {
-  const { router } = renderHomeAt('/en', { en: null, it: null })
+test('before anything is published Home says so in the reader’s locale', async () => {
+  renderHomeAt('/en', { en: null, it: null })
 
-  await router.load()
-  expect(screen.queryByRole('heading')).toBeNull()
+  expect(
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'The profile is not published yet.',
+    }),
+  ).toBeDefined()
 })

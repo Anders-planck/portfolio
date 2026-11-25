@@ -1,3 +1,4 @@
+import { EmptyState } from '@astryxdesign/core/EmptyState'
 import { Heading } from '@astryxdesign/core/Heading'
 import { Layout, LayoutContent } from '@astryxdesign/core/Layout'
 import { Link } from '@astryxdesign/core/Link'
@@ -8,6 +9,7 @@ import { Text } from '@astryxdesign/core/Text'
 import { useProfileTranslation } from '../../entities/profile/use-profile-translation'
 import { TranslationFallbackNotice } from '../../shared/i18n/translation-fallback-notice'
 import { useLocale } from '../../shared/i18n/use-locale'
+import { useMessages } from '../../shared/i18n/use-messages'
 
 /**
  * Bare Home: the published Profile in the locale of the address, or in the
@@ -17,10 +19,16 @@ import { useLocale } from '../../shared/i18n/use-locale'
  */
 export function HomePage() {
   const profile = useProfileTranslation(useLocale())
+  const { home } = useMessages()
 
-  // Nothing published in any locale yet: the page stays empty.
   if (profile.kind === 'missing') {
-    return null
+    return (
+      <Layout height="auto">
+        <LayoutContent padding={8}>
+          <EmptyState title={home.emptyTitle} headingLevel={1} />
+        </LayoutContent>
+      </Layout>
+    )
   }
   const { fields, content } = profile.content
   return (

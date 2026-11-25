@@ -33,6 +33,10 @@ export interface Messages {
     title: (shownLanguage: string) => string
     description: string
   }
+  home: {
+    /** Shown while no Profile is published in any locale. */
+    emptyTitle: string
+  }
   notFound: {
     /** The browser tab title of the 404 page. */
     documentTitle: (siteName: string) => string
