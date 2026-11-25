@@ -6,11 +6,14 @@ import { toMessagesFromLocale } from '../../shared/i18n/to-messages-from-locale'
  * What a page says about itself, for its route's `head`: title,
  * description and their Open Graph copies, in the locale of its path. The
  * address part (canonical, hreflang, `og:url`) comes from the root
- * (`toShellHead`). Usage: `toPageHead(match.pathname, …)`.
+ * (`toShellHead`). Usage: `toPageHead(match.pathname, …)`. A page that is
+ * not part of the site's public content (the engine demo) passes
+ * `isListed: false` and is kept out of search results.
  */
 export function toPageHead(
   pathname: string,
   pickCopy: (messages: Messages) => { title: string; description: string },
+  { isListed }: { isListed: boolean } = { isListed: true },
 ) {
   const messages = toMessagesFromLocale(toLocaleFromPathname(pathname))
   const { title, description } = pickCopy(messages)
@@ -22,6 +25,7 @@ export function toPageHead(
       { property: 'og:site_name', content: messages.site.name },
       { property: 'og:title', content: title },
       { property: 'og:description', content: description },
+      ...(isListed ? [] : [{ name: 'robots', content: 'noindex' }]),
     ],
   }
 }

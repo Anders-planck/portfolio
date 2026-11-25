@@ -34,6 +34,26 @@ export const MESSAGES_EN: Messages = {
     body: 'The page did not load. Try again in a moment.',
     retry: 'Try again',
   },
+  immersive: {
+    chapterIndexLabel: 'Chapters',
+    chapterNavigationLabel: 'Chapter',
+    previousChapter: 'Previous chapter',
+    nextChapter: 'Next chapter',
+    stageHint: 'Drag the block to turn it · scroll to change chapter',
+    blockLabel: 'Block',
+    blockKeyboardHint: 'Left and right arrows turn the block.',
+    blockCursorLabel: 'Drag',
+    chapterEyebrow: (chapterNumber, eyebrow) => `${chapterNumber} / ${eyebrow}`,
+    chapterIndexStep: (chapterNumber, eyebrow) => `${chapterNumber} ${eyebrow}`,
+    chapterPosition: (chapterNumber, lastChapterNumber, eyebrow) =>
+      `${chapterNumber} / ${lastChapterNumber} · ${eyebrow}`,
+    frontFace: (faceNumber, faceLabel) => `${faceNumber} · ${faceLabel}`,
+  },
+  immersiveDemo: {
+    title: 'Immersive engine demo',
+    description:
+      'A test page for the engine of the immersive pages, with placeholder copy.',
+  },
   notFound: {
     documentTitle: (siteName) => `Page not found · ${siteName}`,
     eyebrow: 'Page not found',

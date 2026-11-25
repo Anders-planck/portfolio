@@ -34,6 +34,26 @@ export const MESSAGES_IT: Messages = {
     body: 'La pagina non si è caricata. Riprova tra poco.',
     retry: 'Riprova',
   },
+  immersive: {
+    chapterIndexLabel: 'Capitoli',
+    chapterNavigationLabel: 'Capitolo',
+    previousChapter: 'Capitolo precedente',
+    nextChapter: 'Capitolo successivo',
+    stageHint: 'Trascina il blocco per girarlo · scorri per cambiare capitolo',
+    blockLabel: 'Blocco',
+    blockKeyboardHint: 'Frecce sinistra e destra per girare il blocco.',
+    blockCursorLabel: 'Trascina',
+    chapterEyebrow: (chapterNumber, eyebrow) => `${chapterNumber} / ${eyebrow}`,
+    chapterIndexStep: (chapterNumber, eyebrow) => `${chapterNumber} ${eyebrow}`,
+    chapterPosition: (chapterNumber, lastChapterNumber, eyebrow) =>
+      `${chapterNumber} / ${lastChapterNumber} · ${eyebrow}`,
+    frontFace: (faceNumber, faceLabel) => `${faceNumber} · ${faceLabel}`,
+  },
+  immersiveDemo: {
+    title: 'Demo del motore immersivo',
+    description:
+      'Pagina di prova del motore delle pagine immersive, con testi segnaposto.',
+  },
   notFound: {
     documentTitle: (siteName) => `Pagina non trovata · ${siteName}`,
     eyebrow: 'Pagina non trovata',

@@ -34,6 +34,27 @@ export const MESSAGES_DE: Messages = {
     body: 'Die Seite wurde nicht geladen. Versuch es gleich noch einmal.',
     retry: 'Erneut versuchen',
   },
+  immersive: {
+    chapterIndexLabel: 'Kapitel',
+    chapterNavigationLabel: 'Kapitelnavigation',
+    previousChapter: 'Vorheriges Kapitel',
+    nextChapter: 'Nächstes Kapitel',
+    stageHint:
+      'Block ziehen, um ihn zu drehen · scrollen, um das Kapitel zu wechseln',
+    blockLabel: 'Block',
+    blockKeyboardHint: 'Die Pfeiltasten links und rechts drehen den Block.',
+    blockCursorLabel: 'Ziehen',
+    chapterEyebrow: (chapterNumber, eyebrow) => `${chapterNumber} / ${eyebrow}`,
+    chapterIndexStep: (chapterNumber, eyebrow) => `${chapterNumber} ${eyebrow}`,
+    chapterPosition: (chapterNumber, lastChapterNumber, eyebrow) =>
+      `${chapterNumber} / ${lastChapterNumber} · ${eyebrow}`,
+    frontFace: (faceNumber, faceLabel) => `${faceNumber} · ${faceLabel}`,
+  },
+  immersiveDemo: {
+    title: 'Demo der immersiven Engine',
+    description:
+      'Eine Testseite der Engine für die immersiven Seiten, mit Platzhaltertexten.',
+  },
   notFound: {
     documentTitle: (siteName) => `Seite nicht gefunden · ${siteName}`,
     eyebrow: 'Seite nicht gefunden',

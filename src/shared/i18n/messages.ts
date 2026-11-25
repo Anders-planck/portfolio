@@ -42,6 +42,39 @@ export interface Messages {
     body: string
     retry: string
   }
+  immersive: {
+    /** The accessible name of the chapter index (Stepper). */
+    chapterIndexLabel: string
+    /** The accessible name of the ‹ › chapter navigation group. */
+    chapterNavigationLabel: string
+    previousChapter: string
+    nextChapter: string
+    /** Under the chapter navigation: what the Block and the scroll do. */
+    stageHint: string
+    /** The accessible name of the Block. */
+    blockLabel: string
+    /** How to turn the Block from the keyboard. */
+    blockKeyboardHint: string
+    /** The cursor label over the Block. */
+    blockCursorLabel: string
+    /** A chapter's eyebrow, e.g. "01 / Discipline". */
+    chapterEyebrow: (chapterNumber: string, eyebrow: string) => string
+    /** A step of the chapter index, e.g. "01 Discipline". */
+    chapterIndexStep: (chapterNumber: string, eyebrow: string) => string
+    /** The active chapter in the ‹ › navigation, e.g. "01 / 05 · Discipline". */
+    chapterPosition: (
+      chapterNumber: string,
+      lastChapterNumber: string,
+      eyebrow: string,
+    ) => string
+    /** The face that looks at the reader, e.g. "02 · Backend". */
+    frontFace: (faceNumber: string, faceLabel: string) => string
+  }
+  /** The head of the engine demo page; its body copy is in its route chunk (ADR 0013). */
+  immersiveDemo: {
+    title: string
+    description: string
+  }
   notFound: {
     /** The browser tab title of the 404 page. */
     documentTitle: (siteName: string) => string

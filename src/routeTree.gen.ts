@@ -16,6 +16,7 @@ import { Route as CmsFontiRouteImport } from './routes/cms/fonti'
 import { Route as CmsProfiloRouteImport } from './routes/cms/profilo'
 import { Route as Char123LocaleChar125IndexRouteImport } from './routes/{-$locale}/index'
 import { Route as Char123LocaleChar125SplatRouteImport } from './routes/{-$locale}/$'
+import { Route as Char123LocaleChar125DemoRouteImport } from './routes/{-$locale}/demo'
 import { Route as CmsNoteIndexRouteImport } from './routes/cms/note/index'
 import { Route as CmsNoteKeyRouteImport } from './routes/cms/note/$key'
 import { Route as Char123LocaleChar125NoteIndexRouteImport } from './routes/{-$locale}/note/index'
@@ -59,6 +60,12 @@ const Char123LocaleChar125SplatRoute =
     path: '/$',
     getParentRoute: () => Char123LocaleChar125RouteRoute,
   } as any)
+const Char123LocaleChar125DemoRoute =
+  Char123LocaleChar125DemoRouteImport.update({
+    id: '/demo',
+    path: '/demo',
+    getParentRoute: () => Char123LocaleChar125RouteRoute,
+  } as any)
 const CmsNoteIndexRoute = CmsNoteIndexRouteImport.update({
   id: '/note/',
   path: '/note/',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/cms/fonti': typeof CmsFontiRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms/': typeof CmsIndexRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/cms/note/$key': typeof CmsNoteKeyRoute
@@ -99,6 +107,7 @@ export interface FileRoutesByTo {
   '/cms/fonti': typeof CmsFontiRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms': typeof CmsIndexRoute
   '/{-$locale}': typeof Char123LocaleChar125IndexRoute
   '/cms/note/$key': typeof CmsNoteKeyRoute
@@ -113,6 +122,7 @@ export interface FileRoutesById {
   '/cms/fonti': typeof CmsFontiRoute
   '/cms/profilo': typeof CmsProfiloRoute
   '/{-$locale}/$': typeof Char123LocaleChar125SplatRoute
+  '/{-$locale}/demo': typeof Char123LocaleChar125DemoRoute
   '/cms/': typeof CmsIndexRoute
   '/{-$locale}/': typeof Char123LocaleChar125IndexRoute
   '/cms/note/$key': typeof CmsNoteKeyRoute
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/cms/fonti'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms/'
     | '/{-$locale}/'
     | '/cms/note/$key'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/cms/fonti'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms'
     | '/{-$locale}'
     | '/cms/note/$key'
@@ -152,6 +164,7 @@ export interface FileRouteTypes {
     | '/cms/fonti'
     | '/cms/profilo'
     | '/{-$locale}/$'
+    | '/{-$locale}/demo'
     | '/cms/'
     | '/{-$locale}/'
     | '/cms/note/$key'
@@ -216,6 +229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char123LocaleChar125SplatRouteImport
       parentRoute: typeof Char123LocaleChar125RouteRoute
     }
+    '/{-$locale}/demo': {
+      id: '/{-$locale}/demo'
+      path: '/demo'
+      fullPath: '/{-$locale}/demo'
+      preLoaderRoute: typeof Char123LocaleChar125DemoRouteImport
+      parentRoute: typeof Char123LocaleChar125RouteRoute
+    }
     '/cms/note/': {
       id: '/cms/note/'
       path: '/note'
@@ -269,6 +289,7 @@ const CmsRouteRouteWithChildren = CmsRouteRoute._addFileChildren(
 
 interface Char123LocaleChar125RouteRouteChildren {
   Char123LocaleChar125SplatRoute: typeof Char123LocaleChar125SplatRoute
+  Char123LocaleChar125DemoRoute: typeof Char123LocaleChar125DemoRoute
   Char123LocaleChar125IndexRoute: typeof Char123LocaleChar125IndexRoute
   Char123LocaleChar125NoteSlugRoute: typeof Char123LocaleChar125NoteSlugRoute
   Char123LocaleChar125NoteIndexRoute: typeof Char123LocaleChar125NoteIndexRoute
@@ -277,6 +298,7 @@ interface Char123LocaleChar125RouteRouteChildren {
 const Char123LocaleChar125RouteRouteChildren: Char123LocaleChar125RouteRouteChildren =
   {
     Char123LocaleChar125SplatRoute: Char123LocaleChar125SplatRoute,
+    Char123LocaleChar125DemoRoute: Char123LocaleChar125DemoRoute,
     Char123LocaleChar125IndexRoute: Char123LocaleChar125IndexRoute,
     Char123LocaleChar125NoteSlugRoute: Char123LocaleChar125NoteSlugRoute,
     Char123LocaleChar125NoteIndexRoute: Char123LocaleChar125NoteIndexRoute,
