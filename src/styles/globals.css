@@ -27,7 +27,7 @@
  * (`--_app-shell-header-height`), as a spacing token: `pt-header`,
  * `scroll-mt-header`. Inline, so it resolves where it is used, under the
  * shell. The fallback is the header's height in this theme, for the first
- * paint before AppShell measures.
+ * paint before AppShell measures. No public Astryx token exists (ADR 0012).
  */
 @theme inline {
   --spacing-header: var(--_app-shell-header-height, 3.25rem);

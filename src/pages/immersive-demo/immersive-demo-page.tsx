@@ -7,11 +7,11 @@ import type { BlockFaces } from '../../features/block/block-face'
 import { useLocale } from '../../shared/i18n/use-locale'
 import { Stage } from '../../widgets/stage/stage'
 import type { StageChapter } from '../../widgets/stage/stage-chapter'
-import { DEMO_COPY, type DemoCopy } from './demo-copy'
+import { DEMO_COPY, type DemoCopy } from './immersive-demo-copy'
 
 /**
  * The demo chapters: the anchors and the motion are the engine's test
- * fixture; every word is placeholder copy from `demo-copy.ts`, per locale. Tickets
+ * fixture; every word is placeholder copy from `immersive-demo-copy.ts`, per locale. Tickets
  * 08–10 feed the Stage from Convex instead.
  */
 function toDemoChapters({ chapters }: DemoCopy): StageChapter[] {

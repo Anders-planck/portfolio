@@ -70,7 +70,7 @@ export interface Messages {
     /** The face that looks at the reader, e.g. "02 · Backend". */
     frontFace: (faceNumber: string, faceLabel: string) => string
   }
-  /** The head of the engine demo page; its body copy is in its route chunk. */
+  /** The head of the engine demo page; its body copy is in its route chunk (ADR 0013). */
   immersiveDemo: {
     title: string
     description: string

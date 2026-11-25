@@ -7,34 +7,8 @@ import { BLOCK_FACE_COUNT, type BlockFaces } from './block-face'
 import type { BlockPose } from './block-pose'
 import { BlockShape } from './block-shape'
 import { toFaceNumber } from './to-face-number'
+import { toTurnStepFromKey } from './to-turn-step-from-key'
 import { useBlockDrive } from './use-block-drive'
-
-/**
- * How many faces a key turns the Block by, given the face at the front:
- * ← → one face, Home/End to the first/last face. Up and Down are left to
- * the page, so they keep scrolling it (resolution 2), and so is any key
- * with a modifier (browser and system shortcuts).
- */
-function toTurnStepFromKey(
-  event: KeyboardEvent,
-  frontFaceIndex: number,
-): number | undefined {
-  if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
-    return undefined
-  }
-  switch (event.key) {
-    case 'ArrowLeft':
-      return -1
-    case 'ArrowRight':
-      return 1
-    case 'Home':
-      return -frontFaceIndex
-    case 'End':
-      return BLOCK_FACE_COUNT - 1 - frontFaceIndex
-    default:
-      return undefined
-  }
-}
 
 /**
  * The Block. Given `readScrollPose` it moves (immersive layout): scroll

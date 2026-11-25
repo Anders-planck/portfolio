@@ -29,7 +29,7 @@ export interface BlockDrive {
   stop: () => void
 }
 
-function toViewportPointer(event: PointerEvent): ViewportPointer {
+function toViewportPointerFromEvent(event: PointerEvent): ViewportPointer {
   return {
     horizontal: (event.clientX / window.innerWidth) * 2 - 1,
     vertical: (event.clientY / window.innerHeight) * 2 - 1,
@@ -85,7 +85,7 @@ export function driveBlock(
   }
   const leanToPointer = (event: PointerEvent) => {
     if (event.pointerType === 'mouse') {
-      motion.pointer = toViewportPointer(event)
+      motion.pointer = toViewportPointerFromEvent(event)
       scheduleDraw()
     }
   }

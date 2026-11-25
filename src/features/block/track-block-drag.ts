@@ -22,7 +22,7 @@ interface Press {
   isDragging: boolean
 }
 
-function toDrag(press: Press, event: PointerEvent) {
+function toBlockDragFromPress(press: Press, event: PointerEvent) {
   const pitchDeg = (press.clientY - event.clientY) * DRAG_PITCH_DEG_PER_PX
   return {
     turnYawDeg:
@@ -78,7 +78,7 @@ export function trackBlockDrag(
     }
     press.isDragging = true
     block.dataset.dragging = ''
-    onDragMove(toDrag(press, event))
+    onDragMove(toBlockDragFromPress(press, event))
   }
   const endPress = (event: PointerEvent) => {
     if (press?.pointerId !== event.pointerId) {

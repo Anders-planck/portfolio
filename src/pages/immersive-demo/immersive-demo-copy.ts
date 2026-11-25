@@ -6,7 +6,7 @@ interface DemoChapterCopy {
   body: string
 }
 
-/** The demo page's placeholder copy (DATA-05), kept in its route chunk. */
+/** The demo page's placeholder copy, kept in its route chunk (ADR 0013). */
 export interface DemoCopy {
   notice: string
   /** One per demo chapter, opening first. */
