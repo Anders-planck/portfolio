@@ -1,4 +1,5 @@
 import { readCursorTarget } from './read-cursor-target'
+import type { ViewportPosition } from './viewport-position'
 
 export interface CursorParts {
   ring: HTMLElement
@@ -6,16 +7,10 @@ export interface CursorParts {
   label: HTMLElement
 }
 
-/** A viewport position, as pointer events give it. */
-interface Position {
-  left: number
-  top: number
-}
-
 /** Below this distance in px the ring is where the pointer is. */
 const SETTLED_DISTANCE_PX = 0.4
 
-function toTranslate({ left, top }: Position): string {
+function toTranslate({ left, top }: ViewportPosition): string {
   return `translate3d(${String(left)}px, ${String(top)}px, 0)`
 }
 
@@ -42,8 +37,8 @@ export function followPointer(
   ringInertia: number,
 ): () => void {
   let frame = 0
-  let pointer: Position | undefined
-  let ringPosition: Position = { left: 0, top: 0 }
+  let pointer: ViewportPosition | undefined
+  let ringPosition: ViewportPosition = { left: 0, top: 0 }
   const moveRing = () => {
     if (pointer === undefined) {
       frame = 0

@@ -1,12 +1,8 @@
+import type { ViewportPosition } from './viewport-position'
+
 export interface MagneticOptions {
   radiusPx: number
   strength: number
-}
-
-/** A viewport position, as pointer events give it. */
-interface PointerPosition {
-  left: number
-  top: number
 }
 
 /** How far the control moves, in px. */
@@ -21,7 +17,7 @@ interface MagneticShift {
  */
 export function toMagneticOffset(
   rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
-  pointer: PointerPosition,
+  pointer: ViewportPosition,
   { radiusPx, strength }: MagneticOptions,
 ): MagneticShift | undefined {
   const offsetX = pointer.left - (rect.left + rect.width / 2)
@@ -43,7 +39,7 @@ export function attractToPointer(
   options: MagneticOptions,
 ): () => void {
   let frame = 0
-  let pointer: PointerPosition | undefined
+  let pointer: ViewportPosition | undefined
   const moveElement = () => {
     frame = 0
     if (pointer === undefined) {

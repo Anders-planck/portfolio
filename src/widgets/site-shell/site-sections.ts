@@ -4,7 +4,7 @@ import type { Messages } from '../../shared/i18n/messages'
 export interface SiteSection {
   /** Path without the locale prefix. */
   path: string
-  labelKey: keyof Pick<Messages['navigation'], 'work' | 'notes' | 'path'>
+  labelKey: keyof Pick<Messages['navigation'], 'work' | 'notes' | 'careerPath'>
 }
 
 /** Lavori: the 404 page sends readers there too. */
@@ -17,7 +17,7 @@ export const WORK_PATH = '/lavori'
 export const SITE_SECTIONS: readonly SiteSection[] = [
   { path: WORK_PATH, labelKey: 'work' },
   { path: '/note', labelKey: 'notes' },
-  { path: '/percorso', labelKey: 'path' },
+  { path: '/percorso', labelKey: 'careerPath' },
 ]
 
 /**

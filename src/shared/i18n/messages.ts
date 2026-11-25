@@ -16,7 +16,7 @@ export interface Messages {
     footerLabel: string
     work: string
     notes: string
-    path: string
+    careerPath: string
     cv: string
   }
   language: {
@@ -25,6 +25,8 @@ export interface Messages {
     /** The short code on the menu button. */
     code: string
     menuLabel: string
+    /** The menu button's accessible name; it contains the visible code. */
+    menuButtonLabel: (code: string) => string
     menuHint: string
   }
   translationFallback: {

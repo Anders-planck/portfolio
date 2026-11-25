@@ -31,7 +31,7 @@ export function LanguageMenu() {
   return (
     <DropdownMenu
       button={{
-        label: `${language.menuLabel}: ${language.code}`,
+        label: language.menuButtonLabel(language.code),
         children: language.code,
         variant: 'ghost',
       }}

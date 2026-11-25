@@ -11,13 +11,14 @@ export const MESSAGES_DE: Messages = {
     footerLabel: 'Seitennavigation',
     work: 'Projekte',
     notes: 'Notizen',
-    path: 'Werdegang',
+    careerPath: 'Werdegang',
     cv: 'CV · PDF',
   },
   language: {
     name: 'Deutsch',
     code: 'DE',
     menuLabel: 'Sprache',
+    menuButtonLabel: (code) => `Sprache: ${code}`,
     menuHint: 'Beim Sprachwechsel bleibst du auf derselben Seite.',
   },
   translationFallback: {
