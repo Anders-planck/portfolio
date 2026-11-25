@@ -3,6 +3,7 @@ import { v } from 'convex/values'
 import { internalMutation, query } from './_generated/server'
 import {
   draftEditValidator,
+  previewOutcomeValidator,
   readDraftForPreview,
   saveDraftEdit,
 } from './model/content/drafts'
@@ -117,12 +118,13 @@ export const createPreviewToken = internalMutation({
 })
 
 /**
- * What preview reads: the draft a token was issued for, or null if the token
- * is bad or expired. Expiry is checked when the query runs.
+ * What preview reads: the draft a token was issued for, or `expired` /
+ * `no-draft`; a token this backend did not sign throws. Expiry is checked
+ * when the query runs.
  */
 export const getDraft = query({
   args: { token: v.string() },
-  returns: v.union(localizedDocumentValidator, v.null()),
+  returns: previewOutcomeValidator,
   handler: (ctx, { token }) =>
     readDraftForPreview(ctx, token, {
       secret: readPreviewTokenSecret(),

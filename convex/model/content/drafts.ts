@@ -1,4 +1,4 @@
-import { type Infer, v } from 'convex/values'
+import { ConvexError, type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
@@ -14,7 +14,7 @@ import {
 } from './profile'
 import {
   type DocumentRef,
-  type LocalizedDocument,
+  localizedDocumentValidator,
   type Snapshot,
   toLocalizedDocumentFromSnapshot,
 } from './snapshot'
@@ -105,20 +105,44 @@ function toSnapshotContentFromProfileContent(
   return { locale: record.locale, ...pickProfileContentFields(record) }
 }
 
-/** The draft a preview token was issued for; null if the token is bad or expired. */
+/**
+ * What preview shows for a token: the draft it was issued for, `expired`
+ * (the owner opens a new link) or `no-draft`. A token this backend did not
+ * sign is an authorization failure and throws.
+ */
+export const previewOutcomeValidator = v.union(
+  v.object({
+    status: v.literal('ready'),
+    document: localizedDocumentValidator,
+  }),
+  v.object({ status: v.literal('expired') }),
+  v.object({ status: v.literal('no-draft') }),
+)
+type PreviewOutcome = Infer<typeof previewOutcomeValidator>
+
 export async function readDraftForPreview(
   ctx: QueryCtx,
   token: string,
   verification: { secret: string; now: number },
-): Promise<LocalizedDocument | null> {
-  const claims = await verifyPreviewToken(token, verification)
-  if (claims === null) {
-    return null
+): Promise<PreviewOutcome> {
+  const check = await verifyPreviewToken(token, verification)
+  if (check.status === 'invalid') {
+    throw new ConvexError({
+      code: 'PREVIEW_TOKEN_INVALID',
+      message: 'This preview link was not issued by this site',
+    })
   }
-  const snapshot = await readDraftSnapshot(ctx, claims)
-  return snapshot === null
-    ? null
-    : toLocalizedDocumentFromSnapshot(snapshot, claims.locale)
+  if (check.status === 'expired') {
+    return { status: 'expired' }
+  }
+  const snapshot = await readDraftSnapshot(ctx, check.claims)
+  if (snapshot === null) {
+    return { status: 'no-draft' }
+  }
+  return {
+    status: 'ready',
+    document: toLocalizedDocumentFromSnapshot(snapshot, check.claims.locale),
+  }
 }
 
 function findProfile(ctx: QueryCtx, key: string) {

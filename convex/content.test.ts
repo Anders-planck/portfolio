@@ -408,9 +408,12 @@ describe('preview', () => {
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
 
-    const draft = await backend.query(api.content.getDraft, { token })
+    const preview = await backend.query(api.content.getDraft, { token })
 
-    expect(draft?.content?.subtitle).toBe('In bozza')
+    expect(preview).toMatchObject({
+      status: 'ready',
+      document: { content: { subtitle: 'In bozza' } },
+    })
     expect(await readPublishedSubtitle(backend)).toBe('Pubblicata')
   })
 
@@ -421,7 +424,9 @@ describe('preview', () => {
 
     vi.advanceTimersByTime(PREVIEW_TOKEN_TTL_MS + 1)
 
-    expect(await backend.query(api.content.getDraft, { token })).toBeNull()
+    expect(await backend.query(api.content.getDraft, { token })).toEqual({
+      status: 'expired',
+    })
   })
 
   test('rotating the secret invalidates earlier preview links', async () => {
@@ -430,6 +435,8 @@ describe('preview', () => {
 
     vi.stubEnv('PREVIEW_TOKEN_SECRET', 'another-secret')
 
-    expect(await backend.query(api.content.getDraft, { token })).toBeNull()
+    await expect(
+      backend.query(api.content.getDraft, { token }),
+    ).rejects.toThrow(/not issued by this site/)
   })
 })

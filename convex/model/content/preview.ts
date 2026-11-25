@@ -39,18 +39,26 @@ export async function signPreviewToken(claims: PreviewClaims, secret: string) {
   return `${payload}.${toBase64UrlFromBytes(new Uint8Array(signature))}`
 }
 
-/** The token's claims if it is authentic and unexpired at `now`, otherwise null. */
+/**
+ * What a token proves at `now`: its claims, that it has expired, or nothing
+ * (malformed, forged, or signed with another secret).
+ */
+export type PreviewTokenCheck =
+  | { status: 'valid'; claims: PreviewClaims }
+  | { status: 'expired' }
+  | { status: 'invalid' }
+
 export async function verifyPreviewToken(
   token: string,
   { secret, now }: { secret: string; now: number },
-): Promise<PreviewClaims | null> {
+): Promise<PreviewTokenCheck> {
   const [payload, signature, ...rest] = token.split('.')
   if (payload === undefined || signature === undefined || rest.length > 0) {
-    return null
+    return { status: 'invalid' }
   }
   const signatureBytes = toBytesFromBase64Url(signature)
   if (signatureBytes === null) {
-    return null
+    return { status: 'invalid' }
   }
   const isAuthentic = await crypto.subtle.verify(
     'HMAC',
@@ -58,11 +66,13 @@ export async function verifyPreviewToken(
     signatureBytes,
     new TextEncoder().encode(payload),
   )
-  if (!isAuthentic) {
-    return null
+  const claims = isAuthentic ? parseClaims(payload) : null
+  if (claims === null) {
+    return { status: 'invalid' }
   }
-  const claims = parseClaims(payload)
-  return claims !== null && claims.expiresAt > now ? claims : null
+  return claims.expiresAt > now
+    ? { status: 'valid', claims }
+    : { status: 'expired' }
 }
 
 function importSigningKey(secret: string) {

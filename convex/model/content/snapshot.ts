@@ -11,7 +11,10 @@ import {
 export const collectionValidator = v.union(v.literal('profile'))
 export type Collection = Infer<typeof collectionValidator>
 
-const COLLECTIONS: readonly Collection[] = ['profile']
+// Read from the validator, so a new collection literal is enough.
+const COLLECTIONS: readonly Collection[] = collectionValidator.members.map(
+  (member) => member.value,
+)
 
 export function isCollection(value: unknown): value is Collection {
   return COLLECTIONS.some((collection) => collection === value)

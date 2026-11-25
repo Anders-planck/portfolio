@@ -25,10 +25,10 @@ describe('preview token', () => {
 
     expect(
       await verifyPreviewToken(token, { secret: SECRET, now: NOW }),
-    ).toEqual(CLAIMS)
+    ).toEqual({ status: 'valid', claims: CLAIMS })
   })
 
-  test('a token reads nothing once it has expired', async () => {
+  test('a token is expired from its expiry time on', async () => {
     const token = await signPreviewToken(CLAIMS, SECRET)
 
     expect(
@@ -36,15 +36,15 @@ describe('preview token', () => {
         secret: SECRET,
         now: CLAIMS.expiresAt,
       }),
-    ).toBeNull()
+    ).toEqual({ status: 'expired' })
   })
 
-  test('a token signed with another secret reads nothing', async () => {
+  test('a token signed with another secret is invalid', async () => {
     const token = await signPreviewToken(CLAIMS, 'another-secret')
 
     expect(
       await verifyPreviewToken(token, { secret: SECRET, now: NOW }),
-    ).toBeNull()
+    ).toEqual({ status: 'invalid' })
   })
 
   test('changing the claims breaks the signature', async () => {
@@ -59,10 +59,10 @@ describe('preview token', () => {
         secret: SECRET,
         now: NOW,
       }),
-    ).toBeNull()
+    ).toEqual({ status: 'invalid' })
   })
 
-  test('a genuine token whose claims name an unknown locale reads nothing', async () => {
+  test('a genuine token whose claims name an unknown locale is invalid', async () => {
     const unknownLocale = {
       ...CLAIMS,
       locale: 'xx',
@@ -71,15 +71,15 @@ describe('preview token', () => {
 
     expect(
       await verifyPreviewToken(token, { secret: SECRET, now: NOW }),
-    ).toBeNull()
+    ).toEqual({ status: 'invalid' })
   })
 
   test.each(['', 'not-a-token', 'a.b.c', 'payload.!!!'])(
-    'malformed token %j reads nothing',
+    'malformed token %j is invalid',
     async (token) => {
       expect(
         await verifyPreviewToken(token, { secret: SECRET, now: NOW }),
-      ).toBeNull()
+      ).toEqual({ status: 'invalid' })
     },
   )
 })

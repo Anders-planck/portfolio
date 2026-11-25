@@ -8,7 +8,7 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 - **Publish**: `publish` → `releases.ts` `publishSelection`: each selected document carries the draft `revision` the owner reviewed (`saveDraft` returns it; every save moves it), and a draft saved since then returns `stale` and writes nothing. Then it reads the selected drafts as snapshots, runs `rules.ts` `PUBLISH_RULES` (a `block` finding returns `blocked` and writes nothing), writes immutable versions (`versions.ts`), records a release and moves the published pointers (`pointers.ts`).
 - **Schedule**: the same call with a future `scheduledAt` freezes the versions now, records a `scheduled` release and schedules `content.publishScheduled`; when it runs, the rules run again and the release becomes `published` or `failed`.
 - **Rollback**: `rollBackToRelease` records a new `published` release with the target's versions (`rolledBackFrom`) and moves the pointers back. No rules, drafts untouched.
-- **Read**: the public site reads `getPublished` → `pointers.ts` `readPublishedDocument`; preview reads `getDraft` with a token from `preview.ts` (HMAC-SHA256, one hour, secret from `model/env.ts`).
+- **Read**: the public site reads `getPublished` → `pointers.ts` `readPublishedDocument`; preview reads `getDraft` with a token from `preview.ts` (HMAC-SHA256, one hour, secret from `model/env.ts`): `ready` with the draft, `expired` or `no-draft`; a token this backend did not sign throws.
 
 ## Files
 
