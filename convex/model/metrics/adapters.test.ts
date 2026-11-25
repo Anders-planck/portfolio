@@ -1,6 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { readSource } from './adapters'
+import { toJsonResponse } from './http.fixture'
 
 const TOKEN = 'test-github-token'
 const DAILY = 'daily'
@@ -19,13 +20,6 @@ function stubFetch(...responses: (Response | Error)[]) {
   })
   vi.stubGlobal('fetch', fetchMock)
   return fetchMock
-}
-
-function toJsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  })
 }
 
 function toHeaders(call: FetchCall | undefined) {

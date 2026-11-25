@@ -25,6 +25,10 @@ const ROUNDING_OPTIONS = (['compact', 'exact'] as const).map((style) => ({
   label: rounding[style],
 }))
 
+// Grid takes its column width in px: three settings cards side by side on a
+// wide screen, one per line on a phone.
+const CARD_MIN_WIDTH_PX = 280
+
 function isLargeNumberStyle(value: string | null): value is LargeNumberStyle {
   return ROUNDING_OPTIONS.some((option) => option.value === value)
 }
@@ -52,7 +56,7 @@ export function SourcesSettings({
   }
 
   return (
-    <Grid columns={{ minWidth: 280, max: 3 }} gap={4}>
+    <Grid columns={{ minWidth: CARD_MIN_WIDTH_PX, max: 3 }} gap={4}>
       <Card>
         <VStack gap={2}>
           <Heading level={2}>{token.title}</Heading>

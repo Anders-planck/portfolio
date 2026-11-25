@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
 import { internal } from './_generated/api'
+import { toJsonResponse } from './model/metrics/http.fixture'
 import { MANUAL_READING_TTL_MS } from './model/metrics/status'
 import schema from './schema'
 
@@ -16,10 +17,6 @@ type Backend = ReturnType<typeof createBackend>
 
 function createBackend() {
   return convexTest(schema, modules)
-}
-
-function toJsonResponse(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status })
 }
 
 /** Answers each URL with its route; anything else is a lost connection. */
@@ -253,6 +250,20 @@ test('a key is used once; repeating the same definition is not an error', async 
     kind: 'rejected',
     problems: [{ kind: 'key-taken' }],
   })
+})
+
+test('a repeated definition is the same whatever order its fields come in', async () => {
+  const backend = createBackend()
+  await createNpmMetric(backend)
+
+  const repeated = await backend.mutation(internal.metrics.createMetric, {
+    source: { cadence: 'daily', packageName: 'some-package', kind: 'npm' },
+    format: 'count',
+    label: 'download/anno',
+    key: 'downloads',
+  })
+
+  expect(repeated).toEqual({ kind: 'created' })
 })
 
 test('the rounding choice changes how large figures are shown', async () => {

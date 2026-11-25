@@ -34,9 +34,23 @@ export const manualCountOutcomeValidator = v.union(
 )
 export type ManualCountOutcome = Infer<typeof manualCountOutcomeValidator>
 
+/** JSON with object keys sorted, so the order fields arrived in never matters. */
+function toCanonicalJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map(toCanonicalJson).join(',')}]`
+  }
+  if (typeof value === 'object' && value !== null) {
+    const entries = Object.entries(value)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, entry]) => `${JSON.stringify(key)}:${toCanonicalJson(entry)}`)
+    return `{${entries.join(',')}}`
+  }
+  return JSON.stringify(value)
+}
+
 function isSameDefinition(left: MetricDefinition, right: MetricDefinition) {
   const pick = ({ key, label, format, source }: MetricDefinition) =>
-    JSON.stringify({ key, label, format, source })
+    toCanonicalJson({ key, label, format, source })
   return pick(left) === pick(right)
 }
 

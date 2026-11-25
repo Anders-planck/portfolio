@@ -82,7 +82,8 @@ async function readCommits(
   source: Extract<Source, { kind: 'github-commits' }>,
   headers: Record<string, string>,
 ): Promise<SourceReading> {
-  const figure = { value: 0, total: 0 }
+  const perRepo: { authored: number; total: number }[] = []
+  // One repository at a time: the first failure stops the read.
   for (const repo of source.repos) {
     const response = await readContributorPages(repo, headers)
     if (response.kind === 'failed') {
@@ -92,9 +93,15 @@ async function readCommits(
     if (commits === null) {
       return { kind: 'failed', reason: { kind: 'author-not-found' } }
     }
-    figure.value += commits.authored
-    figure.total += commits.total
+    perRepo.push(commits)
   }
+  const figure = perRepo.reduce(
+    (sum, commits) => ({
+      value: sum.value + commits.authored,
+      total: sum.total + commits.total,
+    }),
+    { value: 0, total: 0 },
+  )
   return { kind: 'ok', figure }
 }
 

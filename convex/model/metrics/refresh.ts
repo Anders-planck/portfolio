@@ -3,13 +3,13 @@ import type { ActionCtx } from '../../_generated/server'
 import { readSource } from './adapters'
 import { isRefreshDue } from './status'
 
-/**
- * Reads automated sources and records what they said. `due` is the daily
- * cron (`convex/crons.ts`), `all` is "Aggiorna ora" in Fonti. Sources are read
- * in parallel; one failing source never stops the others.
- */
+/** `due` is the daily cron (`convex/crons.ts`), `all` is "Aggiorna ora" in Fonti. */
 export type RefreshScope = 'due' | 'all'
 
+/**
+ * Reads automated sources and records what they said. Sources are read in
+ * parallel; one failing source never stops the others.
+ */
 export async function refreshSources(
   ctx: ActionCtx,
   scope: RefreshScope,
