@@ -6,13 +6,13 @@ import { TextArea } from '@astryxdesign/core/TextArea'
 import type { FunctionArgs, FunctionReturnType } from 'convex/server'
 import { useState } from 'react'
 
-import type { internal } from '../../../convex/_generated/api'
+import type { api } from '../../../convex/_generated/api'
 import { SourceFormDialog } from './source-form-dialog'
 import { SOURCES_MESSAGES } from './sources-messages'
 
-type ManualCount = FunctionArgs<typeof internal.metrics.recordManualCount>
+type ManualCount = FunctionArgs<typeof api.metrics.recordManualCount>
 type ManualCountOutcome = FunctionReturnType<
-  typeof internal.metrics.recordManualCount
+  typeof api.metrics.recordManualCount
 >
 type Problem = Extract<
   ManualCountOutcome,

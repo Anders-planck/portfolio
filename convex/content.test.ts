@@ -1,16 +1,17 @@
-/// <reference types="vite/client" />
-import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { api, internal } from './_generated/api'
+import { api } from './_generated/api'
 import type { Id } from './_generated/dataModel'
 import type { Locale } from './model/content/locales'
 import { PREVIEW_TOKEN_TTL_MS } from './model/content/preview'
 import type * as rulesModule from './model/content/rules'
 import type { Finding, Rule } from './model/content/rules'
-import schema from './schema'
-
-const modules = import.meta.glob('./**/*.ts')
+import {
+  createAuthBackend,
+  createOwnerBackend,
+  type SignedInBackend,
+  signInAsOwner,
+} from './owner.fixture'
 
 // The store's tests choose the server rule set (the rules engine has its own
 // tests): publish reads `PUBLISH_RULES`, which returns `serverRules.current`.
@@ -28,11 +29,7 @@ const OTHER_KEY = 'other'
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 const PREVIEW_SECRET = 'test-preview-secret-of-at-least-32-bytes'
 
-type Backend = ReturnType<typeof createBackend>
-
-function createBackend() {
-  return convexTest(schema, modules)
-}
+type Backend = SignedInBackend
 
 function saveSubtitleDraft(
   backend: Backend,
@@ -40,7 +37,7 @@ function saveSubtitleDraft(
   locale: Locale = 'it',
   key: string = PROFILE.key,
 ) {
-  return backend.mutation(internal.content.saveDraft, {
+  return backend.mutation(api.content.saveDraft, {
     collection: 'profile',
     key,
     localeEdit: { locale, content: { subtitle } },
@@ -53,7 +50,7 @@ function publishDrafts(
   drafts: { key: string; revision: number }[],
   options: { scheduledAt?: number; requestId?: string } = {},
 ) {
-  return backend.mutation(internal.content.publish, {
+  return backend.mutation(api.content.publish, {
     selection: drafts.map((draft) => ({
       collection: 'profile' as const,
       ...draft,
@@ -93,7 +90,7 @@ function rollBack(
   backend: Backend,
   releaseId: Awaited<ReturnType<typeof publishSubtitle>>,
 ) {
-  return backend.mutation(internal.content.rollback, {
+  return backend.mutation(api.content.rollback, {
     releaseId,
     requestId: crypto.randomUUID(),
   })
@@ -131,15 +128,15 @@ function countReleases(backend: Backend) {
 
 describe('publish', () => {
   test('nothing is public before the first publish', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await saveSubtitleDraft(backend, 'Bozza')
 
     expect(await readPublishedProfile(backend)).toBeNull()
   })
 
   test('publishing makes the draft public for its locale', async () => {
-    const backend = createBackend()
-    const { revision } = await backend.mutation(internal.content.saveDraft, {
+    const backend = await createOwnerBackend()
+    const { revision } = await backend.mutation(api.content.saveDraft, {
       ...PROFILE,
       fields: { name: 'Anders Planck' },
       localeEdit: {
@@ -159,7 +156,7 @@ describe('publish', () => {
   })
 
   test('later draft edits stay private until the next publish', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await publishSubtitle(backend, 'Prima')
 
     const { revision } = await saveSubtitleDraft(backend, 'Seconda')
@@ -170,7 +167,7 @@ describe('publish', () => {
   })
 
   test('each locale reads its own content; a missing locale has none', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await saveSubtitleDraft(backend, 'Italiano', 'it')
     const { revision } = await saveSubtitleDraft(backend, 'English', 'en')
 
@@ -186,7 +183,7 @@ describe('publish', () => {
   })
 
   test('publishing a document without a draft fails', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
 
     await expect(publishProfile(backend, { revision: 1 })).rejects.toThrow(
       /No draft/,
@@ -194,7 +191,7 @@ describe('publish', () => {
   })
 
   test('a repeated publish request (double click, retry) publishes once', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Una volta')
 
     const first = await publishProfile(backend, {
@@ -214,7 +211,7 @@ describe('publish', () => {
   })
 
   test('a draft edited after the owner reviewed it is not published', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await publishSubtitle(backend, 'Pubblicata')
     const { revision: reviewed } = await saveSubtitleDraft(backend, 'Rivista')
     // Another tab saves while the owner reads the diff.
@@ -232,7 +229,7 @@ describe('publish', () => {
 
 describe('publish request checks', () => {
   test('publish checks the request before it writes anything', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Doppia')
 
     await expect(
@@ -245,7 +242,7 @@ describe('publish request checks', () => {
   })
 
   test('a publish request id cannot be reused for a rollback', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Uno')
     const outcome = await publishProfile(backend, {
       revision,
@@ -256,7 +253,7 @@ describe('publish request checks', () => {
     }
 
     await expect(
-      backend.mutation(internal.content.rollback, {
+      backend.mutation(api.content.rollback, {
         releaseId: outcome.releaseId,
         requestId: 'shared-id',
       }),
@@ -266,7 +263,7 @@ describe('publish request checks', () => {
 
 describe('rollback', () => {
   test('only a published release can be rolled back to', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await publishSubtitle(backend, 'Uno')
     const { revision } = await saveSubtitleDraft(backend, 'Domani')
     const scheduled = await publishProfile(backend, {
@@ -284,7 +281,7 @@ describe('rollback', () => {
   })
 
   test('restores the whole site as it was: later documents become unpublished', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const first = await publishSubtitle(backend, 'Uno')
     const second = await publishSubtitle(backend, 'Altro', OTHER_KEY)
 
@@ -296,7 +293,7 @@ describe('rollback', () => {
     expect(await readPublishedSubtitle(backend, OTHER_KEY)).toBe('Altro')
   })
   test('restores any earlier release and leaves the draft alone', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const first = await publishSubtitle(backend, 'Uno')
     const second = await publishSubtitle(backend, 'Due')
     await publishSubtitle(backend, 'Tre')
@@ -314,7 +311,7 @@ describe('rollback', () => {
   })
 
   test('a rollback is itself a release that can be rolled back to', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const first = await publishSubtitle(backend, 'Uno')
     await publishSubtitle(backend, 'Due')
 
@@ -326,13 +323,13 @@ describe('rollback', () => {
   })
 
   test('a repeated rollback request rolls back once', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const first = await publishSubtitle(backend, 'Uno')
     await publishSubtitle(backend, 'Due')
     const request = { releaseId: first, requestId: 'rollback-once' }
 
-    const rollback = await backend.mutation(internal.content.rollback, request)
-    const retry = await backend.mutation(internal.content.rollback, request)
+    const rollback = await backend.mutation(api.content.rollback, request)
+    const retry = await backend.mutation(api.content.rollback, request)
 
     expect(retry).toEqual(rollback)
     expect(await countReleases(backend)).toBe(3)
@@ -348,7 +345,8 @@ describe('scheduled publish', () => {
   })
 
   test('goes live at its time with the drafts as they were when scheduled', async () => {
-    const backend = createBackend()
+    const root = createAuthBackend()
+    const backend = await signInAsOwner(root)
     await publishSubtitle(backend, 'Adesso')
     const { revision } = await saveSubtitleDraft(backend, 'Domani')
 
@@ -362,12 +360,12 @@ describe('scheduled publish', () => {
     expect(await readPublishedSubtitle(backend)).toBe('Adesso')
 
     vi.advanceTimersByTime(ONE_DAY_MS)
-    await backend.finishInProgressScheduledFunctions()
+    await root.finishInProgressScheduledFunctions()
     expect(await readPublishedSubtitle(backend)).toBe('Domani')
   })
 
   test('a time in the past publishes now', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Subito')
 
     const outcome = await publishProfile(backend, {
@@ -380,7 +378,8 @@ describe('scheduled publish', () => {
   })
 
   test('a later publish wins: the scheduled release fails with a conflict and applies nothing', async () => {
-    const backend = createBackend()
+    const root = createAuthBackend()
+    const backend = await signInAsOwner(root)
     await publishSubtitle(backend, 'Adesso')
     const main = await saveSubtitleDraft(backend, 'Domani')
     const other = await saveSubtitleDraft(
@@ -403,7 +402,7 @@ describe('scheduled publish', () => {
 
     await publishSubtitle(backend, 'Più nuova')
     vi.advanceTimersByTime(ONE_DAY_MS)
-    await backend.finishInProgressScheduledFunctions()
+    await root.finishInProgressScheduledFunctions()
 
     expect(await readPublishedSubtitle(backend)).toBe('Più nuova')
     expect(await readPublishedProfile(backend, 'it', OTHER_KEY)).toBeNull()
@@ -417,7 +416,8 @@ describe('scheduled publish', () => {
   })
 
   test('a later rollback wins: the scheduled release fails with a conflict', async () => {
-    const backend = createBackend()
+    const root = createAuthBackend()
+    const backend = await signInAsOwner(root)
     const first = await publishSubtitle(backend, 'Uno')
     await publishSubtitle(backend, 'Due')
     const { revision } = await saveSubtitleDraft(backend, 'Tre')
@@ -431,7 +431,7 @@ describe('scheduled publish', () => {
 
     await rollBack(backend, first)
     vi.advanceTimersByTime(ONE_DAY_MS)
-    await backend.finishInProgressScheduledFunctions()
+    await root.finishInProgressScheduledFunctions()
 
     expect(await readPublishedSubtitle(backend)).toBe('Uno')
     expect(await readRelease(backend, scheduled.releaseId)).toMatchObject({
@@ -478,7 +478,7 @@ describe('rules at publish', () => {
   })
 
   test('a block finding stops the publish and nothing goes live', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await publishSubtitle(backend, 'Buona')
     const { revision } = await saveSubtitleDraft(backend, '[da scrivere]', 'en')
 
@@ -502,7 +502,7 @@ describe('rules at publish', () => {
   })
 
   test('warn findings publish and come back with the release', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Quasi TODO')
 
     const outcome = await publishProfile(backend, { revision })
@@ -516,7 +516,8 @@ describe('rules at publish', () => {
 
   test('a scheduled release fails if a rule blocks it when it comes due', async () => {
     vi.useFakeTimers()
-    const backend = createBackend()
+    const root = createAuthBackend()
+    const backend = await signInAsOwner(root)
     await publishSubtitle(backend, 'Prima')
     const { revision } = await saveSubtitleDraft(backend, 'Dopo [anno]')
     // Scheduled while the rule set is still empty...
@@ -532,7 +533,7 @@ describe('rules at publish', () => {
     serverRules.current = [placeholderRule]
 
     vi.advanceTimersByTime(60_000)
-    await backend.finishInProgressScheduledFunctions()
+    await root.finishInProgressScheduledFunctions()
 
     expect(await readPublishedSubtitle(backend)).toBe('Prima')
     expect(await readRelease(backend, outcome.releaseId)).toMatchObject({
@@ -557,18 +558,15 @@ describe('preview', () => {
   async function createPreviewOfDraft(backend: Backend) {
     await publishSubtitle(backend, 'Pubblicata')
     await saveSubtitleDraft(backend, 'In bozza')
-    const { token } = await backend.mutation(
-      internal.content.createPreviewToken,
-      {
-        ...PROFILE,
-        locale: 'it',
-      },
-    )
+    const { token } = await backend.mutation(api.content.createPreviewToken, {
+      ...PROFILE,
+      locale: 'it',
+    })
     return token
   }
 
   test('a preview token reads the draft while the public reads the release', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const token = await createPreviewOfDraft(backend)
 
     const preview = await backend.action(api.content.getDraft, { token })
@@ -582,7 +580,7 @@ describe('preview', () => {
 
   test('a link read again after it expired is expired, not an earlier answer', async () => {
     vi.useFakeTimers()
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const token = await createPreviewOfDraft(backend)
     expect(await backend.action(api.content.getDraft, { token })).toMatchObject(
       {
@@ -598,7 +596,7 @@ describe('preview', () => {
   })
 
   test('rotating the secret invalidates earlier preview links', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     const token = await createPreviewOfDraft(backend)
 
     vi.stubEnv('PREVIEW_TOKEN_SECRET', `another-${PREVIEW_SECRET}`)
@@ -609,12 +607,12 @@ describe('preview', () => {
   })
 
   test('a preview secret shorter than 32 bytes is refused', async () => {
-    const backend = createBackend()
+    const backend = await createOwnerBackend()
     await saveSubtitleDraft(backend, 'In bozza')
     vi.stubEnv('PREVIEW_TOKEN_SECRET', 'too-short')
 
     await expect(
-      backend.mutation(internal.content.createPreviewToken, {
+      backend.mutation(api.content.createPreviewToken, {
         ...PROFILE,
         locale: 'it',
       }),
@@ -622,14 +620,54 @@ describe('preview', () => {
   })
 
   test('a link for a document without a draft shows no draft', async () => {
-    const backend = createBackend()
-    const { token } = await backend.mutation(
-      internal.content.createPreviewToken,
-      { collection: 'profile', key: OTHER_KEY, locale: 'it' },
-    )
+    const backend = await createOwnerBackend()
+    const { token } = await backend.mutation(api.content.createPreviewToken, {
+      collection: 'profile',
+      key: OTHER_KEY,
+      locale: 'it',
+    })
 
     expect(await backend.action(api.content.getDraft, { token })).toEqual({
       status: 'no-draft',
     })
+  })
+})
+
+describe('editable draft', () => {
+  test('before the first save the editor opens on empty values', async () => {
+    const backend = await createOwnerBackend()
+
+    const draft = await backend.query(api.content.getEditableDraft, {
+      ...PROFILE,
+      locale: 'it',
+    })
+
+    expect(draft).toMatchObject({ revision: null, savedAt: null })
+    expect(draft.content.subtitle).toBe('')
+    expect(draft.fields.links).toEqual([])
+  })
+
+  test('the editor opens on the saved draft of its locale, with its revision', async () => {
+    const backend = await createOwnerBackend()
+    await saveSubtitleDraft(backend, 'Italiano', 'it')
+    const { revision, savedAt } = await saveSubtitleDraft(
+      backend,
+      'English',
+      'en',
+    )
+
+    const english = await backend.query(api.content.getEditableDraft, {
+      ...PROFILE,
+      locale: 'en',
+    })
+    const german = await backend.query(api.content.getEditableDraft, {
+      ...PROFILE,
+      locale: 'de',
+    })
+
+    expect(english).toMatchObject({ revision, savedAt })
+    expect(english.content.subtitle).toBe('English')
+    expect(german.revision).toBe(revision)
+    expect(german.content.subtitle).toBe('')
   })
 })

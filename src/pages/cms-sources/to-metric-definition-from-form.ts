@@ -1,6 +1,6 @@
 import type { FunctionArgs } from 'convex/server'
 
-import type { internal } from '../../../convex/_generated/api'
+import type { api } from '../../../convex/_generated/api'
 
 /**
  * The "Nuova fonte" form and the metric definition it creates (pure). The
@@ -8,9 +8,7 @@ import type { internal } from '../../../convex/_generated/api'
  * go into the definition. The server checks the values.
  */
 
-export type MetricDefinition = FunctionArgs<
-  typeof internal.metrics.createMetric
->
+export type MetricDefinition = FunctionArgs<typeof api.metrics.createMetric>
 export type SourceKind = MetricDefinition['source']['kind']
 export type Cadence = Extract<
   MetricDefinition['source'],

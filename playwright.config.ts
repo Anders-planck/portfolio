@@ -9,7 +9,16 @@ const APP_PORT = process.env.E2E_APP_PORT ?? '4173'
 const convexUrl =
   process.env.VITE_CONVEX_URL ?? `http://127.0.0.1:${String(CONVEX_PORT)}`
 
-export default defineConfig({
+// The CMS tests sign in through the test-only sign-in (convex/e2e.ts), which
+// works only on a loopback backend; these values are not secrets.
+const e2eEnv = {
+  E2E_CONVEX_PORT: String(CONVEX_PORT),
+  E2E_OWNER_GITHUB_ID: '1000001',
+  E2E_SIGN_IN_SECRET: 'local-e2e-sign-in-secret-loopback-only',
+}
+
+// The options `e2e/cms-test.ts` declares (config may not import e2e code).
+export default defineConfig<{ convexUrl: string; testSignInSecret: string }>({
   testDir: './e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -18,6 +27,8 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${APP_PORT}`,
     trace: 'on-first-retry',
+    convexUrl,
+    testSignInSecret: e2eEnv.E2E_SIGN_IN_SECRET,
   },
   projects: [
     {
@@ -36,10 +47,12 @@ export default defineConfig({
   ],
   webServer: [
     {
-      // The site port (HTTP actions) sits next to the cloud port, as by default.
+      // First the local backend's env (convex.config.ts needs it to push;
+      // the script refuses any other deployment). The site port (HTTP
+      // actions) sits next to the cloud port, as by default.
       // `seed:publishSeedProfile` publishes the seed profile once (a no-op afterwards).
-      command: `bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)} --run seed:publishSeedProfile`,
-      env: { CONVEX_AGENT_MODE: 'anonymous' },
+      command: `bun scripts/local-convex/prepare-local-convex.ts && bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)} --run seed:publishSeedProfile`,
+      env: { CONVEX_AGENT_MODE: 'anonymous', ...e2eEnv },
       url: `${convexUrl}/version`,
       reuseExistingServer: !process.env.CI,
       timeout: 120_000,

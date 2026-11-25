@@ -1,9 +1,12 @@
 import { v } from 'convex/values'
 
 import {
+  action,
   internalAction,
   internalMutation,
   internalQuery,
+  mutation,
+  query,
 } from './_generated/server'
 import { readGithubToken } from './model/env'
 import {
@@ -28,35 +31,35 @@ import {
   listAutomatedMetrics,
   refreshTargetValidator,
 } from './model/metrics/targets'
-import { requireOwner } from './model/owner'
+import { requireOwner, requireOwnerInAction } from './model/owner'
 
 /**
- * Metrics (ADR 0004). The CMS functions (Fonti) are internal until owner auth
- * exists (ticket 04, see `model/owner.ts`); the refresh runs from the cron.
+ * Metrics (ADR 0004). The CMS functions (Fonti) start with the owner check
+ * (ADR 0005); the refresh also runs from the cron.
  */
 
 /** Fonti: every metric with its last verified figure, date and status. */
-export const getSourcesOverview = internalQuery({
+export const getSourcesOverview = query({
   args: {},
   returns: sourcesOverviewValidator,
   handler: async (ctx) => {
-    await requireOwner()
+    await requireOwner(ctx)
     return readSourcesOverview(ctx, readGithubToken() !== null, Date.now())
   },
 })
 
 /** Fonti "Nuova fonte". Repeating the same definition is not an error. */
-export const createMetric = internalMutation({
+export const createMetric = mutation({
   args: metricDefinitionValidator,
   returns: createOutcomeValidator,
   handler: async (ctx, definition) => {
-    await requireOwner()
+    await requireOwner(ctx)
     return addMetric(ctx, definition, Date.now())
   },
 })
 
 /** Records a manual count with its evidence; `countedAt` is the day of the count. */
-export const recordManualCount = internalMutation({
+export const recordManualCount = mutation({
   args: {
     key: v.string(),
     value: v.number(),
@@ -65,28 +68,28 @@ export const recordManualCount = internalMutation({
   },
   returns: manualCountOutcomeValidator,
   handler: async (ctx, count) => {
-    await requireOwner()
+    await requireOwner(ctx)
     return addManualCount(ctx, count, Date.now())
   },
 })
 
 /** Fonti "Arrotondamenti": exact figures, or «10k+» above ten thousand. */
-export const chooseLargeNumberStyle = internalMutation({
+export const chooseLargeNumberStyle = mutation({
   args: { largeNumberStyle: largeNumberStyleValidator },
   returns: v.null(),
   handler: async (ctx, { largeNumberStyle }) => {
-    await requireOwner()
+    await requireOwner(ctx)
     await saveLargeNumberStyle(ctx, largeNumberStyle)
     return null
   },
 })
 
 /** Fonti "Aggiorna ora": reads every automated source now. */
-export const refreshNow = internalAction({
+export const refreshNow = action({
   args: {},
   returns: v.null(),
   handler: async (ctx) => {
-    await requireOwner()
+    await requireOwnerInAction(ctx)
     await refreshSources(ctx, 'all', readGithubToken(), Date.now())
     return null
   },

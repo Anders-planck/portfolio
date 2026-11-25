@@ -133,6 +133,45 @@ export async function readDraftPreview(
   }
 }
 
+/**
+ * What the CMS editor opens: the draft in one locale, starting from empty
+ * values where nothing is saved yet. `revision` and `savedAt` are null
+ * before the document's first save (there is nothing to publish).
+ */
+export const editableDraftValidator = v.object({
+  revision: v.union(v.number(), v.null()),
+  savedAt: v.union(v.number(), v.null()),
+  fields: profileFieldsValidator,
+  content: profileContentFieldsValidator,
+})
+export type EditableDraft = Infer<typeof editableDraftValidator>
+
+export async function readEditableDraft(
+  ctx: QueryCtx,
+  target: DocumentRef & { locale: Locale },
+): Promise<EditableDraft> {
+  const profile = await findProfile(ctx, target.key)
+  const snapshot = await readDraftSnapshot(ctx, target)
+  if (profile === null || snapshot === null) {
+    return {
+      revision: null,
+      savedAt: null,
+      fields: EMPTY_PROFILE_FIELDS,
+      content: EMPTY_PROFILE_CONTENT_FIELDS,
+    }
+  }
+  const { fields, content } = toLocalizedDocumentFromSnapshot(
+    snapshot,
+    target.locale,
+  )
+  return {
+    revision: profile.revision,
+    savedAt: profile.updatedAt,
+    fields,
+    content: content ?? EMPTY_PROFILE_CONTENT_FIELDS,
+  }
+}
+
 function findProfile(ctx: QueryCtx, key: string) {
   return ctx.db
     .query('profile')

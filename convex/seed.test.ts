@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test'
 import { expect, test } from 'vitest'
 
 import { api, internal } from './_generated/api'
+import { createOwnerBackend } from './owner.fixture'
 import schema from './schema'
 const modules = import.meta.glob('./**/*.ts')
 
@@ -37,11 +38,11 @@ test('the seeded copy has no free numbers (ADR 0004)', async () => {
 })
 
 test('the seed creates the cms-fonti metrics once, with the manual count', async () => {
-  const backend = convexTest(schema, modules)
+  const backend = await createOwnerBackend()
   await backend.mutation(internal.seed.seedMetrics, {})
   await backend.mutation(internal.seed.seedMetrics, {})
 
-  const overview = await backend.query(internal.metrics.getSourcesOverview, {})
+  const overview = await backend.query(api.metrics.getSourcesOverview, {})
   expect(overview.metrics.map((metric) => metric.key)).toEqual([
     'sdk-downloads',
     'expo-mtls-downloads',

@@ -21,7 +21,9 @@ vi.mock('../../entities/appearance/use-appearance', () => ({
 
 // The shell has its own test; here only the document around it matters.
 vi.mock('./site-shell', () => ({
-  SiteShell: ({ children }: { children: ReactNode }) => children,
+  SiteShell: ({ children }: { children: ReactNode }) => (
+    <section data-site-shell="">{children}</section>
+  ),
 }))
 
 /** The server HTML of a page at `path`, as the Worker would send it. */
@@ -45,4 +47,12 @@ test('the document carries the locale of the address and the published mode', as
   const html = await renderDocumentAt('/fr/lavori')
   expect(html).toMatch(/<html lang="fr"[^>]*data-theme="dark"/)
   expect(html).toContain('<p>Pagina</p>')
+})
+
+test('site pages get the site shell; the CMS gets the document without it', async () => {
+  expect(await renderDocumentAt('/')).toContain('data-site-shell')
+
+  const cmsHtml = await renderDocumentAt('/cms/profilo')
+  expect(cmsHtml).not.toContain('data-site-shell')
+  expect(cmsHtml).toContain('<p>Pagina</p>')
 })

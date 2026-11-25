@@ -109,7 +109,10 @@ export function SourcesTable({ rows, onOpenManualCount }: SourcesTableProps) {
       columns={toColumns(onOpenManualCount)}
       idKey="key"
       verticalAlign="top"
-      emptyState={<EmptyState title={SOURCES_MESSAGES.empty} isCompact />}
+      // Level 2: the table sits right under the page's h1 (axe heading-order).
+      emptyState={
+        <EmptyState title={SOURCES_MESSAGES.empty} headingLevel={2} isCompact />
+      }
     />
   )
 }

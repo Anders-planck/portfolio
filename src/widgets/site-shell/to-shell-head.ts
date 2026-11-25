@@ -1,6 +1,7 @@
 import { isNotFound } from '@tanstack/react-router'
 
 import type { Locale } from '../../shared/i18n/locale'
+import { isCmsPathname } from '../../shared/router/is-cms-pathname'
 import type { SiteOrigin } from './site-origin'
 import { toAddressHead } from './to-address-head'
 import { toNotFoundHead } from './to-not-found-head'
@@ -49,9 +50,11 @@ export function toShellHead({
   if (hasNotFoundMatch(matches)) {
     return { meta: [...sharedMeta, ...toNotFoundHead(locale).meta], links: [] }
   }
-  const address = toAddressHead({
-    siteOrigin,
-    pathname: matches.at(-1)?.pathname ?? '/',
-  })
+  const pathname = matches.at(-1)?.pathname ?? '/'
+  // The CMS is no page of the site: no canonical, hreflang or OG of its own.
+  if (isCmsPathname(pathname)) {
+    return { meta: sharedMeta, links: [] }
+  }
+  const address = toAddressHead({ siteOrigin, pathname })
   return { meta: [...sharedMeta, ...address.meta], links: address.links }
 }

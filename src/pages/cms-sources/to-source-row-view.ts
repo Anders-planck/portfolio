@@ -1,6 +1,6 @@
 import type { FunctionReturnType } from 'convex/server'
 
-import type { internal } from '../../../convex/_generated/api'
+import type { api } from '../../../convex/_generated/api'
 import { SOURCES_MESSAGES } from './sources-messages'
 
 /**
@@ -9,7 +9,7 @@ import { SOURCES_MESSAGES } from './sources-messages'
  */
 
 export type SourcesOverview = FunctionReturnType<
-  typeof internal.metrics.getSourcesOverview
+  typeof api.metrics.getSourcesOverview
 >
 export type SourceRow = SourcesOverview['metrics'][number]
 type Status = SourceRow['status']

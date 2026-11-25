@@ -8,6 +8,8 @@ export const SOURCES_MESSAGES = {
     'Ogni numero del sito viene da qui. Se una fonte non risponde, il sito mostra l’ultimo valore verificato con la sua data, mai un numero inventato.',
   refreshNow: 'Aggiorna ora',
   refreshFailed: 'Aggiornamento non riuscito. Riprova.',
+  loading: 'Caricamento delle fonti…',
+  loadFailed: 'Non riesco a leggere le fonti',
   newSource: 'Nuova fonte',
   tableLabel: 'Fonti dei numeri',
   empty: 'Nessuna fonte. Aggiungine una con «Nuova fonte».',

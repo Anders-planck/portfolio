@@ -9,8 +9,10 @@
  */
 
 import type * as appearance from "../appearance.js";
+import type * as auth from "../auth.js";
 import type * as content from "../content.js";
 import type * as crons from "../crons.js";
+import type * as e2e from "../e2e.js";
 import type * as metrics from "../metrics.js";
 import type * as model_appearance from "../model/appearance.js";
 import type * as model_content_drafts from "../model/content/drafts.js";
@@ -31,6 +33,7 @@ import type * as model_content_seed from "../model/content/seed.js";
 import type * as model_content_snapshot from "../model/content/snapshot.js";
 import type * as model_content_versions from "../model/content/versions.js";
 import type * as model_env from "../model/env.js";
+import type * as model_loopback from "../model/loopback.js";
 import type * as model_metrics_adapters from "../model/metrics/adapters.js";
 import type * as model_metrics_attempts from "../model/metrics/attempts.js";
 import type * as model_metrics_checks from "../model/metrics/checks.js";
@@ -51,7 +54,12 @@ import type * as model_metrics_status from "../model/metrics/status.js";
 import type * as model_metrics_tables from "../model/metrics/tables.js";
 import type * as model_metrics_targets from "../model/metrics/targets.js";
 import type * as model_owner from "../model/owner.js";
+import type * as model_secret from "../model/secret.js";
+import type * as model_sessions from "../model/sessions.js";
+import type * as model_users from "../model/users.js";
 import type * as seed from "../seed.js";
+import type * as sessions from "../sessions.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -61,8 +69,10 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   appearance: typeof appearance;
+  auth: typeof auth;
   content: typeof content;
   crons: typeof crons;
+  e2e: typeof e2e;
   metrics: typeof metrics;
   "model/appearance": typeof model_appearance;
   "model/content/drafts": typeof model_content_drafts;
@@ -83,6 +93,7 @@ declare const fullApi: ApiFromModules<{
   "model/content/snapshot": typeof model_content_snapshot;
   "model/content/versions": typeof model_content_versions;
   "model/env": typeof model_env;
+  "model/loopback": typeof model_loopback;
   "model/metrics/adapters": typeof model_metrics_adapters;
   "model/metrics/attempts": typeof model_metrics_attempts;
   "model/metrics/checks": typeof model_metrics_checks;
@@ -103,7 +114,12 @@ declare const fullApi: ApiFromModules<{
   "model/metrics/tables": typeof model_metrics_tables;
   "model/metrics/targets": typeof model_metrics_targets;
   "model/owner": typeof model_owner;
+  "model/secret": typeof model_secret;
+  "model/sessions": typeof model_sessions;
+  "model/users": typeof model_users;
   seed: typeof seed;
+  sessions: typeof sessions;
+  users: typeof users;
 }>;
 
 /**
@@ -132,4 +148,7 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  auth: import("@convex-dev/auth/_generated/component.js").ComponentApi<"auth">;
+  authGithub: import("@convex-dev/auth/components/github/_generated/component.js").ComponentApi<"authGithub">;
+};

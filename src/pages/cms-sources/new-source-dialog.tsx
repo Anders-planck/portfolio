@@ -5,7 +5,7 @@ import { TextInput } from '@astryxdesign/core/TextInput'
 import type { FunctionReturnType } from 'convex/server'
 import { useState } from 'react'
 
-import type { internal } from '../../../convex/_generated/api'
+import type { api } from '../../../convex/_generated/api'
 import { SourceFormDialog } from './source-form-dialog'
 import { SOURCES_MESSAGES } from './sources-messages'
 import {
@@ -17,7 +17,7 @@ import {
   toMetricDefinitionFromForm,
 } from './to-metric-definition-from-form'
 
-type CreateOutcome = FunctionReturnType<typeof internal.metrics.createMetric>
+type CreateOutcome = FunctionReturnType<typeof api.metrics.createMetric>
 type Problem = Extract<CreateOutcome, { kind: 'rejected' }>['problems'][number]
 
 export interface NewSourceDialogProps {

@@ -30,8 +30,8 @@ export interface SourcesPageProps {
 /**
  * CMS Fonti (mockup `cms-fonti`): every metric with its source and status,
  * "Aggiorna ora", "Nuova fonte", manual counts and how figures are rounded.
- * It renders data it is given; the route wires the Convex functions once the
- * owner can sign in (ticket 04, #12).
+ * It renders data it is given; `cms-sources-page.tsx` wires the Convex
+ * functions.
  */
 export function SourcesPage({
   overview,

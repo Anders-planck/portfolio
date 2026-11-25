@@ -93,6 +93,17 @@ test('a page that loaded gets the address head of the deepest match', () => {
   expect(meta).toContainEqual({ property: 'og:locale', content: 'en_GB' })
 })
 
+test('the CMS gets only the shared meta, no address head of the site', () => {
+  const { links } = toShellHead({
+    matches: [
+      { status: 'success', pathname: '/' },
+      { status: 'success', pathname: '/cms/profilo' },
+    ],
+    shell: { locale: 'it', siteOrigin: PREVIEW },
+  })
+  expect(links).toEqual([])
+})
+
 test('before the root loader answers only the shared meta is known', () => {
   expect(toShellHead({ matches: [], shell: undefined })).toEqual({
     meta: [

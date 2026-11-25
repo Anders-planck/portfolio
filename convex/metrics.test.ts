@@ -1,23 +1,15 @@
-/// <reference types="vite/client" />
-import { convexTest } from 'convex-test'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
-import { internal } from './_generated/api'
+import { api, internal } from './_generated/api'
 import { toJsonResponse } from './model/metrics/http.fixture'
 import { MANUAL_READING_TTL_MS } from './model/metrics/status'
-import schema from './schema'
-
-const modules = import.meta.glob('./**/*.ts')
+import { createOwnerBackend, type SignedInBackend } from './owner.fixture'
 
 const NOW = Date.UTC(2026, 10, 25, 6)
 const DAY_MS = 24 * 60 * 60 * 1000
 const NPM_URL = 'https://api.npmjs.org/downloads/point/last-year/some-package'
 
-type Backend = ReturnType<typeof createBackend>
-
-function createBackend() {
-  return convexTest(schema, modules)
-}
+type Backend = SignedInBackend
 
 /** Answers each URL with its route; anything else is a lost connection. */
 function stubFetchRoutes(routes: Record<string, () => Response>) {
@@ -35,7 +27,7 @@ function createNpmMetric(
   backend: Backend,
   cadence: 'daily' | 'weekly' = 'daily',
 ) {
-  return backend.mutation(internal.metrics.createMetric, {
+  return backend.mutation(api.metrics.createMetric, {
     key: 'downloads',
     label: 'download/anno',
     format: 'count',
@@ -44,7 +36,7 @@ function createNpmMetric(
 }
 
 function createManualMetric(backend: Backend) {
-  return backend.mutation(internal.metrics.createMetric, {
+  return backend.mutation(api.metrics.createMetric, {
     key: 'test-files',
     label: 'file di test',
     format: 'at-least',
@@ -53,7 +45,7 @@ function createManualMetric(backend: Backend) {
 }
 
 async function readMetricRow(backend: Backend, key: string) {
-  const overview = await backend.query(internal.metrics.getSourcesOverview, {})
+  const overview = await backend.query(api.metrics.getSourcesOverview, {})
   return overview.metrics.find((metric) => metric.key === key)
 }
 
@@ -69,11 +61,11 @@ afterEach(() => {
 })
 
 test('a refresh records the figure and Fonti shows it formatted, with its date', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
   stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ downloads: 8489 }) })
 
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
     display: '8.489',
@@ -83,14 +75,14 @@ test('a refresh records the figure and Fonti shows it formatted, with its date',
 })
 
 test('a failed refresh keeps the last verified figure and its date, never zero', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
   stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ downloads: 8489 }) })
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   vi.setSystemTime(NOW + DAY_MS)
   stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ error: 'down' }, 503) })
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
     display: '8.489',
@@ -104,11 +96,11 @@ test('a failed refresh keeps the last verified figure and its date, never zero',
 })
 
 test('a source that never answered has no figure to show', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
   stubFetchRoutes({})
 
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
     display: null,
@@ -118,7 +110,7 @@ test('a source that never answered has no figure to show', async () => {
 })
 
 test('the scheduled refresh reads only the sources that are due', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend, 'weekly')
   const fetchMock = stubFetchRoutes({
     [NPM_URL]: () => toJsonResponse({ downloads: 10 }),
@@ -134,7 +126,7 @@ test('the scheduled refresh reads only the sources that are due', async () => {
 })
 
 test('a weekly source that failed is read again on the next daily run', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend, 'weekly')
   const fetchMock = stubFetchRoutes({
     [NPM_URL]: () => toJsonResponse({ error: 'down' }, 503),
@@ -148,13 +140,13 @@ test('a weekly source that failed is read again on the next daily run', async ()
 })
 
 test('reading the sources twice in a row records one reading', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
   stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ downloads: 8489 }) })
 
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
   vi.setSystemTime(NOW + 60 * 1000)
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   const readings = await backend.run((ctx) =>
     ctx.db.query('metricReadings').take(10),
@@ -163,9 +155,9 @@ test('reading the sources twice in a row records one reading', async () => {
 })
 
 test('a private source is not read without the GitHub token', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   vi.stubEnv('GITHUB_TOKEN', '')
-  await backend.mutation(internal.metrics.createMetric, {
+  await backend.mutation(api.metrics.createMetric, {
     key: 'merged-prs',
     label: 'PR mergiati',
     format: 'count',
@@ -178,21 +170,21 @@ test('a private source is not read without the GitHub token', async () => {
   })
   const fetchMock = stubFetchRoutes({})
 
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   expect(fetchMock).not.toHaveBeenCalled()
   expect(await readMetricRow(backend, 'merged-prs')).toMatchObject({
     status: { kind: 'failing', reason: { kind: 'missing-token' } },
   })
-  const overview = await backend.query(internal.metrics.getSourcesOverview, {})
+  const overview = await backend.query(api.metrics.getSourcesOverview, {})
   expect(overview.isGithubTokenSet).toBe(false)
 })
 
 test('a manual count needs evidence', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createManualMetric(backend)
 
-  const outcome = await backend.mutation(internal.metrics.recordManualCount, {
+  const outcome = await backend.mutation(api.metrics.recordManualCount, {
     key: 'test-files',
     value: 750,
     countedAt: NOW,
@@ -210,11 +202,11 @@ test('a manual count needs evidence', async () => {
 })
 
 test('a manual count is shown with its evidence and expires after ninety days', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createManualMetric(backend)
   const countedAt = NOW - DAY_MS
 
-  await backend.mutation(internal.metrics.recordManualCount, {
+  await backend.mutation(api.metrics.recordManualCount, {
     key: 'test-files',
     value: 750,
     countedAt,
@@ -235,7 +227,7 @@ test('a manual count is shown with its evidence and expires after ninety days', 
 })
 
 test('recording the same manual count twice keeps one reading', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createManualMetric(backend)
   const count = {
     key: 'test-files',
@@ -244,8 +236,8 @@ test('recording the same manual count twice keeps one reading', async () => {
     evidence: 'Conteggio a mano',
   }
 
-  await backend.mutation(internal.metrics.recordManualCount, count)
-  await backend.mutation(internal.metrics.recordManualCount, count)
+  await backend.mutation(api.metrics.recordManualCount, count)
+  await backend.mutation(api.metrics.recordManualCount, count)
 
   const readings = await backend.run((ctx) =>
     ctx.db.query('metricReadings').take(10),
@@ -254,10 +246,10 @@ test('recording the same manual count twice keeps one reading', async () => {
 })
 
 test('a manual count is refused for an automated metric', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
 
-  const outcome = await backend.mutation(internal.metrics.recordManualCount, {
+  const outcome = await backend.mutation(api.metrics.recordManualCount, {
     key: 'downloads',
     value: 1,
     countedAt: NOW,
@@ -271,7 +263,7 @@ test('a manual count is refused for an automated metric', async () => {
 })
 
 test('a key is used once; repeating the same definition is not an error', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
 
   expect(await createNpmMetric(backend)).toEqual({ kind: 'created' })
   expect(await createNpmMetric(backend)).toEqual({ kind: 'created' })
@@ -282,10 +274,10 @@ test('a key is used once; repeating the same definition is not an error', async 
 })
 
 test('a repeated definition is the same whatever order its fields come in', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
 
-  const repeated = await backend.mutation(internal.metrics.createMetric, {
+  const repeated = await backend.mutation(api.metrics.createMetric, {
     source: { cadence: 'daily', packageName: 'some-package', kind: 'npm' },
     format: 'count',
     label: 'download/anno',
@@ -296,15 +288,15 @@ test('a repeated definition is the same whatever order its fields come in', asyn
 })
 
 test('the rounding choice changes how large figures are shown', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
   stubFetchRoutes({ [NPM_URL]: () => toJsonResponse({ downloads: 25_300 }) })
-  await backend.action(internal.metrics.refreshNow, {})
+  await backend.action(api.metrics.refreshNow, {})
 
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
     display: '25k+',
   })
-  await backend.mutation(internal.metrics.chooseLargeNumberStyle, {
+  await backend.mutation(api.metrics.chooseLargeNumberStyle, {
     largeNumberStyle: 'exact',
   })
   expect(await readMetricRow(backend, 'downloads')).toMatchObject({
@@ -313,12 +305,12 @@ test('the rounding choice changes how large figures are shown', async () => {
 })
 
 async function publishSubtitle(backend: Backend, subtitle: string) {
-  const { revision } = await backend.mutation(internal.content.saveDraft, {
+  const { revision } = await backend.mutation(api.content.saveDraft, {
     collection: 'profile',
     key: 'main',
     localeEdit: { locale: 'it', content: { subtitle } },
   })
-  return backend.mutation(internal.content.publish, {
+  return backend.mutation(api.content.publish, {
     selection: [{ collection: 'profile', key: 'main', revision }],
     note: 'Sottotitolo',
     requestId: `publish:${subtitle}`,
@@ -326,7 +318,7 @@ async function publishSubtitle(backend: Backend, subtitle: string) {
 }
 
 test('copy can be published only with references to metrics that exist', async () => {
-  const backend = createBackend()
+  const backend = await createOwnerBackend()
   await createNpmMetric(backend)
 
   expect(
