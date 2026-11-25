@@ -26,7 +26,8 @@ test('with a mouse it draws a ring that lights up over a link', () => {
   const { container, unmount } = renderCursor()
   const ring = container.querySelector('[data-cursor-ring]')
   expect(ring).not.toBeNull()
-  expect(document.body.hasAttribute('data-custom-cursor')).toBe(true)
+  // The system cursor stays until a mouse moves.
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(false)
 
   const link = document.createElement('a')
   link.href = '/lavori'
@@ -41,6 +42,7 @@ test('with a mouse it draws a ring that lights up over a link', () => {
   )
   expect(ring?.hasAttribute('data-active')).toBe(true)
   expect(ring?.hasAttribute('data-link')).toBe(true)
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(true)
 
   unmount()
   link.remove()

@@ -72,6 +72,8 @@ test('a page is server-rendered with canonical, hreflang and Open Graph', async 
     )
   }
   expect(head).toContain('<meta property="og:locale" content="fr_FR"')
+  // No SITE_ORIGIN is configured here, so the host is not the production one.
+  expect(head).toContain('<meta name="robots" content="noindex"')
   expect(head).toContain(
     '<meta name="description" content="Frontend et full-stack en TypeScript."',
   )

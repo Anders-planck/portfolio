@@ -40,7 +40,7 @@ export function SiteFooter() {
               {navigation[section.labelKey]}
             </Link>
           ))}
-          <Link href={CV_PATH} color="secondary">
+          <Link href={toPathnameInLocale(CV_PATH, locale)} color="secondary">
             {navigation.cv}
           </Link>
         </Stack>

@@ -22,4 +22,6 @@ Preview URL: https://portfolio.anders-jipwouo.workers.dev
 
 ## Later tickets
 
+- **`SITE_ORIGIN` (with the production domain).** Set the Worker var `SITE_ORIGIN` to the bare production origin (e.g. `https://example.com`, no path or trailing slash), in `wrangler.jsonc` `vars` or the Cloudflare dashboard. Until it is set, canonical, hreflang and `og:url` use the request's own origin and every page carries `noindex`; once set, they point at it and only that host is indexed (`*.workers.dev` previews stay `noindex`). Read by `src/shared/config/env.ts` (ticket 06).
+
 - Convex production deployment and deploy key; GitHub OAuth app; R2 bucket and keys; Convex env vars (`docs/redesign/PLAN.md` → Environments and secrets); DNS cutover. Each gets its wizard in the ticket that needs it.

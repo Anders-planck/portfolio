@@ -49,7 +49,7 @@ export function SiteHeader() {
           <Button
             ref={cvButtonRef}
             label={navigation.cv}
-            href={CV_PATH}
+            href={toPathnameInLocale(CV_PATH, locale)}
             variant="primary"
             className="transition-transform duration-(--duration-medium) ease-(--ease-move)"
           />

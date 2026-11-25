@@ -35,6 +35,39 @@ test('switching language on an inner page stays on it, query and anchor kept', a
   await expect(page.locator('html')).toHaveAttribute('lang', 'de')
 })
 
+test('on a slow network the page never blanks while the language changes', async ({
+  page,
+}) => {
+  await page.goto('/')
+  await expect(page.getByRole('banner')).toBeVisible()
+  // Records any moment the header leaves the document during the switch.
+  await page.evaluate(() => {
+    new MutationObserver(() => {
+      if (document.querySelector('header, [role="banner"]') === null) {
+        Reflect.set(window, 'hasLostShell', true)
+      }
+    }).observe(document, { childList: true, subtree: true })
+  })
+  // Every script and catalog loaded from now on arrives late.
+  await page.route('**/assets/**', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 800))
+    await route.continue()
+  })
+
+  await page
+    .getByRole('banner')
+    .getByRole('button', { name: 'Lingua: IT' })
+    .click()
+  await page.getByRole('menuitemradio', { name: 'Deutsch' }).click()
+  await expect(page.locator('html')).toHaveAttribute('lang', 'de')
+  await expect(
+    page.getByRole('link', { name: 'Projekte' }).first(),
+  ).toBeVisible()
+  expect(
+    await page.evaluate(() => Reflect.get(window, 'hasLostShell') === true),
+  ).toBe(false)
+})
+
 test('the language menu marks the current language and closes on Escape', async ({
   page,
 }) => {

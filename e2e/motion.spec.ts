@@ -46,6 +46,48 @@ test.describe('with a mouse and motion allowed', () => {
     await expect(page.locator('body')).toHaveAttribute('data-custom-cursor', '')
   })
 
+  test('an open menu gets the system cursor back, and loses it once closed', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await hoverNearCvButton(page)
+    const body = page.locator('body')
+    await expect(body).toHaveAttribute('data-custom-cursor', '')
+
+    const menuButton = page
+      .getByRole('banner')
+      .getByRole('button', { name: 'Lingua: IT' })
+    await menuButton.click()
+    const english = page.getByRole('menuitemradio', { name: 'English' })
+    await english.hover()
+    await expect(body).not.toHaveAttribute('data-custom-cursor')
+    await expect(english).not.toHaveCSS('cursor', 'none')
+
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('menuitemradio')).toHaveCount(0)
+    await hoverNearCvButton(page)
+    await expect(body).toHaveAttribute('data-custom-cursor', '')
+  })
+
+  test('a text field keeps the native I-beam', async ({ page }) => {
+    await page.goto('/')
+    await hoverNearCvButton(page)
+    await expect(page.locator('body')).toHaveAttribute('data-custom-cursor', '')
+    // No page has a field yet; one is added the way a page would render it.
+    await page.evaluate(() => {
+      const field = document.createElement('input')
+      field.setAttribute('aria-label', 'campo')
+      field.style.position = 'fixed'
+      field.style.top = '50%'
+      field.style.left = '50%'
+      document.body.append(field)
+    })
+    const field = page.getByRole('textbox', { name: 'campo' })
+    await field.hover()
+    await expect(page.locator('body')).not.toHaveAttribute('data-custom-cursor')
+    await expect(field).toHaveCSS('cursor', 'text')
+  })
+
   test('the CV button leans toward a pointer near it', async ({ page }) => {
     await page.goto('/')
     await expect(page.locator(CURSOR_RING)).toHaveCount(1)

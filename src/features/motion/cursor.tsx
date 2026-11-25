@@ -6,13 +6,6 @@ import { followPointer } from './follow-pointer'
 import { canFollowPointer, useMotionSettings } from './use-motion-settings'
 
 /**
- * The attribute on `<body>` that hides the system cursor while this one
- * draws (`SiteDocument` styles it). Never set otherwise, so on touch or with
- * reduced motion the system cursor always shows (resolution 8).
- */
-const CUSTOM_CURSOR_ATTRIBUTE = 'data-custom-cursor'
-
-/**
  * Cursor: a dot on the pointer and a ring that follows with inertia, larger
  * over links and with a label over a `data-cursor` element. Theme coloured;
  * a surface-coloured outline keeps the ring visible on dark slabs. Only with
@@ -38,12 +31,9 @@ function CursorShape({ ringInertia }: { ringInertia: number }) {
     if (ring === null || dot === null || label === null) {
       return undefined
     }
-    const stopFollowing = followPointer({ ring, dot, label }, ringInertia)
-    document.body.toggleAttribute(CUSTOM_CURSOR_ATTRIBUTE, true)
-    return () => {
-      stopFollowing()
-      document.body.removeAttribute(CUSTOM_CURSOR_ATTRIBUTE)
-    }
+    // `data-custom-cursor` on <body> (styled by SiteDocument) hides the
+    // system cursor only while the ring draws (resolution 8).
+    return followPointer({ ring, dot, label, host: document.body }, ringInertia)
   }, [ringInertia])
 
   return (

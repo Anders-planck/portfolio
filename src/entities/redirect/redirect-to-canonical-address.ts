@@ -1,18 +1,19 @@
 import { redirect } from '@tanstack/react-router'
 
-import { findRedirect } from './find-redirect'
 import type { RedirectRule } from './redirect-rule'
+import { toCanonicalAddress } from './to-canonical-address'
 
 /**
- * For a route's `beforeLoad`: when a rule matches the address, throws the
- * router redirect (the server answers with the rule's status code), keeping
- * the query string. Otherwise returns and the page loads.
+ * For the root route's `beforeLoad` (a deeper route never loads for an
+ * address nothing matches): when the address is not canonical, throws the
+ * router redirect, query string kept, and the server answers with its
+ * status code. Otherwise returns and the page loads.
  */
-export function applyRedirectRules(
+export function redirectToCanonicalAddress(
   location: { pathname: string; searchStr: string },
   rules: readonly RedirectRule[],
 ): void {
-  const target = findRedirect(location.pathname, rules)
+  const target = toCanonicalAddress(location.pathname, rules)
   if (target === undefined) {
     return
   }

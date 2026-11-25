@@ -20,5 +20,5 @@ test('the sections link in the locale of the page, the current one marked', asyn
   ).toBe('/en')
   expect(
     screen.getByRole('link', { name: 'CV · PDF' }).getAttribute('href'),
-  ).toBe('/cv')
+  ).toBe('/en/cv')
 })

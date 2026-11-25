@@ -16,13 +16,28 @@ function createCursorParts(): CursorParts {
     ring: document.createElement('div'),
     dot: document.createElement('div'),
     label: document.createElement('span'),
+    host: document.body,
   }
 }
 
-function moveMouse(clientX: number, clientY: number) {
-  window.dispatchEvent(
-    new PointerEvent('pointermove', { pointerType: 'mouse', clientX, clientY }),
+/** A pointer move over `target` (the page itself by default). */
+function movePointer(
+  clientX: number,
+  clientY: number,
+  { pointerType = 'mouse', target = document.body } = {},
+) {
+  target.dispatchEvent(
+    new PointerEvent('pointermove', {
+      pointerType,
+      clientX,
+      clientY,
+      bubbles: true,
+    }),
   )
+}
+
+function moveMouse(clientX: number, clientY: number) {
+  movePointer(clientX, clientY)
 }
 
 beforeEach(() => {
@@ -75,13 +90,49 @@ test('the cursor hides when the pointer leaves the page, and a finger is ignored
   expect(parts.ring.hasAttribute('data-active')).toBe(false)
   expect(parts.dot.hasAttribute('data-active')).toBe(false)
 
-  window.dispatchEvent(
-    new PointerEvent('pointermove', {
-      pointerType: 'touch',
-      clientX: 50,
-      clientY: 50,
-    }),
-  )
+  movePointer(50, 50, { pointerType: 'touch' })
   expect(parts.dot.style.transform).toBe('translate3d(10px, 10px, 0)')
   stopFollowing()
+})
+
+test('a pen keeps the system cursor and draws no ring', () => {
+  const parts = createCursorParts()
+  const stopFollowing = followPointer(parts, 0.5)
+  movePointer(10, 10, { pointerType: 'pen' })
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(false)
+  expect(parts.ring.hasAttribute('data-active')).toBe(false)
+  stopFollowing()
+})
+
+test('over a text field the native I-beam shows', () => {
+  const parts = createCursorParts()
+  const stopFollowing = followPointer(parts, 0.5)
+  const field = document.createElement('input')
+  document.body.append(field)
+  movePointer(10, 10)
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(true)
+  movePointer(12, 10, { target: field })
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(false)
+  field.remove()
+  stopFollowing()
+})
+
+test('opening a menu hands over to the system cursor without the mouse moving', () => {
+  const parts = createCursorParts()
+  const stopFollowing = followPointer(parts, 0.5)
+  moveMouse(10, 10)
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(true)
+
+  const menu = document.createElement('div')
+  menu.setAttribute('role', 'menu')
+  document.body.append(menu)
+  document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  pendingFrames.forEach((frame) => {
+    frame(0)
+  })
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(false)
+
+  menu.remove()
+  stopFollowing()
+  expect(document.body.hasAttribute('data-custom-cursor')).toBe(false)
 })

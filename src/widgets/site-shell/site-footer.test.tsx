@@ -19,6 +19,6 @@ test('the footer links home and every section in the locale of the page', async 
     ['Projets', '/fr/lavori'],
     ['Notes', '/fr/note'],
     ['Parcours', '/fr/percorso'],
-    ['CV · PDF', '/cv'],
+    ['CV · PDF', '/fr/cv'],
   ])
 })
