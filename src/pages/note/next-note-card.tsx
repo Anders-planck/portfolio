@@ -9,6 +9,7 @@ import { pickNoteTranslation } from '../../entities/note/pick-note-translation'
 import { toPathnameInLocale } from '../../shared/i18n/locale'
 import { useLocale } from '../../shared/i18n/use-locale'
 import { useMessages } from '../../shared/i18n/use-messages'
+import { NOTE_COPY } from './note-copy'
 
 /** The link to the next older published note, in the reader's language. */
 export function NextNoteCard({
@@ -18,6 +19,7 @@ export function NextNoteCard({
 }) {
   const locale = useLocale()
   const { notes } = useMessages()
+  const copy = NOTE_COPY[locale]
   const picked = pickNoteTranslation(next.translations, locale)
   if (picked.kind === 'missing') {
     return null
@@ -26,7 +28,7 @@ export function NextNoteCard({
     <Card padding={5}>
       <Stack gap={1}>
         <Text type="supporting" color="secondary">
-          {notes.nextNote}
+          {copy.nextNote}
         </Text>
         <Link
           href={toPathnameInLocale(`/note/${next.slug}`, locale)}

@@ -88,23 +88,12 @@ export interface Messages {
     /** The Note list's heading and browser tab title. */
     title: string
     intro: string
-    topicFilterLabel: string
-    allTopics: string
     topics: { ai: string; mobile: string; architecture: string }
-    /** A filter option with how many published notes it shows. */
-    topicOption: (label: string, count: string) => string
     readingTime: (minutes: string) => string
     /** Under a note in the list: its topic and reading time. */
     cardMeta: (topic: string, readingTime: string) => string
     /** The custom cursor's label over a note link. */
     readCursor: string
-    emptyTitle: string
-    emptyTopicTitle: string
-    backToNotes: string
-    outlineLabel: string
-    progressLabel: string
-    nextNote: string
-    alsoIn: string
     metricVerifiedAt: (date: string) => string
     metricUnavailable: string
   }

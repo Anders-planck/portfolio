@@ -10,6 +10,7 @@ import { type Locale, toPathnameInLocale } from '../../shared/i18n/locale'
 import { toMessagesFromLocale } from '../../shared/i18n/to-messages-from-locale'
 import { useLocale } from '../../shared/i18n/use-locale'
 import { useMessages } from '../../shared/i18n/use-messages'
+import { NOTE_COPY } from './note-copy'
 
 /**
  * The line above a note's title: date, topic and reading time, and links
@@ -30,6 +31,7 @@ export function NoteMeta({
 }) {
   const locale = useLocale()
   const { notes } = useMessages()
+  const copy = NOTE_COPY[locale]
   return (
     <Stack direction="horizontal" gap={3} wrap="wrap">
       <Text type="supporting" color="secondary">
@@ -43,7 +45,7 @@ export function NoteMeta({
       </Text>
       {otherLocales.length > 0 && (
         <Text type="supporting" color="secondary">
-          {notes.alsoIn}
+          {copy.alsoIn}
           {otherLocales.map((otherLocale) => (
             <Fragment key={otherLocale}>
               {' '}
