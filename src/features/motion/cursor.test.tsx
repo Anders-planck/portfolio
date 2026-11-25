@@ -4,7 +4,8 @@ import { afterEach, expect, test, vi } from 'vitest'
 
 import { createAppearance } from '../../entities/appearance/appearance.fixture'
 import { Cursor } from './cursor'
-import { MotionWrapper, stubReaderSettings } from './motion.fixture'
+import { stubReaderSettings } from './motion.fixture'
+import { MotionProvider } from './motion-provider'
 
 vi.mock('../../entities/appearance/use-appearance', () => ({
   useAppearance: () => ({ appearance: createAppearance(), css: undefined }),
@@ -16,7 +17,7 @@ afterEach(() => {
 })
 
 function renderCursor() {
-  return render(<Cursor />, { wrapper: MotionWrapper })
+  return render(<Cursor />, { wrapper: MotionProvider })
 }
 
 test('with a mouse it draws a ring that lights up over a link', () => {

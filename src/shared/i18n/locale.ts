@@ -27,16 +27,30 @@ export function toLocaleFromPathname(pathname: string): Locale {
   return isPrefixedLocale(firstSegment) ? firstSegment : DEFAULT_LOCALE
 }
 
-/** The path of a page without its locale prefix: `/en/lavori` → `/lavori`. */
-export function toUnprefixedPathname(pathname: string): string {
+/**
+ * The path without its first segment when that segment is `locale`:
+ * `/en/lavori` without `en` → `/lavori`; any other path stays as it is.
+ */
+export function toPathnameWithoutLocale(
+  pathname: string,
+  locale: Locale,
+): string {
   const firstSegment = readFirstSegment(pathname)
-  if (!isPrefixedLocale(firstSegment)) {
+  if (firstSegment !== locale) {
     return pathname
   }
   const rest = pathname.slice(
     pathname.indexOf(firstSegment) + firstSegment.length,
   )
   return rest === '' ? '/' : rest
+}
+
+/** The path of a page without its locale prefix: `/en/lavori` → `/lavori`. */
+export function toUnprefixedPathname(pathname: string): string {
+  const firstSegment = readFirstSegment(pathname)
+  return isPrefixedLocale(firstSegment)
+    ? toPathnameWithoutLocale(pathname, firstSegment)
+    : pathname
 }
 
 /** The same page in another locale: `/en/lavori` in FR → `/fr/lavori`. */

@@ -3,7 +3,8 @@ import { cleanup, render } from '@testing-library/react'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
 import { createAppearance } from '../../entities/appearance/appearance.fixture'
-import { MotionWrapper, stubReaderSettings } from './motion.fixture'
+import { stubReaderSettings } from './motion.fixture'
+import { MotionProvider } from './motion-provider'
 import { useMagnetic } from './use-magnetic'
 import { useReveal } from './use-reveal'
 import { useStagger } from './use-stagger'
@@ -59,7 +60,7 @@ afterEach(() => {
 test('with motion allowed, blocks below the fold wait to come in', () => {
   stubReaderSettings({ isReducedMotion: false, hasFinePointer: true })
   const { getByLabelText, getByRole } = render(<Blocks />, {
-    wrapper: MotionWrapper,
+    wrapper: MotionProvider,
   })
   expect(getByLabelText('reveal').style.opacity).toBe('0')
   expect(getByRole('listitem').style.opacity).toBe('0')
@@ -69,7 +70,7 @@ test('with motion allowed, blocks below the fold wait to come in', () => {
 test('with reduced motion every block is simply there and nothing is magnetic', () => {
   stubReaderSettings({ isReducedMotion: true, hasFinePointer: true })
   const { getByLabelText, getByRole } = render(<Blocks />, {
-    wrapper: MotionWrapper,
+    wrapper: MotionProvider,
   })
   expect(getByLabelText('reveal').style.opacity).toBe('')
   expect(getByRole('listitem').style.opacity).toBe('')
@@ -79,7 +80,7 @@ test('with reduced motion every block is simply there and nothing is magnetic', 
 test('on touch blocks still come in, but nothing is magnetic', () => {
   stubReaderSettings({ isReducedMotion: false, hasFinePointer: false })
   const { getByLabelText, getByRole } = render(<Blocks />, {
-    wrapper: MotionWrapper,
+    wrapper: MotionProvider,
   })
   expect(getByLabelText('reveal').style.opacity).toBe('0')
   expect(getByRole('button').style.transition).toBe('')

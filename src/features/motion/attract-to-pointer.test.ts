@@ -13,7 +13,7 @@ afterEach(() => {
 test('a pointer inside the radius pulls by a share of its offset', () => {
   expect(
     toMagneticOffset(BUTTON_RECT, { left: 160, top: 130 }, OPTIONS),
-  ).toEqual({ translateX: 20 * 0.35, translateY: 10 * 0.35 })
+  ).toEqual({ translateXPx: 20 * 0.35, translateYPx: 10 * 0.35 })
 })
 
 test('a pointer at or past the radius leaves the control in place', () => {

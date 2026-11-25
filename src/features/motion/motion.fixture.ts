@@ -1,7 +1,3 @@
-import type { ReactNode } from 'react'
-
-import { MotionProvider } from './motion-provider'
-
 /** The reader's settings a test runs under. */
 export interface ReaderSettings {
   isReducedMotion: boolean
@@ -25,8 +21,4 @@ export function stubReaderSettings({
       removeEventListener: () => undefined,
     }),
   })
-}
-
-export function MotionWrapper({ children }: { children: ReactNode }) {
-  return <MotionProvider>{children}</MotionProvider>
 }

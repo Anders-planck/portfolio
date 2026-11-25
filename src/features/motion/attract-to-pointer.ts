@@ -7,8 +7,8 @@ export interface MagneticOptions {
 
 /** How far the control moves, in px. */
 interface MagneticShift {
-  translateX: number
-  translateY: number
+  translateXPx: number
+  translateYPx: number
 }
 
 /**
@@ -25,7 +25,7 @@ export function toMagneticOffset(
   if (Math.hypot(offsetX, offsetY) >= radiusPx) {
     return undefined
   }
-  return { translateX: offsetX * strength, translateY: offsetY * strength }
+  return { translateXPx: offsetX * strength, translateYPx: offsetY * strength }
 }
 
 /**
@@ -53,7 +53,7 @@ export function attractToPointer(
     element.style.transform =
       offset === undefined
         ? ''
-        : `translate(${String(offset.translateX)}px, ${String(offset.translateY)}px)`
+        : `translate(${String(offset.translateXPx)}px, ${String(offset.translateYPx)}px)`
   }
   const followPointer = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse') {

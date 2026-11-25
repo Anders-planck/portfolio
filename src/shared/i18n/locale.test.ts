@@ -6,6 +6,7 @@ import {
   toHrefInLocale,
   toLocaleFromPathname,
   toPathnameInLocale,
+  toPathnameWithoutLocale,
   toUnprefixedPathname,
 } from './locale'
 
@@ -42,6 +43,13 @@ describe('the same page in another locale', () => {
     ['/de/percorso', 'it', '/percorso'],
   ] as const)('%s in %s is %s', (pathname, locale, expected) => {
     expect(toPathnameInLocale(pathname, locale)).toBe(expected)
+  })
+
+  test('a path loses a given locale segment, and only that one', () => {
+    expect(toPathnameWithoutLocale('/it/lavori', 'it')).toBe('/lavori')
+    expect(toPathnameWithoutLocale('/it', 'it')).toBe('/')
+    expect(toPathnameWithoutLocale('/italia', 'it')).toBe('/italia')
+    expect(toPathnameWithoutLocale('/en/lavori', 'it')).toBe('/en/lavori')
   })
 
   test('the unprefixed path drops only a locale prefix', () => {

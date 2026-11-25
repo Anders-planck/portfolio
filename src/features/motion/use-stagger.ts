@@ -16,10 +16,13 @@ export function useStagger<Target extends HTMLElement>(): RefCallback<Target> {
       if (element === null || mode === 'reduced') {
         return undefined
       }
-      const items = Array.from(element.children).filter(
+      const staggerTargets = Array.from(element.children).filter(
         (child) => child instanceof HTMLElement,
       )
-      return revealOnEntry(element, items, { entryDistancePx, staggerDelayMs })
+      return revealOnEntry(element, staggerTargets, {
+        entryDistancePx,
+        staggerDelayMs,
+      })
     },
     [mode, entryDistancePx, staggerDelayMs],
   )

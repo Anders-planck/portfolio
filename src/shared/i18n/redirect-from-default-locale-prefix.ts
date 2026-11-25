@@ -1,6 +1,6 @@
 import { redirect } from '@tanstack/react-router'
 
-import { DEFAULT_LOCALE, readFirstSegment } from './locale'
+import { DEFAULT_LOCALE, toPathnameWithoutLocale } from './locale'
 
 /**
  * For the root route's `beforeLoad`: IT is the default locale and has no
@@ -11,15 +11,16 @@ export function redirectFromDefaultLocalePrefix(location: {
   pathname: string
   searchStr: string
 }): void {
-  if (readFirstSegment(location.pathname) !== DEFAULT_LOCALE) {
+  const unprefixedPathname = toPathnameWithoutLocale(
+    location.pathname,
+    DEFAULT_LOCALE,
+  )
+  if (unprefixedPathname === location.pathname) {
     return
   }
-  const unprefixedPathname = location.pathname.slice(
-    `/${DEFAULT_LOCALE}`.length,
-  )
   // `throw: true` makes the router throw its own redirect object.
   redirect({
-    href: `${unprefixedPathname === '' ? '/' : unprefixedPathname}${location.searchStr}`,
+    href: `${unprefixedPathname}${location.searchStr}`,
     statusCode: 301,
     throw: true,
   })
