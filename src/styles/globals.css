@@ -13,3 +13,22 @@
 @import '@astryxdesign/core/tailwind-theme.css';
 /* Scan only app code for utilities, not docs/ mockups. */
 @import 'tailwindcss/utilities.css' layer(utilities) source('../');
+
+/*
+ * The immersive layout of a Stage (ADR 0008, resolution 7): a wide screen, a
+ * fine pointer and motion allowed. CSS lays it out, so the server already
+ * renders the right geometry; JS only adds behaviour. Keep in sync with
+ * IMMERSIVE_MEDIA_QUERY (src/widgets/stage/immersive-media-query.ts).
+ */
+@custom-variant immersive (@media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference));
+
+/*
+ * The sticky header's height, which AppShell measures onto its element
+ * (`--_app-shell-header-height`), as a spacing token: `pt-header`,
+ * `scroll-mt-header`. Inline, so it resolves where it is used, under the
+ * shell. The fallback is the header's height in this theme, for the first
+ * paint before AppShell measures.
+ */
+@theme inline {
+  --spacing-header: var(--_app-shell-header-height, 3.25rem);
+}

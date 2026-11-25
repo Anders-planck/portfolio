@@ -1,8 +1,7 @@
 // @vitest-environment happy-dom
-import { cleanup, screen } from '@testing-library/react'
-import { afterEach, beforeEach, expect, test } from 'vitest'
+import { act, cleanup, fireEvent, screen } from '@testing-library/react'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
-import { DEFAULT_MOTION_KNOBS } from '../../features/motion/motion-knobs'
 import { Stage } from './stage'
 import {
   ANIMATED_FINE_POINTER,
@@ -13,55 +12,89 @@ import {
   TEST_FACES,
 } from './stage.fixture'
 
+let intersections: ReturnType<typeof stubIntersectionObserver>
+const scrollIntoView =
+  vi.fn<(options?: ScrollIntoViewOptions | boolean) => void>()
+
 beforeEach(() => {
-  stubIntersectionObserver()
+  intersections = stubIntersectionObserver()
+  scrollIntoView.mockClear()
+  Element.prototype.scrollIntoView = scrollIntoView
 })
 
 afterEach(cleanup)
 
-function readHeadings() {
-  return screen.getAllByRole('heading').map((heading) => heading.textContent)
-}
-
-test('on a wide screen with a mouse and motion the Stage is immersive', async () => {
-  stubScreenWidth({ isWide: true })
-  renderForReader(
+function renderStage() {
+  return renderForReader(
     <Stage chapters={TEST_CHAPTERS} faces={TEST_FACES} />,
     ANIMATED_FINE_POINTER,
   )
-  expect(await screen.findByRole('slider', { name: 'Blocco' })).toBeDefined()
-  expect(screen.getByRole('list', { name: 'Capitoli' })).toBeDefined()
-  expect(readHeadings()).toEqual([
-    'Titolo di apertura',
-    'Titolo di mezzo',
-    'Titolo di chiusura',
-  ])
-})
+}
 
-test('with reduced motion every chapter is there, in a linear page', async () => {
-  stubScreenWidth({ isWide: true })
-  renderForReader(<Stage chapters={TEST_CHAPTERS} faces={TEST_FACES} />, {
-    mode: 'reduced',
-    pointer: 'fine',
-    knobs: DEFAULT_MOTION_KNOBS,
-  })
+test('every chapter is a section with its anchor and heading, in order', async () => {
+  stubScreenWidth({ isWide: false })
+  const { container } = renderStage()
   expect(
     await screen.findByRole('heading', {
       level: 1,
       name: 'Titolo di apertura',
     }),
   ).toBeDefined()
-  expect(readHeadings()).toHaveLength(3)
-  expect(screen.queryByRole('slider')).toBeNull()
-  expect(screen.queryByRole('list', { name: 'Capitoli' })).toBeNull()
+  expect(
+    Array.from(container.querySelectorAll('section')).map(
+      (section) => section.id,
+    ),
+  ).toEqual(['inizio', 'mezzo', 'fine'])
 })
 
-test('a narrow screen gets the linear page even with a mouse', async () => {
+test('outside the immersive layout the Block is a still picture', async () => {
   stubScreenWidth({ isWide: false })
-  renderForReader(
-    <Stage chapters={TEST_CHAPTERS} faces={TEST_FACES} />,
-    ANIMATED_FINE_POINTER,
-  )
-  expect(await screen.findAllByRole('heading')).toHaveLength(3)
+  renderStage()
+  await screen.findAllByRole('heading')
   expect(screen.queryByRole('slider')).toBeNull()
+})
+
+test('in the immersive layout the Block is driven', async () => {
+  stubScreenWidth({ isWide: true })
+  renderStage()
+  expect(await screen.findByRole('slider', { name: 'Blocco' })).toBeDefined()
+})
+
+test('the chapter under the middle line is the active one', async () => {
+  stubScreenWidth({ isWide: true })
+  renderStage()
+  const navigation = await screen.findByRole('group', { name: 'Capitolo' })
+  expect(navigation.textContent).toContain('00 / 02 · Inizio')
+  const middle = document.getElementById('mezzo')
+  act(() => {
+    if (middle !== null) {
+      intersections.reportActive(middle)
+    }
+  })
+  expect(navigation.textContent).toContain('01 / 02 · Mezzo')
+})
+
+test('next scrolls to the following chapter and puts it in the address', async () => {
+  stubScreenWidth({ isWide: true })
+  const { router } = renderStage()
+  fireEvent.click(
+    await screen.findByRole('button', { name: 'Capitolo successivo' }),
+  )
+  expect(scrollIntoView).toHaveBeenCalledOnce()
+  await vi.waitFor(() => {
+    expect(router.state.location.hash).toBe('mezzo')
+  })
+})
+
+test('a second next while the first is on its way goes one chapter further', async () => {
+  stubScreenWidth({ isWide: true })
+  const { router } = renderStage()
+  const next = await screen.findByRole('button', {
+    name: 'Capitolo successivo',
+  })
+  fireEvent.click(next)
+  fireEvent.click(next)
+  await vi.waitFor(() => {
+    expect(router.state.location.hash).toBe('fine')
+  })
 })

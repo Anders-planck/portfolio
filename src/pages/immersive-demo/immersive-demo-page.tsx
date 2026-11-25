@@ -4,16 +4,14 @@ import { Text } from '@astryxdesign/core/Text'
 import { useMemo } from 'react'
 
 import type { BlockFaces } from '../../features/block/block-face'
-import type { Messages } from '../../shared/i18n/messages'
-import { useMessages } from '../../shared/i18n/use-messages'
+import { useLocale } from '../../shared/i18n/use-locale'
 import { Stage } from '../../widgets/stage/stage'
 import type { StageChapter } from '../../widgets/stage/stage-chapter'
-
-type DemoCopy = Messages['immersiveDemo']
+import { DEMO_COPY, type DemoCopy } from './demo-copy'
 
 /**
  * The demo chapters: the anchors and the motion are the engine's test
- * fixture; every word is placeholder copy from the locale files. Tickets
+ * fixture; every word is placeholder copy from `demo-copy.ts`, per locale. Tickets
  * 08–10 feed the Stage from Convex instead.
  */
 function toDemoChapters({ chapters }: DemoCopy): StageChapter[] {
@@ -54,14 +52,14 @@ function toDemoFaces({ faceLabels, faceDetail }: DemoCopy): BlockFaces {
  * demo on the page itself and kept out of search (noindex, no sitemap).
  */
 export function ImmersiveDemoPage() {
-  const { immersiveDemo } = useMessages()
-  const chapters = useMemo(() => toDemoChapters(immersiveDemo), [immersiveDemo])
-  const faces = useMemo(() => toDemoFaces(immersiveDemo), [immersiveDemo])
+  const demoCopy = DEMO_COPY[useLocale()]
+  const chapters = useMemo(() => toDemoChapters(demoCopy), [demoCopy])
+  const faces = useMemo(() => toDemoFaces(demoCopy), [demoCopy])
   // A plain Stack, not LayoutContent: that one scrolls on its own, and an
   // inner scroller would unpin the scene (window scroll, ADR 0008).
   return (
     <Stack gap={4} paddingInline={8} paddingBlockStart={8}>
-      <Banner status="info" title={immersiveDemo.notice} />
+      <Banner status="info" title={demoCopy.notice} />
       <Stage chapters={chapters} faces={faces} />
     </Stack>
   )

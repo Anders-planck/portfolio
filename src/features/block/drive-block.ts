@@ -6,6 +6,7 @@ import {
 } from './to-block-transform'
 import { toFrontFaceIndex, toTurnYawDegAtFace } from './to-turn-yaw-deg-at-face'
 import { trackBlockDrag } from './track-block-drag'
+import { watchOnScreen } from './watch-on-screen'
 
 /** The two elements of a driven Block. */
 export interface BlockElements {
@@ -49,6 +50,8 @@ export function driveBlock(
 ): BlockDrive {
   let pendingFrameId = 0
   let frontFaceIndex: number | undefined
+  // Off screen (the Stage scrolled away) no frame is drawn.
+  let isOnScreen = true
   const motion: Omit<BlockMotionState, 'scrollPose'> = {
     turnYawDeg: 0,
     dragPitchDeg: 0,
@@ -67,7 +70,7 @@ export function driveBlock(
     }
   }
   const scheduleDraw = () => {
-    if (pendingFrameId === 0) {
+    if (isOnScreen && pendingFrameId === 0) {
       pendingFrameId = requestAnimationFrame(draw)
     }
   }
@@ -101,6 +104,10 @@ export function driveBlock(
     },
   )
 
+  const stopWatchingScreen = watchOnScreen(handle, (isVisible) => {
+    isOnScreen = isVisible
+    scheduleDraw()
+  })
   window.addEventListener('scroll', scheduleDraw, { passive: true })
   window.addEventListener('resize', scheduleDraw, { passive: true })
   window.addEventListener('pointermove', leanToPointer, { passive: true })
@@ -110,6 +117,7 @@ export function driveBlock(
     turnByFaces: turnToFace,
     stop: () => {
       stopDragTracking()
+      stopWatchingScreen()
       window.removeEventListener('scroll', scheduleDraw)
       window.removeEventListener('resize', scheduleDraw)
       window.removeEventListener('pointermove', leanToPointer)

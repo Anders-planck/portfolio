@@ -12,16 +12,26 @@ import {
 afterEach(cleanup)
 
 function renderAt(activeChapterIndex: number) {
-  const goToChapter = vi.fn()
-  renderForReader(
+  const goToAdjacentChapter = vi.fn((step: number) => {
+    const chapterIndex = activeChapterIndex + step
+    return chapterIndex >= 0 && chapterIndex < TEST_CHAPTERS.length
+      ? chapterIndex
+      : undefined
+  })
+  const rendered = renderForReader(
     <ChapterNavigation
       chapters={TEST_CHAPTERS}
       activeChapterIndex={activeChapterIndex}
-      onGoToChapter={goToChapter}
+      onGoToAdjacentChapter={goToAdjacentChapter}
     />,
     ANIMATED_FINE_POINTER,
   )
-  return goToChapter
+  return { goToAdjacentChapter, ...rendered }
+}
+
+function readAnnouncement(container: HTMLElement) {
+  // Astryx buttons carry their own (empty) status regions.
+  return container.querySelector('[aria-live]:not([role])')?.textContent
 }
 
 test('it names the active chapter as n / N with the eyebrow numbers', async () => {
@@ -30,20 +40,25 @@ test('it names the active chapter as n / N with the eyebrow numbers', async () =
   expect(navigation.textContent).toContain('01 / 02 · Mezzo')
 })
 
-test('previous and next go one chapter back and forward', async () => {
-  const goToChapter = renderAt(1)
-  fireEvent.click(
-    await screen.findByRole('button', { name: 'Capitolo precedente' }),
-  )
+test('previous and next step back and forward and announce where to', async () => {
+  const { goToAdjacentChapter, container } = renderAt(1)
+  await screen.findByRole('group', { name: 'Capitolo' })
+  expect(readAnnouncement(container)).toBe('')
+
   fireEvent.click(screen.getByRole('button', { name: 'Capitolo successivo' }))
-  expect(goToChapter.mock.calls).toEqual([[0], [2]])
+  expect(readAnnouncement(container)).toBe('02 / 02 · Fine')
+  fireEvent.click(screen.getByRole('button', { name: 'Capitolo precedente' }))
+  expect(goToAdjacentChapter.mock.calls).toEqual([[1], [-1]])
+  expect(readAnnouncement(container)).toBe('00 / 02 · Inizio')
 })
 
-test('at the opening, previous stays focusable but is marked unavailable', async () => {
-  renderAt(0)
+test('at the opening, previous stays focusable, is marked unavailable and announces nothing', async () => {
+  const { container } = renderAt(0)
   const previous = await screen.findByRole('button', {
     name: 'Capitolo precedente',
   })
   expect(previous.getAttribute('aria-disabled')).toBe('true')
   expect(previous.hasAttribute('disabled')).toBe(false)
+  fireEvent.click(previous)
+  expect(readAnnouncement(container)).toBe('')
 })

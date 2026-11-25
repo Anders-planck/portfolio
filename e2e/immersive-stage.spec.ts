@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, type Page, test } from '@playwright/test'
 
 import {
   DEMO_PATH,
@@ -7,24 +7,46 @@ import {
   openImmersiveDemo,
 } from './immersive-stage.fixture'
 
+/**
+ * Presses `key` and waits until the scroll it starts has ended: Chrome
+ * animates keyboard scrolling, and a key pressed meanwhile can be lost.
+ */
+async function pressAndSettle(page: Page, key: string) {
+  const settled = page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        window.addEventListener(
+          'scrollend',
+          () => {
+            resolve()
+          },
+          { once: true },
+        )
+        setTimeout(resolve, 1500)
+      }),
+  )
+  await page.keyboard.press(key)
+  await settled
+}
+
 test('Page Down, Space and the arrows move through chapters without a click', async ({
   page,
 }) => {
   await openImmersiveDemo(page)
   await expect(findActiveStep(page)).toContainText('Apertura')
 
-  await page.keyboard.press('PageDown')
-  await page.keyboard.press('PageDown')
+  await pressAndSettle(page, 'PageDown')
+  await pressAndSettle(page, 'PageDown')
   await expect(findActiveStep(page)).not.toContainText('Apertura')
 
-  await page.keyboard.press('Space')
-  await page.keyboard.press('ArrowDown')
+  await pressAndSettle(page, 'Space')
+  await pressAndSettle(page, 'ArrowDown')
   await expect(findActiveStep(page)).toContainText('Puntatore')
 
-  await page.keyboard.press('End')
+  await pressAndSettle(page, 'End')
   await expect(findActiveStep(page)).toContainText('Impaginazione')
-  await page.keyboard.press('PageUp')
-  await page.keyboard.press('ArrowUp')
+  await pressAndSettle(page, 'PageUp')
+  await pressAndSettle(page, 'ArrowUp')
   await expect(findActiveStep(page)).toContainText('Ancore')
 })
 

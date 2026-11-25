@@ -1,21 +1,13 @@
 import { useMediaQuery } from '@astryxdesign/core/hooks'
 
-import {
-  canFollowPointer,
-  useMotionSettings,
-} from '../../features/motion/use-motion-settings'
-
-/** The width the header switches to its menu drawer at, too (`lg`). */
-const WIDE_SCREEN_QUERY = '(min-width: 1024px)'
+import { IMMERSIVE_MEDIA_QUERY } from './immersive-media-query'
 
 /**
- * Whether an immersive page pins its scene and moves the Block: on a wide
- * screen, with a fine pointer and without reduced motion (ADR 0008,
- * resolution 7). Otherwise it renders as a linear page. On the server and
- * in the first client render it is linear, like every motion setting.
+ * Whether the Stage's behaviour (the driven Block) runs. CSS lays the
+ * immersive layout out on its own (the `immersive:` variant); this only
+ * tells JS. On the server and in the first client render it is false, so
+ * the Block stands still until the reader's settings are known.
  */
 export function useImmersiveLayout(): boolean {
-  const isWideScreen = useMediaQuery(WIDE_SCREEN_QUERY, false)
-  const motion = useMotionSettings()
-  return isWideScreen && canFollowPointer(motion)
+  return useMediaQuery(IMMERSIVE_MEDIA_QUERY, false)
 }

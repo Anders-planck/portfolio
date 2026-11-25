@@ -54,42 +54,6 @@ export const MESSAGES_FR: Messages = {
     title: 'Démo du moteur immersif',
     description:
       'Une page d’essai du moteur des pages immersives, avec des textes provisoires.',
-    notice:
-      'Page de démonstration : les textes sont provisoires et ne décrivent aucun travail réel.',
-    chapters: {
-      opening: {
-        eyebrow: 'Ouverture',
-        title: 'Démo du moteur immersif',
-        body: 'Une page d’essai pour les chapitres, l’index et le bloc. Aucun contenu réel.',
-      },
-      scroll: {
-        eyebrow: 'Défilement',
-        title: 'Le défilement tourne le bloc',
-        body: 'Chaque chapitre donne une pose au bloc ; entre deux chapitres, le bloc passe de l’une à l’autre.',
-      },
-      pointer: {
-        eyebrow: 'Pointeur',
-        title: 'Le bloc suit le pointeur',
-        body: 'Faites-le glisser pour le tourner : au relâchement, il s’arrête sur une face. Au clavier, flèches gauche et droite.',
-      },
-      anchors: {
-        eyebrow: 'Ancres',
-        title: 'Chaque chapitre a une adresse',
-        body: 'L’index et les commandes sous le bloc mènent à un chapitre ; Retour revient là où vous étiez.',
-      },
-      layouts: {
-        eyebrow: 'Mise en page',
-        title: 'Linéaire quand il le faut',
-        body: 'Sur un écran étroit, au toucher ou avec le mouvement réduit, la page défile en colonne et le bloc reste immobile.',
-      },
-    },
-    faceLabels: [
-      'Première face',
-      'Deuxième face',
-      'Troisième face',
-      'Quatrième face',
-    ],
-    faceDetail: 'démo',
   },
   notFound: {
     documentTitle: (siteName) => `Page introuvable · ${siteName}`,

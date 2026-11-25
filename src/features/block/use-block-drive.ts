@@ -4,12 +4,13 @@ import type { BlockPose } from './block-pose'
 import { type BlockDrive, driveBlock } from './drive-block'
 
 /**
- * Connects a Block's handle and turning element to `driveBlock` while they
- * are mounted. `readScrollPose` must keep its identity (a `useCallback`):
- * a new one restarts the drive. React state changes only when another face
- * comes to the front.
+ * Connects a Block's handle and turning element to `driveBlock` while
+ * `readScrollPose` is given; without it the Block stands still.
+ * `readScrollPose` must keep its identity (a `useCallback`): a new one
+ * restarts the drive. React state changes only when another face comes to
+ * the front.
  */
-export function useBlockDrive(readScrollPose: () => BlockPose) {
+export function useBlockDrive(readScrollPose: (() => BlockPose) | undefined) {
   const handleRef = useRef<HTMLElement>(null)
   const blockRef = useRef<HTMLElement>(null)
   const driveRef = useRef<BlockDrive>(undefined)
@@ -18,7 +19,7 @@ export function useBlockDrive(readScrollPose: () => BlockPose) {
   useEffect(() => {
     const handle = handleRef.current
     const block = blockRef.current
-    if (handle === null || block === null) {
+    if (handle === null || block === null || readScrollPose === undefined) {
       return undefined
     }
     const drive = driveBlock(

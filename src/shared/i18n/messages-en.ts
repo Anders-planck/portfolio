@@ -53,37 +53,6 @@ export const MESSAGES_EN: Messages = {
     title: 'Immersive engine demo',
     description:
       'A test page for the engine of the immersive pages, with placeholder copy.',
-    notice:
-      'Demo page: the copy is placeholder text and describes no real work.',
-    chapters: {
-      opening: {
-        eyebrow: 'Opening',
-        title: 'Immersive engine demo',
-        body: 'A test page for chapters, index and block. No real content.',
-      },
-      scroll: {
-        eyebrow: 'Scroll',
-        title: 'Scrolling turns the block',
-        body: 'Each chapter gives the block a pose; between two chapters the block moves from one to the other.',
-      },
-      pointer: {
-        eyebrow: 'Pointer',
-        title: 'The block follows the pointer',
-        body: 'Drag it to turn it: on release it stops on a face. From the keyboard, left and right arrows.',
-      },
-      anchors: {
-        eyebrow: 'Anchors',
-        title: 'Every chapter has an address',
-        body: 'The index and the controls under the block lead to a chapter; Back returns to where you were.',
-      },
-      layouts: {
-        eyebrow: 'Layout',
-        title: 'Linear when it helps',
-        body: 'On a narrow screen, on touch or with reduced motion the page runs as a column and the block stays still.',
-      },
-    },
-    faceLabels: ['First face', 'Second face', 'Third face', 'Fourth face'],
-    faceDetail: 'demo',
   },
   notFound: {
     documentTitle: (siteName) => `Page not found · ${siteName}`,

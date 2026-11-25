@@ -41,3 +41,34 @@ test('a drag turns the Block and it snaps to a face on release', async ({
   await expect(block.locator('[data-dragging]')).toHaveCount(0)
   await expect(block).toHaveAttribute('aria-valuetext', '04 · Quarta faccia')
 })
+
+test('a click without movement is not a drag', async ({ page }) => {
+  await openImmersiveDemo(page)
+  const block = findBlock(page)
+  const box = await block.boundingBox()
+  expect(box).not.toBeNull()
+  await page.mouse.move(
+    (box?.x ?? 0) + (box?.width ?? 0) / 2,
+    (box?.y ?? 0) + (box?.height ?? 0) / 2,
+  )
+  await page.mouse.down()
+  await expect(block.locator('[data-dragging]')).toHaveCount(0)
+  await page.mouse.up()
+  await expect(block).toHaveAttribute('aria-valuetext', '01 · Prima faccia')
+})
+
+test('arrows with a modifier key are left to the browser; Home and End pick the ends', async ({
+  page,
+}) => {
+  await openImmersiveDemo(page)
+  const block = findBlock(page)
+  await block.focus()
+  await page.keyboard.press('Shift+ArrowRight')
+  await page.keyboard.press('Control+ArrowLeft')
+  await expect(block).toHaveAttribute('aria-valuetext', '01 · Prima faccia')
+
+  await page.keyboard.press('End')
+  await expect(block).toHaveAttribute('aria-valuetext', '04 · Quarta faccia')
+  await page.keyboard.press('Home')
+  await expect(block).toHaveAttribute('aria-valuetext', '01 · Prima faccia')
+})

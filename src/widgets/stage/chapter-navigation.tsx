@@ -2,6 +2,8 @@ import { Button } from '@astryxdesign/core/Button'
 import { Icon } from '@astryxdesign/core/Icon'
 import { Stack } from '@astryxdesign/core/Stack'
 import { Text } from '@astryxdesign/core/Text'
+import { VisuallyHidden } from '@astryxdesign/core/VisuallyHidden'
+import { useState } from 'react'
 
 import { useMessages } from '../../shared/i18n/use-messages'
 import type { StageChapter } from './stage-chapter'
@@ -11,22 +13,35 @@ import { toChapterNumber } from './to-chapter-number'
  * The control under the Block (resolution 3): ‹ previous, the active
  * chapter as "n / N · name" with the eyebrow's numbers (00 = opening, N =
  * the last chapter), next ›. At either end the button stays focusable but
- * is marked unavailable, so focus never drops to the page.
+ * is marked unavailable, so focus never drops to the page. Only a ‹ ›
+ * activation is announced; scrolling past chapters is not.
  */
 export function ChapterNavigation({
   chapters,
   activeChapterIndex,
-  onGoToChapter,
+  onGoToAdjacentChapter,
 }: {
   chapters: readonly Pick<StageChapter, 'id' | 'eyebrow'>[]
   activeChapterIndex: number
-  onGoToChapter: (chapterIndex: number) => void
+  /** Goes `step` chapters on or back; returns where to, if anywhere. */
+  onGoToAdjacentChapter: (step: number) => number | undefined
 }) {
   const { immersive } = useMessages()
-  const activeChapter = chapters[activeChapterIndex]
+  const [announcement, setAnnouncement] = useState('')
   const lastChapterIndex = chapters.length - 1
-  const isFirst = activeChapterIndex <= 0
-  const isLast = activeChapterIndex >= lastChapterIndex
+  const toPosition = (chapterIndex: number) =>
+    immersive.chapterPosition(
+      toChapterNumber(chapterIndex),
+      toChapterNumber(lastChapterIndex),
+      chapters[chapterIndex]?.eyebrow ?? '',
+    )
+  const goBy = (step: number) => {
+    const chapterIndex = onGoToAdjacentChapter(step)
+    if (chapterIndex !== undefined) {
+      setAnnouncement(toPosition(chapterIndex))
+    }
+  }
+
   return (
     <Stack
       role="group"
@@ -42,28 +57,25 @@ export function ChapterNavigation({
         isIconOnly
         icon={<Icon icon="chevronLeft" />}
         variant="ghost"
-        aria-disabled={isFirst}
+        aria-disabled={activeChapterIndex <= 0}
         onClick={() => {
-          onGoToChapter(activeChapterIndex - 1)
+          goBy(-1)
         }}
       />
-      <Text aria-live="polite" weight="semibold" className="whitespace-nowrap">
-        {immersive.chapterPosition(
-          toChapterNumber(activeChapterIndex),
-          toChapterNumber(lastChapterIndex),
-          activeChapter?.eyebrow ?? '',
-        )}
+      <Text weight="semibold" className="whitespace-nowrap">
+        {toPosition(activeChapterIndex)}
       </Text>
       <Button
         label={immersive.nextChapter}
         isIconOnly
         icon={<Icon icon="chevronRight" />}
         variant="ghost"
-        aria-disabled={isLast}
+        aria-disabled={activeChapterIndex >= lastChapterIndex}
         onClick={() => {
-          onGoToChapter(activeChapterIndex + 1)
+          goBy(1)
         }}
       />
+      <VisuallyHidden aria-live="polite">{announcement}</VisuallyHidden>
     </Stack>
   )
 }
