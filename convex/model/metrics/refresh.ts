@@ -1,0 +1,35 @@
+import { internal } from '../../_generated/api'
+import type { ActionCtx } from '../../_generated/server'
+import { readSource } from './adapters'
+import { isRefreshDue } from './status'
+
+/** `due` is the daily cron (`convex/crons.ts`), `all` is "Aggiorna ora" in Fonti. */
+export type RefreshScope = 'due' | 'all'
+
+/**
+ * Reads automated sources and records what they said. Sources are read in
+ * parallel; one failing source never stops the others.
+ */
+export async function refreshSources(
+  ctx: ActionCtx,
+  scope: RefreshScope,
+  githubToken: string | null,
+  now: number,
+) {
+  const targets = await ctx.runQuery(internal.metrics.listRefreshTargets, {})
+  const selected = targets.filter(
+    (target) =>
+      scope === 'all' ||
+      isRefreshDue(target.source, target.lastVerifiedAt, now),
+  )
+  await Promise.all(
+    selected.map(async ({ metricId, source }) => {
+      const reading = await readSource(source, githubToken)
+      await ctx.runMutation(internal.metrics.recordSourceReading, {
+        metricId,
+        attemptedAt: now,
+        reading,
+      })
+    }),
+  )
+}

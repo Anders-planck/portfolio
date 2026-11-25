@@ -11,6 +11,8 @@ const SNAPSHOT: Snapshot = {
   content: [{ ...EMPTY_PROFILE_CONTENT_FIELDS, locale: 'en' }],
 }
 
+const NO_METRICS = { metricKeys: new Set<string>() }
+
 const emptySubtitleRule: Rule = (snapshot) =>
   snapshot.content
     .filter((record) => record.subtitle === '')
@@ -23,11 +25,11 @@ const emptySubtitleRule: Rule = (snapshot) =>
     }))
 
 test('with no rules nothing is found', () => {
-  expect(runPublishRules([SNAPSHOT], [])).toEqual([])
+  expect(runPublishRules([SNAPSHOT], [], NO_METRICS)).toEqual([])
 })
 
 test('findings are tagged with the document they are about', () => {
-  expect(runPublishRules([SNAPSHOT], [emptySubtitleRule])).toEqual([
+  expect(runPublishRules([SNAPSHOT], [emptySubtitleRule], NO_METRICS)).toEqual([
     {
       collection: 'profile',
       key: 'main',

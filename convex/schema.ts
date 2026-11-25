@@ -12,6 +12,7 @@ import {
   collectionValidator,
   snapshotValidator,
 } from './model/content/snapshot'
+import { METRICS_TABLES } from './model/metrics/tables'
 
 export default defineSchema({
   // One row: the published theme and motion params (ADR 0010). A stand-in
@@ -57,4 +58,7 @@ export default defineSchema({
     versionId: v.id('versions'),
     releaseId: v.id('releases'),
   }).index('by_collection_and_key', ['collection', 'key']),
+
+  // Metrics (ADR 0004): every number on the site, with its source and readings.
+  ...METRICS_TABLES,
 })
