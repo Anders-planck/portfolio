@@ -19,7 +19,21 @@ export default defineConfig({
     baseURL: `http://localhost:${APP_PORT}`,
     trace: 'on-first-retry',
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      testIgnore: 'appearance.spec.ts',
+    },
+    {
+      // Publishing an appearance changes every open page (colours included),
+      // so it runs alone, after the specs that check pages, e.g. with axe.
+      name: 'appearance',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: 'appearance.spec.ts',
+      dependencies: ['chromium'],
+    },
+  ],
   webServer: [
     {
       // The site port (HTTP actions) sits next to the cloud port, as by default.

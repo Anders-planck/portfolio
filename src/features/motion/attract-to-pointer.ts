@@ -1,4 +1,4 @@
-import { type MagneticOptions, toMagneticOffset } from './to-magnetic-offset'
+import { type MagneticOptions, toMagneticShift } from './to-magnetic-shift'
 import { type Rect, toUntransformedRect } from './to-untransformed-rect'
 import type { ViewportPosition } from './viewport-position'
 
@@ -30,11 +30,11 @@ export function attractToPointer(
       return
     }
     restingRect ??= measureRestingRect()
-    const offset = toMagneticOffset(restingRect, pointer, options)
+    const shift = toMagneticShift(restingRect, pointer, options)
     element.style.transform =
-      offset === undefined
+      shift === undefined
         ? ''
-        : `translate(${String(offset.translateXPx)}px, ${String(offset.translateYPx)}px)`
+        : `translate(${String(shift.translateXPx)}px, ${String(shift.translateYPx)}px)`
   }
   const trackPointer = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse') {

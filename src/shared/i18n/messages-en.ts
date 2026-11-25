@@ -29,6 +29,11 @@ export const MESSAGES_EN: Messages = {
   home: {
     emptyTitle: 'The profile is not published yet.',
   },
+  pageError: {
+    title: 'Something went wrong.',
+    body: 'The page did not load. Try again in a moment.',
+    retry: 'Try again',
+  },
   notFound: {
     documentTitle: (siteName) => `Page not found · ${siteName}`,
     eyebrow: 'Page not found',

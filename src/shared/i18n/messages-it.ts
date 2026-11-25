@@ -29,6 +29,11 @@ export const MESSAGES_IT: Messages = {
   home: {
     emptyTitle: 'Il profilo non è ancora pubblicato.',
   },
+  pageError: {
+    title: 'Qualcosa non ha funzionato.',
+    body: 'La pagina non si è caricata. Riprova tra poco.',
+    retry: 'Riprova',
+  },
   notFound: {
     documentTitle: (siteName) => `Pagina non trovata · ${siteName}`,
     eyebrow: 'Pagina non trovata',

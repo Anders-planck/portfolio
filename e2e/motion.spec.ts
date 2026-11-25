@@ -39,6 +39,8 @@ test.describe('with a mouse and motion allowed', () => {
     page,
   }) => {
     await page.goto('/')
+    // The cursor mounts once the page is interactive.
+    await expect(page.locator(CURSOR_RING)).toHaveCount(1)
     await hoverNearCvButton(page)
     const ring = page.locator(CURSOR_RING)
     await expect(ring).toHaveAttribute('data-active', '')
@@ -50,6 +52,8 @@ test.describe('with a mouse and motion allowed', () => {
     page,
   }) => {
     await page.goto('/')
+    // The cursor mounts once the page is interactive.
+    await expect(page.locator(CURSOR_RING)).toHaveCount(1)
     await hoverNearCvButton(page)
     const body = page.locator('body')
     await expect(body).toHaveAttribute('data-custom-cursor', '')
@@ -71,6 +75,8 @@ test.describe('with a mouse and motion allowed', () => {
 
   test('a text field keeps the native I-beam', async ({ page }) => {
     await page.goto('/')
+    // The cursor mounts once the page is interactive.
+    await expect(page.locator(CURSOR_RING)).toHaveCount(1)
     await hoverNearCvButton(page)
     await expect(page.locator('body')).toHaveAttribute('data-custom-cursor', '')
     // No page has a field yet; one is added the way a page would render it.

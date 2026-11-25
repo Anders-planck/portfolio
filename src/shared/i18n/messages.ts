@@ -37,6 +37,11 @@ export interface Messages {
     /** Shown while no Profile is published in any locale. */
     emptyTitle: string
   }
+  pageError: {
+    title: string
+    body: string
+    retry: string
+  }
   notFound: {
     /** The browser tab title of the 404 page. */
     documentTitle: (siteName: string) => string

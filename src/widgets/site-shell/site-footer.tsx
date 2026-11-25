@@ -1,7 +1,7 @@
 import { LayoutFooter } from '@astryxdesign/core/Layout'
 import { Link } from '@astryxdesign/core/Link'
 import { Stack } from '@astryxdesign/core/Stack'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 
 import { profileQueryOptions } from '../../entities/profile/profile-query-options'
 import { useReveal } from '../../features/motion/use-reveal'
@@ -13,13 +13,14 @@ import { CV_PATH, SITE_SECTIONS } from './site-sections'
 /**
  * The footer of every page: the wordmark home, the same sections as the
  * header, and the contacts and social links of the published Profile (none
- * before it is published). The shell loader fills the Profile query.
+ * before it is published, or while it cannot be read). The shell loader
+ * fills the Profile query.
  */
 export function SiteFooter() {
   const locale = useLocale()
   const { site, navigation } = useMessages()
   const revealRef = useReveal<HTMLDivElement>()
-  const { data: profile } = useSuspenseQuery(profileQueryOptions(locale))
+  const { data: profile } = useQuery(profileQueryOptions(locale))
 
   return (
     <LayoutFooter role="contentinfo" label={navigation.footerLabel} hasDivider>
@@ -48,7 +49,7 @@ export function SiteFooter() {
             {navigation.cv}
           </Link>
         </Stack>
-        {profile === null ? null : (
+        {profile === undefined || profile === null ? null : (
           <Stack direction="horizontal" gap={4} wrap="wrap">
             <Link href={`mailto:${profile.fields.email}`} color="secondary">
               {profile.fields.email}

@@ -29,6 +29,11 @@ export const MESSAGES_DE: Messages = {
   home: {
     emptyTitle: 'Das Profil ist noch nicht veröffentlicht.',
   },
+  pageError: {
+    title: 'Etwas hat nicht funktioniert.',
+    body: 'Die Seite wurde nicht geladen. Versuch es gleich noch einmal.',
+    retry: 'Erneut versuchen',
+  },
   notFound: {
     documentTitle: (siteName) => `Seite nicht gefunden · ${siteName}`,
     eyebrow: 'Seite nicht gefunden',

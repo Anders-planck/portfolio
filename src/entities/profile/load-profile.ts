@@ -5,10 +5,7 @@ import { toFallbackLocales } from '../../shared/i18n/pick-translation'
 import { profileQueryOptions } from './profile-query-options'
 
 function queryProfile(queryClient: QueryClient, locale: Locale) {
-  return queryClient.query({
-    ...profileQueryOptions(locale),
-    staleTime: 'static',
-  })
+  return queryClient.query(profileQueryOptions(locale))
 }
 
 /**

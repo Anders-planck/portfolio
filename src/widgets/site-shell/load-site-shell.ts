@@ -24,7 +24,8 @@ export async function loadSiteShell(
     queryClient.query(siteOriginQueryOptions()),
     loadAppearance(queryClient),
     queryClient.query(astryxCatalogQueryOptions(locale)),
-    queryClient.query({ ...profileQueryOptions(locale), staleTime: 'static' }),
+    // The footer's contacts are extra: a failure leaves them out, not the page.
+    queryClient.query(profileQueryOptions(locale)).catch(() => null),
   ])
   return { locale, siteOrigin }
 }

@@ -40,7 +40,10 @@ function hideCursor(parts: CursorParts): void {
  * Draws the ring or hands over to the system cursor (pen, text entry, an
  * open menu or drawer), and says which it did.
  */
-function showCursorFor(parts: CursorParts, context: PointerContext): boolean {
+function drawCursorOrHandOver(
+  parts: CursorParts,
+  context: PointerContext,
+): boolean {
   const isSystemCursor = shouldUseSystemCursor(context)
   parts.host.toggleAttribute(CUSTOM_CURSOR_ATTRIBUTE, !isSystemCursor)
   if (isSystemCursor) {
@@ -103,7 +106,7 @@ export function followPointer(
       return
     }
     lastContext = { target: event.target, pointerType: event.pointerType }
-    if (!showCursorFor(parts, lastContext)) {
+    if (!drawCursorOrHandOver(parts, lastContext)) {
       return
     }
     const isFirstMove = pointer === undefined
@@ -119,7 +122,7 @@ export function followPointer(
   const decideAgain = () => {
     requestAnimationFrame(() => {
       if (lastContext !== undefined) {
-        showCursorFor(parts, lastContext)
+        drawCursorOrHandOver(parts, lastContext)
       }
     })
   }

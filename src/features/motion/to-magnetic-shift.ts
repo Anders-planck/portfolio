@@ -15,7 +15,7 @@ interface MagneticShift {
  * How far a control moves toward the pointer: a share of the offset from its
  * centre while the pointer is within the radius, nothing outside it.
  */
-export function toMagneticOffset(
+export function toMagneticShift(
   rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
   pointer: ViewportPosition,
   { radiusPx, strength }: MagneticOptions,

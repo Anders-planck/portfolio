@@ -29,6 +29,11 @@ export const MESSAGES_FR: Messages = {
   home: {
     emptyTitle: 'Le profil n’est pas encore publié.',
   },
+  pageError: {
+    title: 'Quelque chose n’a pas fonctionné.',
+    body: 'La page ne s’est pas chargée. Réessayez dans un instant.',
+    retry: 'Réessayer',
+  },
   notFound: {
     documentTitle: (siteName) => `Page introuvable · ${siteName}`,
     eyebrow: 'Page introuvable',
