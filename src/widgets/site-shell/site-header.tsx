@@ -51,6 +51,7 @@ export function SiteHeader() {
             label={navigation.cv}
             href={CV_PATH}
             variant="primary"
+            className="transition-transform duration-(--duration-medium) ease-(--ease-move)"
           />
         </Stack>
       }

@@ -36,7 +36,7 @@ export const DEFAULT_MOTION_KNOBS: MotionKnobs = {
  * The knobs at the published tempo: tempo scales every theme duration, so it
  * scales the stagger delay too, and the reveal keeps its rhythm.
  */
-export function toMotionKnobsFromParams(
+export function toMotionKnobsFromMotion(
   motion: Appearance['motion'],
 ): MotionKnobs {
   return {

@@ -27,7 +27,7 @@ export const MESSAGES_FR: Messages = {
     description: 'Les menus et la navigation restent dans la langue choisie.',
   },
   notFound: {
-    pageTitle: 'Page introuvable',
+    documentTitle: (siteName) => `Page introuvable · ${siteName}`,
     eyebrow: 'Erreur 404',
     title: 'Cette page n’existe pas, ou plus.',
     body: 'Le bloc s’est défait. Revenons là où tout est à sa place.',

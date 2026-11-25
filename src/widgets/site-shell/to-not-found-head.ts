@@ -9,7 +9,7 @@ export function toNotFoundHead(locale: Locale) {
   const messages = toMessagesFromLocale(locale)
   return {
     meta: [
-      { title: `${messages.notFound.pageTitle} · ${messages.site.name}` },
+      { title: messages.notFound.documentTitle(messages.site.name) },
       { name: 'robots', content: 'noindex' },
     ],
   }

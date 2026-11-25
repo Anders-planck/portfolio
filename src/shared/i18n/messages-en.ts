@@ -27,7 +27,7 @@ export const MESSAGES_EN: Messages = {
     description: 'Menus and navigation stay in the language you chose.',
   },
   notFound: {
-    pageTitle: 'Page not found',
+    documentTitle: (siteName) => `Page not found · ${siteName}`,
     eyebrow: 'Error 404',
     title: 'This page does not exist, or not anymore.',
     body: 'The block came apart. Let’s go back to where things are in place.',

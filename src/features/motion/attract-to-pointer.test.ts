@@ -1,25 +1,12 @@
 // @vitest-environment happy-dom
 import { afterEach, expect, test, vi } from 'vitest'
 
-import { attractToPointer, toMagneticOffset } from './attract-to-pointer'
+import { attractToPointer } from './attract-to-pointer'
 
-const BUTTON_RECT = { left: 100, top: 100, width: 80, height: 40 }
 const OPTIONS = { radiusPx: 200, strength: 0.35 }
 
 afterEach(() => {
   vi.unstubAllGlobals()
-})
-
-test('a pointer inside the radius pulls by a share of its offset', () => {
-  expect(
-    toMagneticOffset(BUTTON_RECT, { left: 160, top: 130 }, OPTIONS),
-  ).toEqual({ translateXPx: 20 * 0.35, translateYPx: 10 * 0.35 })
-})
-
-test('a pointer at or past the radius leaves the control in place', () => {
-  expect(
-    toMagneticOffset(BUTTON_RECT, { left: 340, top: 120 }, OPTIONS),
-  ).toBeUndefined()
 })
 
 test('the control follows a mouse and lets go on cleanup', () => {

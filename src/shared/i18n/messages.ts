@@ -34,7 +34,8 @@ export interface Messages {
     description: string
   }
   notFound: {
-    pageTitle: string
+    /** The browser tab title of the 404 page. */
+    documentTitle: (siteName: string) => string
     eyebrow: string
     title: string
     body: string

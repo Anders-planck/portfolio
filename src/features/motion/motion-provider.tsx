@@ -2,7 +2,11 @@ import { useMediaQuery } from '@astryxdesign/core/hooks'
 import { createContext, type ReactNode, useMemo } from 'react'
 
 import { useAppearance } from '../../entities/appearance/use-appearance'
-import { type MotionKnobs, toMotionKnobsFromParams } from './motion-knobs'
+import {
+  DEFAULT_MOTION_KNOBS,
+  type MotionKnobs,
+  toMotionKnobsFromMotion,
+} from './motion-knobs'
 
 /** Reduced motion always wins over the published params (GLOSSARY: Motion). */
 export type MotionMode = 'animated' | 'reduced'
@@ -24,7 +28,7 @@ export interface Motion {
 const STILL_MOTION: Motion = {
   mode: 'reduced',
   pointer: 'coarse',
-  knobs: toMotionKnobsFromParams({ tempo: 1, character: 'standard' }),
+  knobs: DEFAULT_MOTION_KNOBS,
 }
 
 export const MotionContext = createContext<Motion>(STILL_MOTION)
@@ -47,7 +51,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
     () => ({
       mode: isReducedMotion ? 'reduced' : 'animated',
       pointer: hasFinePointer ? 'fine' : 'coarse',
-      knobs: toMotionKnobsFromParams({ tempo, character }),
+      knobs: toMotionKnobsFromMotion({ tempo, character }),
     }),
     [isReducedMotion, hasFinePointer, tempo, character],
   )

@@ -29,6 +29,18 @@ function placeEverythingBelowTheFold() {
   )
 }
 
+/** A mouse just right of the button's centre; returns the button's transform. */
+function readTransformAfterMouseNear(button: HTMLElement): string {
+  window.dispatchEvent(
+    new PointerEvent('pointermove', {
+      pointerType: 'mouse',
+      clientX: 50,
+      clientY: window.innerHeight + 120,
+    }),
+  )
+  return button.style.transform
+}
+
 function Blocks() {
   const revealRef = useReveal<HTMLElement>()
   const staggerRef = useStagger<HTMLUListElement>()
@@ -48,6 +60,10 @@ function Blocks() {
 
 beforeEach(() => {
   vi.stubGlobal('IntersectionObserver', StubIntersectionObserver)
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+    callback(0)
+    return 1
+  })
   placeEverythingBelowTheFold()
 })
 
@@ -64,7 +80,9 @@ test('with motion allowed, blocks below the fold wait to come in', () => {
   })
   expect(getByLabelText('reveal').style.opacity).toBe('0')
   expect(getByRole('listitem').style.opacity).toBe('0')
-  expect(getByRole('button').style.transition).toContain('--ease-move')
+  expect(readTransformAfterMouseNear(getByRole('button'))).toBe(
+    'translate(3.5px, 0px)',
+  )
 })
 
 test('with reduced motion every block is simply there and nothing is magnetic', () => {
@@ -74,7 +92,7 @@ test('with reduced motion every block is simply there and nothing is magnetic', 
   })
   expect(getByLabelText('reveal').style.opacity).toBe('')
   expect(getByRole('listitem').style.opacity).toBe('')
-  expect(getByRole('button').style.transition).toBe('')
+  expect(readTransformAfterMouseNear(getByRole('button'))).toBe('')
 })
 
 test('on touch blocks still come in, but nothing is magnetic', () => {
@@ -83,5 +101,5 @@ test('on touch blocks still come in, but nothing is magnetic', () => {
     wrapper: MotionProvider,
   })
   expect(getByLabelText('reveal').style.opacity).toBe('0')
-  expect(getByRole('button').style.transition).toBe('')
+  expect(readTransformAfterMouseNear(getByRole('button'))).toBe('')
 })

@@ -1,38 +1,11 @@
+import { type MagneticOptions, toMagneticOffset } from './to-magnetic-offset'
 import type { ViewportPosition } from './viewport-position'
-
-export interface MagneticOptions {
-  radiusPx: number
-  strength: number
-}
-
-/** How far the control moves, in px. */
-interface MagneticShift {
-  translateXPx: number
-  translateYPx: number
-}
-
-/**
- * How far a control moves toward the pointer: a share of the offset from its
- * centre while the pointer is within the radius, nothing outside it.
- */
-export function toMagneticOffset(
-  rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
-  pointer: ViewportPosition,
-  { radiusPx, strength }: MagneticOptions,
-): MagneticShift | undefined {
-  const offsetX = pointer.left - (rect.left + rect.width / 2)
-  const offsetY = pointer.top - (rect.top + rect.height / 2)
-  if (Math.hypot(offsetX, offsetY) >= radiusPx) {
-    return undefined
-  }
-  return { translateXPx: offsetX * strength, translateYPx: offsetY * strength }
-}
 
 /**
  * Magnetic: pulls `element` toward a mouse pointer near it. Measures with
  * `getBoundingClientRect` once per frame at most and writes the transform
- * straight to the element; nothing goes through React state. The theme's
- * move curve eases it back. Returns the cleanup.
+ * straight to the element; nothing goes through React state. The control
+ * eases with its own token-backed transition classes. Returns the cleanup.
  */
 export function attractToPointer(
   element: HTMLElement,
@@ -55,7 +28,7 @@ export function attractToPointer(
         ? ''
         : `translate(${String(offset.translateXPx)}px, ${String(offset.translateYPx)}px)`
   }
-  const followPointer = (event: PointerEvent) => {
+  const trackPointer = (event: PointerEvent) => {
     if (event.pointerType !== 'mouse') {
       return
     }
@@ -64,12 +37,10 @@ export function attractToPointer(
       frame = requestAnimationFrame(moveElement)
     }
   }
-  element.style.transition = 'transform var(--duration-medium) var(--ease-move)'
-  window.addEventListener('pointermove', followPointer, { passive: true })
+  window.addEventListener('pointermove', trackPointer, { passive: true })
   return () => {
-    window.removeEventListener('pointermove', followPointer)
+    window.removeEventListener('pointermove', trackPointer)
     cancelAnimationFrame(frame)
     element.style.removeProperty('transform')
-    element.style.removeProperty('transition')
   }
 }

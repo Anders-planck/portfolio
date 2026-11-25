@@ -5,7 +5,8 @@ import { canFollowPointer, useMotion } from './use-motion'
 
 /**
  * Magnetic: the control this ref is on leans toward a mouse pointer near
- * it. Off on touch and with reduced motion (ADR 0008).
+ * it. Off on touch and with reduced motion (ADR 0008). Give the control a
+ * transform transition (theme duration and move curve) so it eases.
  */
 export function useMagnetic<Target extends HTMLElement>(): RefCallback<Target> {
   const motion = useMotion()
