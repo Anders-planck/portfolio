@@ -63,10 +63,11 @@ test('a failed save says so', async () => {
   expect(await screen.findByText('Non salvato. Riprova.')).toBeDefined()
 })
 
-test('Chiudi closes the dialog', () => {
+test('the close button closes the dialog', () => {
   const onClose = renderDialog(vi.fn())
 
-  fireEvent.click(screen.getByRole('button', { name: 'Chiudi' }))
+  // Astryx's own label: English here, Italian under the CMS locale provider.
+  fireEvent.click(screen.getByRole('button', { name: /^(close|chiudi)$/i }))
 
   expect(onClose).toHaveBeenCalled()
 })

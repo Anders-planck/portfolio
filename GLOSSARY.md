@@ -25,6 +25,8 @@ Domain words for the portfolio and its CMS. Code identifiers use the English ter
 | Rule | regola | A publish check with severity block or warn. Runs in the CMS and again on the server at publish. |
 | Reserved term | termine riservato | A word that must never appear in public content (employer product details). Stored hashed, never readable back. |
 | AI suggestion | proposta AI | A change proposed by the assistant for one field in one locale. States: running · ready · accepted · rejected · failed · cancelled. Never applied without the owner. |
+| Media | media | An image or file the owner uploaded to R2 (the CV is one). Documents point at it by id; it is live data, not released. |
+| Alt text | testo alternativo | What a screen reader says for an image, one per locale. Required in every locale of a document that shows the image (publish rule). |
 | Theme | tema | The look the owner can change without a deploy: type scale, fonts, corner radius, colour mode. Published like content. |
 | Motion | movimento | How the site moves: tempo (speed) and character (crisp, standard, expressive). Reduced motion always wins over it. |
 | Appearance | aspetto | The published theme and motion together: what the site looks and moves like. |

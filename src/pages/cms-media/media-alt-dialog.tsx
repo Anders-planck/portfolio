@@ -1,12 +1,5 @@
-import { Button } from '@astryxdesign/core/Button'
 import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
-import {
-  HStack,
-  Layout,
-  LayoutContent,
-  LayoutFooter,
-  VStack,
-} from '@astryxdesign/core/Layout'
+import { Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Text } from '@astryxdesign/core/Text'
 import { TextArea } from '@astryxdesign/core/TextArea'
 import { useState } from 'react'
@@ -29,7 +22,7 @@ export interface MediaAltDialogProps {
 /**
  * The alt text of one image, one field per locale. Each field saves when it
  * loses focus (resolution 14: no save button) and says whether it did.
- * Closing goes through `onClose` only (Escape, the close button, Chiudi).
+ * Closing goes through `onClose` only (Escape and the header's close button).
  */
 export function MediaAltDialog({
   entry,
@@ -70,13 +63,6 @@ export function MediaAltDialog({
               ))}
             </VStack>
           </LayoutContent>
-        }
-        footer={
-          <LayoutFooter>
-            <HStack gap={2} hAlign="end">
-              <Button label={ALT_COPY.close} onClick={onClose} />
-            </HStack>
-          </LayoutFooter>
         }
       />
     </Dialog>

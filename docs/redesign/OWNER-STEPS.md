@@ -30,8 +30,21 @@ Run `scripts/wizard/github-oauth.sh` from the repo root of the checkout whose `.
 
 `convex/convex.config.ts` requires both values: until they are set, pushes to the dev deployment fail. The other values of the sign-in (`OWNER_GITHUB_IDS`, `AUTH_REDIRECT_ORIGINS`) are set by the coordinating session, not by this wizard. Production gets its own OAuth app (its callback is the production deployment's URL) with the production deployment's ticket.
 
+### Ticket 12 · R2 bucket and keys for Media (dev)
+
+Run `scripts/wizard/r2-media.sh` from the repo root of the checkout whose `.env.local` links the cloud dev deployment, signed in to the personal Cloudflare account. It walks you through:
+
+1. Creating the bucket (`portfolio-media`) in R2.
+2. Copying the account ID (not secret).
+3. A public domain for the bucket: a custom domain such as `media.<your domain>` (needed for Image transformations), or the r2.dev development URL meanwhile.
+4. The bucket's CORS rule (printed by the wizard): `PUT`, `GET`, `HEAD` with header `Content-Type`, from `http://localhost:3000` and `https://portfolio.anders-jipwouo.workers.dev` (add the production origin later).
+5. An R2 API token with **Object Read & Write on this bucket only**; the Access Key ID and the Secret Access Key go straight to the Convex env (`R2_ACCOUNT_ID`, `R2_BUCKET`, `MEDIA_PUBLIC_ORIGIN`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`; the secret through stdin, nothing on disk).
+6. Later, with the production domain: Image transformations on that zone (Images → Transformations → Enable), its sources allowing the media domain, and `IMAGE_TRANSFORM_ORIGIN` (e.g. `https://example.com`). Until then images are served as uploaded.
+
+The five storage values are all-or-none: with only some set, Media refuses to load. Production gets its own token (and may share the bucket or get its own) with the production deployment's ticket.
+
 ## Later tickets
 
 - **`SITE_ORIGIN` (with the production domain).** Set the Worker var `SITE_ORIGIN` to the bare production origin (e.g. `https://example.com`, no path or trailing slash), in `wrangler.jsonc` `vars` or the Cloudflare dashboard. Until it is set, canonical, hreflang and `og:url` use the request's own origin and every page carries `noindex`; once set, they point at it and only that host is indexed (`*.workers.dev` previews stay `noindex`). Read by `src/shared/config/env.ts` (ticket 06).
 
-- Convex production deployment and deploy key; production GitHub OAuth app; R2 bucket and keys; Convex env vars (`docs/redesign/PLAN.md` → Environments and secrets); DNS cutover. Each gets its wizard in the ticket that needs it.
+- Convex production deployment and deploy key; production GitHub OAuth app; production R2 token and `IMAGE_TRANSFORM_ORIGIN`; Convex env vars (`docs/redesign/PLAN.md` → Environments and secrets); DNS cutover. Each gets its wizard in the ticket that needs it.

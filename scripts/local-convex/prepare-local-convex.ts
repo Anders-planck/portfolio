@@ -8,7 +8,8 @@
 //
 // Optional env: E2E_CONVEX_PORT (the port `convex dev` will use),
 // E2E_OWNER_GITHUB_ID and E2E_SIGN_IN_SECRET (the test-only sign-in,
-// convex/e2e.ts, which works only on a loopback backend whatever its env says).
+// convex/e2e.ts, which works only on a loopback backend whatever its env says),
+// E2E_FAKE_R2_ORIGIN (media on the fake R2 server, scripts/fake-r2).
 
 import { execFileSync, spawnSync } from 'node:child_process'
 import {
@@ -21,6 +22,7 @@ import {
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
+import { toFakeR2Env } from '../fake-r2/fake-r2-settings'
 import {
   chooseLocalConvexStep,
   type LocalConvexStep,
@@ -99,7 +101,8 @@ function alignLocalStatePorts() {
 }
 
 function toLocalEnv(): Record<string, string> {
-  const { E2E_OWNER_GITHUB_ID, E2E_SIGN_IN_SECRET } = process.env
+  const { E2E_OWNER_GITHUB_ID, E2E_SIGN_IN_SECRET, E2E_FAKE_R2_ORIGIN } =
+    process.env
   return {
     // Placeholders: the local backend never talks to GitHub.
     AUTH_GITHUB_ID: 'local-placeholder',
@@ -108,6 +111,10 @@ function toLocalEnv(): Record<string, string> {
       ? {}
       : { OWNER_GITHUB_IDS: E2E_OWNER_GITHUB_ID }),
     ...(E2E_SIGN_IN_SECRET === undefined ? {} : { E2E_SIGN_IN_SECRET }),
+    // Media on the fake R2 server (scripts/fake-r2), never a real bucket.
+    ...(E2E_FAKE_R2_ORIGIN === undefined
+      ? {}
+      : toFakeR2Env(E2E_FAKE_R2_ORIGIN)),
   }
 }
 

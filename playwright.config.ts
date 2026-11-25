@@ -6,6 +6,9 @@ import { defineConfig, devices } from '@playwright/test'
 // worktrees at once do not collide; the defaults are Convex's and Vite's.
 const CONVEX_PORT = Number(process.env.E2E_CONVEX_PORT ?? '3210')
 const APP_PORT = process.env.E2E_APP_PORT ?? '4173'
+// The fake R2 server (scripts/fake-r2) sits after the backend's site port.
+const FAKE_R2_PORT = CONVEX_PORT + 2
+const fakeR2Origin = `http://127.0.0.1:${String(FAKE_R2_PORT)}`
 const convexUrl =
   process.env.VITE_CONVEX_URL ?? `http://127.0.0.1:${String(CONVEX_PORT)}`
 
@@ -15,6 +18,7 @@ const e2eEnv = {
   E2E_CONVEX_PORT: String(CONVEX_PORT),
   E2E_OWNER_GITHUB_ID: '1000001',
   E2E_SIGN_IN_SECRET: 'local-e2e-sign-in-secret-loopback-only',
+  E2E_FAKE_R2_ORIGIN: fakeR2Origin,
 }
 
 // The options `e2e/cms-test.ts` declares (config may not import e2e code).
@@ -32,9 +36,17 @@ export default defineConfig<{ convexUrl: string; testSignInSecret: string }>({
   },
   projects: [
     {
+      // Uploads a CV and publishes the Profile with it, so the header's CV
+      // button (magnetic in motion.spec.ts) exists for the other specs.
+      name: 'media',
+      use: { ...devices['Desktop Chrome'] },
+      testMatch: 'cms-media.spec.ts',
+    },
+    {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: 'appearance.spec.ts',
+      testIgnore: ['appearance.spec.ts', 'cms-media.spec.ts'],
+      dependencies: ['media'],
     },
     {
       // Publishing an appearance changes every open page (colours included),
@@ -46,6 +58,13 @@ export default defineConfig<{ convexUrl: string; testSignInSecret: string }>({
     },
   ],
   webServer: [
+    {
+      // Before the backend: its media env points here.
+      command: `bun scripts/fake-r2/fake-r2-server.ts ${String(FAKE_R2_PORT)}`,
+      url: `${fakeR2Origin}/health`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000,
+    },
     {
       // First the local backend's env (convex.config.ts needs it to push;
       // the script refuses any other deployment). The site port (HTTP

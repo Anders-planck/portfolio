@@ -64,7 +64,6 @@ export const CMS_MEDIA_MESSAGES = {
     fieldLabel: (localeName: string) => `Alt · ${localeName}`,
     saved: 'Salvato',
     saveFailed: 'Non salvato. Riprova.',
-    close: 'Chiudi',
   },
   locales: { it: 'Italiano', en: 'English', fr: 'Français', de: 'Deutsch' },
 } as const
