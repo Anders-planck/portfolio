@@ -61,6 +61,16 @@ test('"Aggiorna ora" runs the refresh action', async () => {
   })
 })
 
+test('an overview that cannot be read says so', async () => {
+  renderPage((queryClient) => {
+    queryClient.setQueryDefaults(OVERVIEW_KEY, {
+      queryFn: () => Promise.reject(new Error('offline')),
+    })
+  })
+
+  expect(await screen.findByText('Non riesco a leggere le fonti')).toBeDefined()
+})
+
 test('while the overview loads the page says so', () => {
   renderPage(() => undefined)
 

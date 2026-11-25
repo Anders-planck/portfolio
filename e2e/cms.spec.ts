@@ -13,7 +13,7 @@ const CONTACT_LABEL = 'Testo del pulsante di contatto'
  * A word no earlier run left on Home. Letters only: a numeral would be a
  * free number, which the publish rules block (ADR 0004).
  */
-function toUniqueWord() {
+function createUniqueWord() {
   return Date.now()
     .toString()
     .replace(/\d/g, (numeral) => 'abcdefghij'.charAt(Number(numeral)))
@@ -106,7 +106,7 @@ test('the owner edits the Profile, it saves itself, and publishing puts it on Ho
 }) => {
   const originalLabel = await readPublishedContactLabel(ownerPage)
   await openProfileEditor(ownerPage)
-  const editedLabel = `Scrivimi ${toUniqueWord()}`
+  const editedLabel = `Scrivimi ${createUniqueWord()}`
 
   await publishContactLabel(ownerPage, editedLabel)
   await ownerPage.goto('/')
@@ -122,7 +122,7 @@ test('a draft edit stays off Home until it is published', async ({
 }) => {
   const originalLabel = await readPublishedContactLabel(ownerPage)
   await openProfileEditor(ownerPage)
-  const draftLabel = `Bozza ${toUniqueWord()}`
+  const draftLabel = `Bozza ${createUniqueWord()}`
 
   await ownerPage.getByLabel(CONTACT_LABEL).fill(draftLabel)
   await expect(
