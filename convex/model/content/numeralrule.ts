@@ -45,6 +45,11 @@ function toProseFieldsFromSnapshot(snapshot: Snapshot): ProseField[] {
   return [...shared, ...localized]
 }
 
+/**
+ * `message` is the server's diagnostic (seed errors, logs). The CMS words a
+ * finding for the owner from `rule` with its own Italian messages (DATA-05),
+ * as for every rule; it shows the field's text, so it can mark the numeral.
+ */
 export function freeNumeralRule(snapshot: Snapshot) {
   return toProseFieldsFromSnapshot(snapshot).flatMap(
     ({ field, locale, text }) =>

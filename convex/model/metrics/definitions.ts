@@ -9,14 +9,12 @@ import {
   manualCountProblemValidator,
 } from './checks'
 import { findMetricByKey, readLatestReading } from './readings'
-import type { metricDefinitionValidator } from './tables'
+import type { MetricDefinition } from './tables'
 
 /**
  * What the owner writes in Fonti: a new metric, a manual count. Both are
  * idempotent: repeating the same request (a double click) changes nothing.
  */
-
-type MetricDefinition = Infer<typeof metricDefinitionValidator>
 
 export const createOutcomeValidator = v.union(
   v.object({ kind: v.literal('created') }),

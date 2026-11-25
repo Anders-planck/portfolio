@@ -1,5 +1,5 @@
 import { defineTable } from 'convex/server'
-import { v } from 'convex/values'
+import { type Infer, v } from 'convex/values'
 
 import { attemptValidator } from './attempts'
 import { largeNumberStyleValidator, metricFormatValidator } from './format'
@@ -18,6 +18,7 @@ export const metricDefinitionValidator = v.object({
   format: metricFormatValidator,
   source: sourceValidator,
 })
+export type MetricDefinition = Infer<typeof metricDefinitionValidator>
 
 export const METRICS_TABLES = {
   metrics: defineTable({

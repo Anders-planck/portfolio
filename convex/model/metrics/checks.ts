@@ -2,7 +2,7 @@ import { type Infer, v } from 'convex/values'
 
 import { isMetricKey } from './references'
 import type { Source } from './sources'
-import type { metricDefinitionValidator } from './tables'
+import type { MetricDefinition } from './tables'
 
 /**
  * Checks of what the owner enters in Fonti (pure). Problems are typed results
@@ -39,7 +39,6 @@ export const manualCountProblemValidator = v.union(
 )
 export type ManualCountProblem = Infer<typeof manualCountProblemValidator>
 
-type MetricDefinition = Infer<typeof metricDefinitionValidator>
 export interface ManualCount {
   value: number
   countedAt: number

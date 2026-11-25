@@ -1,8 +1,6 @@
-import type { Infer } from 'convex/values'
-
 import type { MutationCtx } from '../../_generated/server'
 import { addManualCount, addMetric } from './definitions'
-import type { metricDefinitionValidator } from './tables'
+import type { MetricDefinition } from './tables'
 
 /**
  * Seed metrics: only the sources listed in the `cms-fonti` mockup (PLAN →
@@ -17,8 +15,6 @@ import type { metricDefinitionValidator } from './tables'
  * "a ogni build" in the mockup becomes `daily`: content goes live without a
  * build, so the daily cron is the closest refresh.
  */
-
-type MetricDefinition = Infer<typeof metricDefinitionValidator>
 
 const OWNER_GITHUB_LOGIN = 'Anders-planck'
 

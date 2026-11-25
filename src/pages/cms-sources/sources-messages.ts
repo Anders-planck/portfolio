@@ -7,7 +7,6 @@ export const SOURCES_MESSAGES = {
   intro:
     'Ogni numero del sito viene da qui. Se una fonte non risponde, il sito mostra l’ultimo valore verificato con la sua data, mai un numero inventato.',
   refreshNow: 'Aggiorna ora',
-  refreshing: 'Aggiornamento in corso',
   refreshFailed: 'Aggiornamento non riuscito. Riprova.',
   newSource: 'Nuova fonte',
   tableLabel: 'Fonti dei numeri',
