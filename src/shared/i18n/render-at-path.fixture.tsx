@@ -10,11 +10,14 @@ import type { ReactNode } from 'react'
 
 /**
  * Renders `ui` as the page at `path`, inside a real router, so the locale
- * hooks read the address and links navigate, with an empty query client.
- * Returns the router and the client too.
+ * hooks read the address and links navigate, with `queryClient` (an empty
+ * one by default). Returns the router and the client too.
  */
-export function renderAtPath(ui: ReactNode, path: string) {
-  const queryClient = new QueryClient()
+export function renderAtPath(
+  ui: ReactNode,
+  path: string,
+  queryClient = new QueryClient(),
+) {
   const router = createRouter({
     routeTree: createRootRoute({ component: () => ui }),
     history: createMemoryHistory({ initialEntries: [path] }),

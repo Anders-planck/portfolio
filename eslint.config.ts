@@ -11,8 +11,10 @@ import simpleImportSort from 'eslint-plugin-simple-import-sort'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
-// The one module allowed to read `process.env` / `import.meta.env` (ARC-08).
+// The one module per runtime allowed to read `process.env` / `import.meta.env`
+// (ARC-08, ADR 0011): the app's, and the Convex backend's.
 const ENV_CONFIG_MODULE = 'src/shared/config/env.ts'
+const CONVEX_ENV_CONFIG_MODULE = 'convex/model/env.ts'
 // The one module allowed to call `console.warn` / `console.error` (TS-04).
 const SERVER_LOG_MODULE = 'src/shared/server/log.ts'
 
@@ -307,7 +309,7 @@ export default defineConfig(
   // Tooling configs run in Node outside the app; they read the process
   // environment directly (ARC-08 covers src/, convex/ and e2e/).
   {
-    files: [ENV_CONFIG_MODULE, ...TOOLING_FILES],
+    files: [ENV_CONFIG_MODULE, CONVEX_ENV_CONFIG_MODULE, ...TOOLING_FILES],
     rules: { 'no-restricted-syntax': ['error', ...RESTRICTED_SYNTAX] },
   },
   {

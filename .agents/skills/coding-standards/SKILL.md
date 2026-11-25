@@ -24,7 +24,7 @@ Folder map ARC-01 enforces (`eslint-plugin-boundaries`; a file outside it fails 
 - `src/routes/` → `src/pages/<page>/` → `src/widgets/<widget>/` → `src/features/<feature>/` → `src/entities/<entity>/` → `src/shared/<segment>/`. Each imports only layers to its right, never a sibling of its own type.
 - Any layer may import `convex/_generated/` and the theme (`src/styles/`, `src/themes/`, `src/astryx-themes.js`).
 - `convex/` imports only `convex/` and `convex/_generated/`; `e2e/` only `src/shared/`.
-- Environment values: only `src/shared/config/env.ts`. `console.warn`/`console.error`: only `src/shared/server/log.ts`.
+- Environment values: only `src/shared/config/env.ts` (app) and `convex/model/env.ts` (Convex backend). `console.warn`/`console.error`: only `src/shared/server/log.ts`.
 
 ## [review] rules: check each one
 

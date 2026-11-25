@@ -6,6 +6,14 @@ import { DEFAULT_LOCALE, type Locale } from './locale'
  */
 const FALLBACK_LOCALES: readonly Locale[] = ['en', DEFAULT_LOCALE]
 
+/**
+ * The locales a page may fall back to from `requestedLocale`, in order: what
+ * a loader fetches when the requested translation is missing.
+ */
+export function toFallbackLocales(requestedLocale: Locale): Locale[] {
+  return FALLBACK_LOCALES.filter((locale) => locale !== requestedLocale)
+}
+
 /** The translation a page shows, and whether it is the one asked for. */
 export type PickedTranslation<Content> =
   | { kind: 'requested'; locale: Locale; content: Content }

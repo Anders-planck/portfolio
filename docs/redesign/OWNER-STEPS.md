@@ -18,8 +18,6 @@ Until then, development and CI use the anonymous local Convex backend (`CONVEX_A
 
 Preview URL: https://portfolio.anders-jipwouo.workers.dev
 
-## Pending
-
 ## Later tickets
 
 - **`SITE_ORIGIN` (with the production domain).** Set the Worker var `SITE_ORIGIN` to the bare production origin (e.g. `https://example.com`, no path or trailing slash), in `wrangler.jsonc` `vars` or the Cloudflare dashboard. Until it is set, canonical, hreflang and `og:url` use the request's own origin and every page carries `noindex`; once set, they point at it and only that host is indexed (`*.workers.dev` previews stay `noindex`). Read by `src/shared/config/env.ts` (ticket 06).

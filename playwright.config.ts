@@ -23,7 +23,8 @@ export default defineConfig({
   webServer: [
     {
       // The site port (HTTP actions) sits next to the cloud port, as by default.
-      command: `bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)}`,
+      // `seed:publishSeedProfile` publishes the seed profile once (a no-op afterwards).
+      command: `bunx convex dev --tail-logs disable --local-cloud-port ${String(CONVEX_PORT)} --local-site-port ${String(CONVEX_PORT + 1)} --run seed:publishSeedProfile`,
       env: { CONVEX_AGENT_MODE: 'anonymous' },
       url: `${convexUrl}/version`,
       reuseExistingServer: !process.env.CI,

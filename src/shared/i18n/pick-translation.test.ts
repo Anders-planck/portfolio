@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { pickTranslation } from './pick-translation'
+import { pickTranslation, toFallbackLocales } from './pick-translation'
 
 test('the requested locale wins when it has a translation', () => {
   expect(pickTranslation({ it: 'ciao', fr: 'salut' }, 'fr')).toEqual({
@@ -28,4 +28,10 @@ test('without English it falls back to the Italian source', () => {
 
 test('with no translation at all it says so', () => {
   expect(pickTranslation<string>({}, 'en')).toEqual({ kind: 'missing' })
+})
+
+test('the fallbacks of a locale never include itself', () => {
+  expect(toFallbackLocales('fr')).toEqual(['en', 'it'])
+  expect(toFallbackLocales('en')).toEqual(['it'])
+  expect(toFallbackLocales('it')).toEqual(['en'])
 })

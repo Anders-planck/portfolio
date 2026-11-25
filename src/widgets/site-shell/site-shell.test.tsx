@@ -4,6 +4,7 @@ import { cleanup, screen } from '@testing-library/react'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import { createAppearance } from '../../entities/appearance/appearance.fixture'
+import { profileQueryOptions } from '../../entities/profile/profile-query-options'
 import { astryxCatalogQueryOptions } from '../../shared/i18n/astryx-catalog-query-options'
 import { renderAtPath } from '../../shared/i18n/render-at-path.fixture'
 import { SiteShell } from './site-shell'
@@ -18,6 +19,7 @@ afterEach(cleanup)
 test('every page sits between the one header and the footer', async () => {
   const queryClient = new QueryClient()
   await queryClient.query(astryxCatalogQueryOptions('en'))
+  queryClient.setQueryData(profileQueryOptions('en').queryKey, null)
   renderAtPath(
     <QueryClientProvider client={queryClient}>
       <SiteShell>
