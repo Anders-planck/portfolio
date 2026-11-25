@@ -20,7 +20,9 @@ test('the seed publishes the profile once', async () => {
   await backend.mutation(internal.seed.publishSeedProfile, {})
 
   const profile = await readPublishedProfile(backend)
-  expect(profile?.fields.name).toBe('Anders Planck')
+  expect(profile?.collection === 'profile' && profile.fields.name).toBe(
+    'Anders Planck',
+  )
   expect(profile?.content).toMatchObject({
     titleLine1: 'Software',
     titleLine2: 'Engineer.',
@@ -61,4 +63,25 @@ test('the seed creates the cms-fonti metrics once, with the manual count', async
     ctx.db.query('metricReadings').take(10),
   )
   expect(readings).toHaveLength(1)
+})
+
+test('the seed publishes the mockup note once, past every rule', async () => {
+  const backend = convexTest(schema, modules)
+  await backend.mutation(internal.seed.publishSeedNote, {})
+  await backend.mutation(internal.seed.publishSeedNote, {})
+
+  const cards = await backend.query(api.notes.listPublished, {})
+  expect(cards).toMatchObject([{ slug: 'review-agenti', topic: 'ai' }])
+  const page = await backend.query(api.notes.getPublished, {
+    slug: 'review-agenti',
+  })
+  expect(page?.translations[0]?.outline.map((entry) => entry.label)).toEqual([
+    'Errori di architettura',
+    'Codice morto e modifiche parallele',
+    'Regole perse a contesto pieno',
+    'Decisioni prese da solo',
+    'Merge tra worktree che si sovrascrivono',
+    'Il metodo: review in loop con agenti a contesto vuoto',
+    'Nessuna review è perfetta',
+  ])
 })

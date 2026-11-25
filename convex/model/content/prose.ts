@@ -1,3 +1,5 @@
+import { parseNoteMarkdown } from '../notes/markdown'
+import { toProseTextsFromNoteBody } from '../notes/prose'
 import type { Locale } from './locales'
 import { pickProfileContentFields } from './profile'
 import type { Snapshot } from './snapshot'
@@ -14,9 +16,17 @@ export interface ProseField {
   text: string
 }
 
-// Profile is the only collection; a new member of `Snapshot` stops this from
-// typechecking until its prose fields are listed here.
+// A new member of `Snapshot` stops this from typechecking until its prose
+// fields are listed here.
 export function toProseFieldsFromSnapshot(snapshot: Snapshot): ProseField[] {
+  return snapshot.collection === 'note'
+    ? toProseFieldsFromNote(snapshot)
+    : toProseFieldsFromProfile(snapshot)
+}
+
+function toProseFieldsFromProfile(
+  snapshot: Extract<Snapshot, { collection: 'profile' }>,
+): ProseField[] {
   const { name, skills, links } = snapshot.fields
   const shared: ProseField[] = [
     { field: 'name', locale: null, text: name },
@@ -39,4 +49,19 @@ export function toProseFieldsFromSnapshot(snapshot: Snapshot): ProseField[] {
     })),
   )
   return [...shared, ...localized]
+}
+
+/** A note's slug, topic and project keys are not prose; its copy is. */
+function toProseFieldsFromNote(
+  snapshot: Extract<Snapshot, { collection: 'note' }>,
+): ProseField[] {
+  return snapshot.content.flatMap(({ locale, title, summary, body }) => [
+    { field: 'title', locale, text: title },
+    { field: 'summary', locale, text: summary },
+    ...toProseTextsFromNoteBody(parseNoteMarkdown(body).blocks).map((text) => ({
+      field: 'body',
+      locale,
+      text,
+    })),
+  ])
 }

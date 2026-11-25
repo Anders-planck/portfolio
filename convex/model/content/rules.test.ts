@@ -11,10 +11,10 @@ const SNAPSHOT: Snapshot = {
   content: [{ ...EMPTY_PROFILE_CONTENT_FIELDS, locale: 'en' }],
 }
 
-const NO_METRICS = { metricKeys: new Set<string>() }
+const NO_METRICS = { metricKeys: new Set<string>(), noteSlugs: new Map() }
 
 const emptySubtitleRule: Rule = (snapshot) =>
-  snapshot.content
+  (snapshot.collection === 'profile' ? snapshot.content : [])
     .filter((record) => record.subtitle === '')
     .map((record) => ({
       rule: 'empty-subtitle',

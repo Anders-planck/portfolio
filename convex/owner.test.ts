@@ -65,11 +65,21 @@ function callEveryCmsFunction(
     caller.action(api.metrics.refreshNow, {}),
     caller.query(api.sessions.listSessions, {}),
     caller.mutation(api.sessions.revokeSession, { sessionId: 'elsewhere' }),
+    caller.query(api.notes.listNotes, {}),
+    caller.mutation(api.notes.createNote, { key: 'note-owner-check' }),
+    caller.query(api.notes.getEditableNote, {
+      key: 'note-owner-check',
+      locale: 'it',
+    }),
+    caller.mutation(api.notes.saveDraft, {
+      key: 'note-owner-check',
+      fields: { slug: 'controllo' },
+    }),
   ]
 }
 
 /** How many CMS functions `callEveryCmsFunction` calls. */
-const CMS_FUNCTION_COUNT = 12
+const CMS_FUNCTION_COUNT = 16
 
 /** A backend with one published release, and the owner's session on it. */
 async function createBackendWithRelease() {

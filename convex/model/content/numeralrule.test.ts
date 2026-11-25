@@ -59,8 +59,54 @@ test('publish runs the free-numeral rule', () => {
   const findings = runPublishRules(
     [toProfileSnapshot({}, 'Da quasi 4 anni.')],
     PUBLISH_RULES,
-    { metricKeys: new Set() },
+    { metricKeys: new Set(), noteSlugs: new Map() },
   )
 
   expect(hasBlockingFinding(findings)).toBe(true)
+})
+
+function toNoteSnapshot(content: {
+  title?: string
+  summary?: string
+  body?: string
+}): Snapshot {
+  return {
+    collection: 'note',
+    key: 'note-a',
+    fields: { slug: 'nota-2026', topic: 'ai', linkedProjectKeys: ['p1'] },
+    content: [{ locale: 'en', title: '', summary: '', body: '', ...content }],
+  }
+}
+
+test('note prose is checked: title, summary and the text of the body', () => {
+  const snapshot = toNoteSnapshot({
+    title: 'Five errors, not 5',
+    summary: 'A 360 view',
+    body: '## Step 1\n\nAbout 40 tests.\n\n- item 2\n\n> quote 3\n\n:::case{title="Case 4"}\nin 6\n:::',
+  })
+
+  expect(
+    numeralRule(snapshot).map(({ field, locale, message }) => [
+      field,
+      locale,
+      /"(.+)"/.exec(message)?.[1],
+    ]),
+  ).toEqual([
+    ['title', 'en', '5'],
+    ['summary', 'en', '360'],
+    ['body', 'en', '1'],
+    ['body', 'en', '40'],
+    ['body', 'en', '2'],
+    ['body', 'en', '3'],
+    ['body', 'en', '4'],
+    ['body', 'en', '6'],
+  ])
+})
+
+test('code, link addresses, list markers and note fields are not prose', () => {
+  const snapshot = toNoteSnapshot({
+    body: '1. Use `useState(0)` and [the docs](https://example.com/v18).\n\n```\nconst port = 3210\n```\n\n::metric{key="sdk-2"}',
+  })
+
+  expect(numeralRule(snapshot)).toEqual([])
 })

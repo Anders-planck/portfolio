@@ -13,6 +13,7 @@ import {
   snapshotValidator,
 } from './model/content/snapshot'
 import { METRICS_TABLES } from './model/metrics/tables'
+import { NOTES_TABLES } from './model/notes/tables'
 import { userFieldsValidator } from './model/users'
 
 export default defineSchema({
@@ -50,7 +51,9 @@ export default defineSchema({
   }).index('by_collection_and_key', ['collection', 'key']),
 
   /** Versions made live together by one publish (or a rollback). */
-  releases: defineTable(releaseValidator).index('by_request_id', ['requestId']),
+  releases: defineTable(releaseValidator)
+    .index('by_request_id', ['requestId'])
+    .index('by_status', ['status']),
 
   /** What the public site reads: the live version of each document. */
   publishedPointers: defineTable({
@@ -65,4 +68,7 @@ export default defineSchema({
 
   // Metrics (ADR 0004): every number on the site, with its source and readings.
   ...METRICS_TABLES,
+
+  // Notes (ticket 11): the note drafts of the content store's `note` collection.
+  ...NOTES_TABLES,
 })

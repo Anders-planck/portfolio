@@ -2,6 +2,7 @@ import { type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
+import { findNote, readNoteDraft } from '../notes/drafts'
 import { type Locale, LOCALES, localeValidator } from './locales'
 import {
   EMPTY_PROFILE_CONTENT_FIELDS,
@@ -68,10 +69,13 @@ export async function saveDraftEdit(
 /** The revision of a document's draft (moves on every save), or null. */
 export async function readDraftRevision(
   ctx: QueryCtx,
-  { key }: DocumentRef,
+  { collection, key }: DocumentRef,
 ): Promise<number | null> {
-  const profile = await findProfile(ctx, key)
-  return profile === null ? null : profile.revision
+  const draft =
+    collection === 'note'
+      ? await findNote(ctx, key)
+      : await findProfile(ctx, key)
+  return draft === null ? null : draft.revision
 }
 
 /** The current draft of a document as a snapshot, or null if it has none. */
@@ -79,6 +83,9 @@ export async function readDraftSnapshot(
   ctx: QueryCtx,
   { collection, key }: DocumentRef,
 ): Promise<Snapshot | null> {
+  if (collection === 'note') {
+    return readNoteSnapshot(ctx, key)
+  }
   const profile = await findProfile(ctx, key)
   if (profile === null) {
     return null
@@ -98,9 +105,26 @@ export async function readDraftSnapshot(
   }
 }
 
+async function readNoteSnapshot(
+  ctx: QueryCtx,
+  key: string,
+): Promise<Snapshot | null> {
+  const draft = await readNoteDraft(ctx, key)
+  if (draft === null) {
+    return null
+  }
+  const { slug, topic, linkedProjectKeys } = draft.fields
+  return {
+    collection: 'note',
+    key,
+    fields: { slug, topic, linkedProjectKeys },
+    content: draft.content,
+  }
+}
+
 function toSnapshotContentFromProfileContent(
   record: Doc<'profileContent'>,
-): Snapshot['content'][number] {
+): Extract<Snapshot, { collection: 'profile' }>['content'][number] {
   return { locale: record.locale, ...pickProfileContentFields(record) }
 }
 
@@ -148,11 +172,11 @@ export type EditableDraft = Infer<typeof editableDraftValidator>
 
 export async function readEditableDraft(
   ctx: QueryCtx,
-  target: DocumentRef & { locale: Locale },
+  target: { collection: 'profile'; key: string; locale: Locale },
 ): Promise<EditableDraft> {
   const profile = await findProfile(ctx, target.key)
   const snapshot = await readDraftSnapshot(ctx, target)
-  if (profile === null || snapshot === null) {
+  if (profile === null || snapshot?.collection !== 'profile') {
     return {
       revision: null,
       savedAt: null,
@@ -160,15 +184,17 @@ export async function readEditableDraft(
       content: EMPTY_PROFILE_CONTENT_FIELDS,
     }
   }
-  const { fields, content } = toLocalizedDocumentFromSnapshot(
-    snapshot,
-    target.locale,
+  const record = snapshot.content.find(
+    (entry) => entry.locale === target.locale,
   )
   return {
     revision: profile.revision,
     savedAt: profile.updatedAt,
-    fields,
-    content: content ?? EMPTY_PROFILE_CONTENT_FIELDS,
+    fields: snapshot.fields,
+    content:
+      record === undefined
+        ? EMPTY_PROFILE_CONTENT_FIELDS
+        : pickProfileContentFields(record),
   }
 }
 
