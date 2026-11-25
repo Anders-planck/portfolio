@@ -46,8 +46,30 @@ function callEveryCmsFunction(
       ...PROFILE,
       locale: 'it',
     }),
+    caller.query(api.metrics.getSourcesOverview, {}),
+    caller.mutation(api.metrics.createMetric, {
+      key: 'test-files',
+      label: 'file di test',
+      format: 'at-least',
+      source: { kind: 'manual' },
+    }),
+    caller.mutation(api.metrics.recordManualCount, {
+      key: 'test-files',
+      value: 750,
+      countedAt: Date.UTC(2026, 10, 23),
+      evidence: 'Conteggio a mano',
+    }),
+    caller.mutation(api.metrics.chooseLargeNumberStyle, {
+      largeNumberStyle: 'exact',
+    }),
+    caller.action(api.metrics.refreshNow, {}),
+    caller.query(api.sessions.listSessions, {}),
+    caller.mutation(api.sessions.revokeSession, { sessionId: 'elsewhere' }),
   ]
 }
+
+/** How many CMS functions `callEveryCmsFunction` calls. */
+const CMS_FUNCTION_COUNT = 12
 
 /** A backend with one published release, and the owner's session on it. */
 async function createBackendWithRelease() {
@@ -79,7 +101,7 @@ async function expectEveryCallRefused(
   kind: 'signed-out' | 'not-owner',
 ) {
   const outcomes = await Promise.allSettled(calls)
-  expect(outcomes).toHaveLength(5)
+  expect(outcomes).toHaveLength(CMS_FUNCTION_COUNT)
   for (const outcome of outcomes) {
     expect(outcome.status).toBe('rejected')
     if (outcome.status === 'rejected') {
@@ -100,7 +122,7 @@ describe('requireOwner on every CMS function', () => {
     )
 
     expect(outcomes.map((outcome) => outcome.status)).toEqual(
-      Array(5).fill('fulfilled'),
+      Array(CMS_FUNCTION_COUNT).fill('fulfilled'),
     )
   })
 

@@ -9,10 +9,9 @@ export const CMS_MESSAGES = {
     content: 'Contenuti',
     site: 'Sito',
     quality: 'Qualità',
-    /** Shown under a group whose screens come with later work. */
-    comingSoon: 'Le schermate arrivano più avanti.',
     overview: 'Panoramica',
     profile: 'Profilo',
+    sources: 'Fonti dei numeri',
     viewSite: 'Vedi il sito',
   },
   access: {

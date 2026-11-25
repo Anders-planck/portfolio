@@ -1,8 +1,9 @@
 import { getAuthUserId } from '@convex-dev/auth/server'
 import { ConvexError } from 'convex/values'
 
+import { internal } from '../_generated/api'
 import type { Doc, Id } from '../_generated/dataModel'
-import type { MutationCtx, QueryCtx } from '../_generated/server'
+import type { ActionCtx, MutationCtx, QueryCtx } from '../_generated/server'
 import { readOwnerGithubIds } from './env'
 import {
   type AccessRefusal,
@@ -30,6 +31,14 @@ export async function requireOwner(ctx: QueryCtx): Promise<Doc<'users'>> {
     throw new ConvexError<AccessRefusal>({ kind: access.status })
   }
   return access.user
+}
+
+/**
+ * `requireOwner` for an action, which has no database: the same check, run
+ * as a query with the caller's identity.
+ */
+export async function requireOwnerInAction(ctx: ActionCtx): Promise<void> {
+  await ctx.runQuery(internal.users.checkOwner, {})
 }
 
 /** Who is calling, without throwing: what the CMS shell switches on. */

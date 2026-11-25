@@ -100,3 +100,13 @@ export function readTestSignInSecret(): string | null {
   }
   return secret
 }
+
+/**
+ * GitHub token for metric sources (`model/metrics/github.ts`). Optional:
+ * public repositories are read without it; a source marked private is not
+ * read at all while it is missing.
+ */
+export function readGithubToken(): string | null {
+  const token = process.env.GITHUB_TOKEN
+  return token === undefined || token === '' ? null : token
+}

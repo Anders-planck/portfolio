@@ -5,7 +5,6 @@ import {
   SideNavItem,
   SideNavSection,
 } from '@astryxdesign/core/SideNav'
-import { Text } from '@astryxdesign/core/Text'
 import { useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 
@@ -15,16 +14,26 @@ import { CMS_PATHNAME } from '../../shared/router/is-cms-pathname'
 
 const NAVIGATION_COPY = CMS_MESSAGES.navigation
 
-/** CMS screens in the Contenuti group, in menu order. */
-const CONTENT_SCREENS = [
+interface CmsScreen {
+  href: string
+  label: string
+}
+
+/** CMS screens of the Contenuti group, in menu order. */
+const CONTENT_SCREENS: readonly CmsScreen[] = [
   { href: CMS_PATHNAME, label: NAVIGATION_COPY.overview },
   { href: `${CMS_PATHNAME}/profilo`, label: NAVIGATION_COPY.profile },
-] as const
+]
+
+/** CMS screens of the Qualità group (mockup `cms-fonti`). */
+const QUALITY_SCREENS: readonly CmsScreen[] = [
+  { href: `${CMS_PATHNAME}/fonti`, label: NAVIGATION_COPY.sources },
+]
 
 /**
  * The frame of every CMS screen after sign-in: AppShell with a SideNav in
  * three groups, "Contenuti", "Sito" and "Qualità" (PLAN, CMS app). Groups
- * list only screens that exist; the others say they come later.
+ * list only screens that exist.
  */
 export function CmsShell({ children }: { children: ReactNode }) {
   const { pathname } = useLocation()
@@ -50,9 +59,14 @@ export function CmsShell({ children }: { children: ReactNode }) {
             <SideNavItem label={NAVIGATION_COPY.viewSite} href="/" />
           </SideNavSection>
           <SideNavSection title={NAVIGATION_COPY.quality}>
-            <Text type="supporting" color="secondary">
-              {NAVIGATION_COPY.comingSoon}
-            </Text>
+            {QUALITY_SCREENS.map((screen) => (
+              <SideNavItem
+                key={screen.href}
+                label={screen.label}
+                href={screen.href}
+                isSelected={pathname === screen.href}
+              />
+            ))}
           </SideNavSection>
         </SideNav>
       }

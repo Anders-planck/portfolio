@@ -3,6 +3,7 @@ import { convexTest } from 'convex-test'
 import { expect, test } from 'vitest'
 
 import { api, internal } from './_generated/api'
+import { createOwnerBackend } from './owner.fixture'
 import schema from './schema'
 const modules = import.meta.glob('./**/*.ts')
 
@@ -34,4 +35,30 @@ test('the seeded copy has no free numbers (ADR 0004)', async () => {
 
   const profile = await readPublishedProfile(backend)
   expect(Object.values(profile?.content ?? {}).join(' ')).not.toMatch(/\d/)
+})
+
+test('the seed creates the cms-fonti metrics once, with the manual count', async () => {
+  const backend = await createOwnerBackend()
+  await backend.mutation(internal.seed.seedMetrics, {})
+  await backend.mutation(internal.seed.seedMetrics, {})
+
+  const overview = await backend.query(api.metrics.getSourcesOverview, {})
+  expect(overview.metrics.map((metric) => metric.key)).toEqual([
+    'sdk-downloads',
+    'expo-mtls-downloads',
+    'sdk-commits',
+    'expo-mtls-commits',
+    'leco-test-files',
+  ])
+  expect(
+    overview.metrics.find((metric) => metric.key === 'leco-test-files'),
+  ).toMatchObject({
+    display: '750+',
+    verifiedAt: Date.UTC(2026, 10, 23),
+    evidence: 'Conteggio a mano',
+  })
+  const readings = await backend.run((ctx) =>
+    ctx.db.query('metricReadings').take(10),
+  )
+  expect(readings).toHaveLength(1)
 })

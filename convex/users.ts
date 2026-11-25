@@ -4,8 +4,8 @@ import {
 } from '@convex-dev/auth/methods/github/server'
 import { v } from 'convex/values'
 
-import { internalMutation, query } from './_generated/server'
-import { admitOwner, readViewer } from './model/owner'
+import { internalMutation, internalQuery, query } from './_generated/server'
+import { admitOwner, readViewer, requireOwner } from './model/owner'
 import type { OwnerProfile } from './model/users'
 import { viewerValidator } from './model/users'
 
@@ -44,6 +44,16 @@ export const readmitGithubUser = internalMutation({
       toOwnerProfileFromGithubProfile(method.profile),
       Date.now(),
     )
+    return null
+  },
+})
+
+/** `requireOwner` for actions (`requireOwnerInAction`): throws unless owner. */
+export const checkOwner = internalQuery({
+  args: {},
+  returns: v.null(),
+  handler: async (ctx) => {
+    await requireOwner(ctx)
     return null
   },
 })

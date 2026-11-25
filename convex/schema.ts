@@ -12,6 +12,7 @@ import {
   collectionValidator,
   snapshotValidator,
 } from './model/content/snapshot'
+import { METRICS_TABLES } from './model/metrics/tables'
 import { userFieldsValidator } from './model/users'
 
 export default defineSchema({
@@ -61,4 +62,7 @@ export default defineSchema({
 
   // CMS users (ADR 0005). Their sessions live in the Convex Auth component.
   users: defineTable(userFieldsValidator).index('by_github_id', ['githubId']),
+
+  // Metrics (ADR 0004): every number on the site, with its source and readings.
+  ...METRICS_TABLES,
 })

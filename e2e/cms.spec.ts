@@ -9,6 +9,30 @@ test.describe.configure({ mode: 'serial' })
 /** The contact link text is on Home and no other test checks it. */
 const CONTACT_LABEL = 'Testo del pulsante di contatto'
 
+/**
+ * A word no earlier run left on Home. Letters only: a numeral would be a
+ * free number, which the publish rules block (ADR 0004).
+ */
+function toUniqueWord() {
+  return Date.now()
+    .toString()
+    .replace(/\d/g, (numeral) => 'abcdefghij'.charAt(Number(numeral)))
+}
+
+/**
+ * The contact label Home shows now: what the tests put back. Read from the
+ * published page, not the draft, so a run that stopped half-way never leaves
+ * its own label behind.
+ */
+async function readPublishedContactLabel(page: Page) {
+  await page.goto('/')
+  const contactLink = page
+    .getByRole('main')
+    .locator('a[href^="mailto:"]')
+    .first()
+  return (await contactLink.textContent())?.trim() ?? ''
+}
+
 async function openProfileEditor(page: Page) {
   await page.goto('/cms/profilo')
   await expect(
@@ -64,18 +88,31 @@ test('the owner lands on Panoramica inside the CMS shell', async ({
   ).toEqual([])
 })
 
+test('the owner opens Fonti from the Qualità group', async ({ ownerPage }) => {
+  await ownerPage.goto('/cms')
+  await ownerPage.getByRole('link', { name: 'Fonti dei numeri' }).click()
+
+  await expect(
+    ownerPage.getByRole('heading', { level: 1, name: 'Fonti dei numeri' }),
+  ).toBeVisible()
+  await expect(ownerPage).toHaveURL(/\/cms\/fonti$/)
+  expect(
+    (await new AxeBuilder({ page: ownerPage }).analyze()).violations,
+  ).toEqual([])
+})
+
 test('the owner edits the Profile, it saves itself, and publishing puts it on Home', async ({
   ownerPage,
 }) => {
+  const originalLabel = await readPublishedContactLabel(ownerPage)
   await openProfileEditor(ownerPage)
-  const originalLabel = await ownerPage.getByLabel(CONTACT_LABEL).inputValue()
-  const editedLabel = `Scrivimi ${String(Date.now())}`
+  const editedLabel = `Scrivimi ${toUniqueWord()}`
 
   await publishContactLabel(ownerPage, editedLabel)
   await ownerPage.goto('/')
   await expect(ownerPage.getByRole('link', { name: editedLabel })).toBeVisible()
 
-  // Put Home back as the seed published it.
+  // Put Home back as it was.
   await openProfileEditor(ownerPage)
   await publishContactLabel(ownerPage, originalLabel)
 })
@@ -83,9 +120,9 @@ test('the owner edits the Profile, it saves itself, and publishing puts it on Ho
 test('a draft edit stays off Home until it is published', async ({
   ownerPage,
 }) => {
+  const originalLabel = await readPublishedContactLabel(ownerPage)
   await openProfileEditor(ownerPage)
-  const originalLabel = await ownerPage.getByLabel(CONTACT_LABEL).inputValue()
-  const draftLabel = `Bozza ${String(Date.now())}`
+  const draftLabel = `Bozza ${toUniqueWord()}`
 
   await ownerPage.getByLabel(CONTACT_LABEL).fill(draftLabel)
   await expect(
