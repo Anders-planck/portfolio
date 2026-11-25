@@ -7,6 +7,7 @@ import {
   collectionValidator,
   type DocumentRef,
   type LocalizedDocument,
+  toDocumentPath,
   toLocalizedDocumentFromSnapshot,
 } from './snapshot'
 import { readVersions } from './versions'
@@ -114,10 +115,6 @@ function hasVersionOf(versions: Doc<'versions'>[], ref: DocumentRef) {
   return versions.some(
     (version) => toDocumentPath(version) === toDocumentPath(ref),
   )
-}
-
-function toDocumentPath({ collection, key }: DocumentRef) {
-  return `${collection}/${key}`
 }
 
 async function readAllPointers(ctx: QueryCtx) {

@@ -225,7 +225,7 @@ describe('publish', () => {
 })
 
 describe('publish request checks', () => {
-  test('a selection that names a document twice is refused', async () => {
+  test('publish checks the request before it writes anything', async () => {
     const backend = createBackend()
     const { revision } = await saveSubtitleDraft(backend, 'Doppia')
 
@@ -235,29 +235,7 @@ describe('publish request checks', () => {
         { key: PROFILE.key, revision },
       ]),
     ).rejects.toThrow(/more than once/)
-  })
-
-  test('a selection over the limit is refused', async () => {
-    const backend = createBackend()
-    const tooMany = Array.from({ length: 101 }, (_, index) => ({
-      key: `doc-${String(index)}`,
-      revision: 1,
-    }))
-
-    await expect(publishDrafts(backend, tooMany)).rejects.toThrow(/at most/)
-  })
-
-  test('a release note over the limit is refused', async () => {
-    const backend = createBackend()
-    const { revision } = await saveSubtitleDraft(backend, 'Nota lunga')
-
-    await expect(
-      backend.mutation(internal.content.publish, {
-        selection: [{ ...PROFILE, revision }],
-        note: 'x'.repeat(501),
-        requestId: crypto.randomUUID(),
-      }),
-    ).rejects.toThrow(/note/)
+    expect(await countReleases(backend)).toBe(0)
   })
 
   test('a publish request id cannot be reused for a rollback', async () => {

@@ -18,6 +18,7 @@ import {
   PUBLISH_RULES,
   runPublishRules,
 } from './rules'
+import { checkPublishRequest } from './selection'
 import {
   type DocumentRef,
   documentRefValidator,
@@ -32,9 +33,6 @@ import { readVersions, writeVersions } from './versions'
  * in one mutation. Blocked, stale and failed publishes are results the owner
  * sees (DATA-03).
  */
-const MAX_SELECTION = 100
-const MAX_NOTE_LENGTH = 500
-
 const RELEASE_BASE_FIELDS = {
   versionIds: v.array(v.id('versions')),
   note: v.string(),
@@ -127,7 +125,7 @@ export async function publishSelection(
   if (repeated !== null) {
     return toPublishOutcomeFromRelease(repeated)
   }
-  checkPublishRequest(request)
+  checkPublishRequest({ selection, note })
   const staleDocuments = await findStaleDrafts(ctx, selection)
   if (staleDocuments.length > 0) {
     return { status: 'stale', documents: staleDocuments }
@@ -233,30 +231,6 @@ function toReleaseFailure({
     return { kind: 'conflict', documents: conflicts }
   }
   return hasBlockingFinding(findings) ? { kind: 'rules' } : null
-}
-
-function checkPublishRequest({ selection, note }: PublishRequest) {
-  if (selection.length === 0 || selection.length > MAX_SELECTION) {
-    throwInvalidPublishRequest(
-      `A release holds at least one and at most ${String(MAX_SELECTION)} documents`,
-    )
-  }
-  const paths = selection.map(({ collection, key }) => `${collection}/${key}`)
-  const repeatedPath = paths.find(
-    (path, index) => paths.indexOf(path) !== index,
-  )
-  if (repeatedPath !== undefined) {
-    throwInvalidPublishRequest(`${repeatedPath} is selected more than once`)
-  }
-  if (note.length > MAX_NOTE_LENGTH) {
-    throwInvalidPublishRequest(
-      `A release note holds at most ${String(MAX_NOTE_LENGTH)} characters`,
-    )
-  }
-}
-
-function throwInvalidPublishRequest(message: string): never {
-  throw new ConvexError({ code: 'INVALID_PUBLISH_REQUEST', message })
 }
 
 async function findStaleDrafts(

@@ -26,6 +26,11 @@ export const documentRefValidator = v.object({
 })
 export type DocumentRef = Infer<typeof documentRefValidator>
 
+/** One string per document, e.g. `profile/main`, for comparing and messages. */
+export function toDocumentPath({ collection, key }: DocumentRef) {
+  return `${collection}/${key}`
+}
+
 /** A document picked for publish, with the draft revision the owner reviewed. */
 export const reviewedDraftValidator = documentRefValidator.extend({
   revision: v.number(),
