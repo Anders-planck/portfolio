@@ -31,12 +31,13 @@ function saveSubtitleDraft(
   })
 }
 
+/** Publishes the profile draft at `revision`, the one the owner reviewed. */
 function publishProfile(
   backend: Backend,
-  options: { scheduledAt?: number; requestId?: string } = {},
+  options: { revision: number; scheduledAt?: number; requestId?: string },
 ) {
   return backend.mutation(internal.content.publish, {
-    selection: [PROFILE],
+    selection: [{ ...PROFILE, revision: options.revision }],
     note: 'Nota di rilascio',
     requestId: options.requestId ?? crypto.randomUUID(),
     ...(options.scheduledAt === undefined
@@ -47,8 +48,8 @@ function publishProfile(
 
 /** Saves the subtitle and publishes it now; returns the release. */
 async function publishSubtitle(backend: Backend, subtitle: string) {
-  await saveSubtitleDraft(backend, subtitle)
-  const outcome = await publishProfile(backend)
+  const { revision } = await saveSubtitleDraft(backend, subtitle)
+  const outcome = await publishProfile(backend, { revision })
   if (outcome.status !== 'published') {
     throw new Error(`Expected a published release, got ${outcome.status}`)
   }
@@ -89,14 +90,14 @@ describe('publish', () => {
 
   test('publishing makes the draft public for its locale', async () => {
     const backend = createBackend()
-    await backend.mutation(internal.content.saveDraft, {
+    const { revision } = await backend.mutation(internal.content.saveDraft, {
       ...PROFILE,
       fields: { name: 'Anders Planck' },
       locale: 'it',
       content: { titleLine1: 'Software', titleLine2: 'Engineer.' },
     })
 
-    await publishProfile(backend)
+    await publishProfile(backend, { revision })
 
     const published = await readPublishedProfile(backend)
     expect(published?.fields.name).toBe('Anders Planck')
@@ -110,19 +111,19 @@ describe('publish', () => {
     const backend = createBackend()
     await publishSubtitle(backend, 'Prima')
 
-    await saveSubtitleDraft(backend, 'Seconda')
+    const { revision } = await saveSubtitleDraft(backend, 'Seconda')
     expect(await readPublishedSubtitle(backend)).toBe('Prima')
 
-    await publishProfile(backend)
+    await publishProfile(backend, { revision })
     expect(await readPublishedSubtitle(backend)).toBe('Seconda')
   })
 
   test('each locale reads its own content; a missing locale has none', async () => {
     const backend = createBackend()
     await saveSubtitleDraft(backend, 'Italiano', 'it')
-    await saveSubtitleDraft(backend, 'English', 'en')
+    const { revision } = await saveSubtitleDraft(backend, 'English', 'en')
 
-    await publishProfile(backend)
+    await publishProfile(backend, { revision })
 
     expect((await readPublishedProfile(backend, 'it'))?.content?.subtitle).toBe(
       'Italiano',
@@ -136,21 +137,45 @@ describe('publish', () => {
   test('publishing a document without a draft fails', async () => {
     const backend = createBackend()
 
-    await expect(publishProfile(backend)).rejects.toThrow(/No draft/)
+    await expect(publishProfile(backend, { revision: 1 })).rejects.toThrow(
+      /No draft/,
+    )
   })
 
   test('a repeated publish request (double click, retry) publishes once', async () => {
     const backend = createBackend()
-    await saveSubtitleDraft(backend, 'Una volta')
+    const { revision } = await saveSubtitleDraft(backend, 'Una volta')
 
-    const first = await publishProfile(backend, { requestId: 'publish-once' })
+    const first = await publishProfile(backend, {
+      revision,
+      requestId: 'publish-once',
+    })
     // The response was lost, the owner edits on, the client retries.
     await saveSubtitleDraft(backend, 'Dopo il retry')
-    const retry = await publishProfile(backend, { requestId: 'publish-once' })
+    const retry = await publishProfile(backend, {
+      revision,
+      requestId: 'publish-once',
+    })
 
     expect(retry).toEqual(first)
     expect(await countReleases(backend)).toBe(1)
     expect(await readPublishedSubtitle(backend)).toBe('Una volta')
+  })
+
+  test('a draft edited after the owner reviewed it is not published', async () => {
+    const backend = createBackend()
+    await publishSubtitle(backend, 'Pubblicata')
+    const { revision: reviewed } = await saveSubtitleDraft(backend, 'Rivista')
+    // Another tab saves while the owner reads the diff.
+    await saveSubtitleDraft(backend, 'Cambiata in un altra scheda')
+
+    const outcome = await publishProfile(backend, { revision: reviewed })
+
+    expect(outcome).toEqual({
+      status: 'stale',
+      documents: [{ collection: 'profile', key: 'main' }],
+    })
+    expect(await readPublishedSubtitle(backend)).toBe('Pubblicata')
   })
 })
 
@@ -160,7 +185,7 @@ describe('rollback', () => {
     const first = await publishSubtitle(backend, 'Uno')
     const second = await publishSubtitle(backend, 'Due')
     await publishSubtitle(backend, 'Tre')
-    await saveSubtitleDraft(backend, 'Bozza')
+    const { revision } = await saveSubtitleDraft(backend, 'Bozza')
 
     await rollBack(backend, first)
     expect(await readPublishedSubtitle(backend)).toBe('Uno')
@@ -169,7 +194,7 @@ describe('rollback', () => {
     expect(await readPublishedSubtitle(backend)).toBe('Due')
 
     // The draft is the owner's work in progress; rollback never touches it.
-    await publishProfile(backend)
+    await publishProfile(backend, { revision })
     expect(await readPublishedSubtitle(backend)).toBe('Bozza')
   })
 
@@ -210,9 +235,10 @@ describe('scheduled publish', () => {
   test('goes live at its time with the drafts as they were when scheduled', async () => {
     const backend = createBackend()
     await publishSubtitle(backend, 'Adesso')
-    await saveSubtitleDraft(backend, 'Domani')
+    const { revision } = await saveSubtitleDraft(backend, 'Domani')
 
     const outcome = await publishProfile(backend, {
+      revision,
       scheduledAt: Date.now() + ONE_DAY_MS,
     })
     expect(outcome.status).toBe('scheduled')
@@ -227,9 +253,10 @@ describe('scheduled publish', () => {
 
   test('a time in the past publishes now', async () => {
     const backend = createBackend()
-    await saveSubtitleDraft(backend, 'Subito')
+    const { revision } = await saveSubtitleDraft(backend, 'Subito')
 
     const outcome = await publishProfile(backend, {
+      revision,
       scheduledAt: Date.now() - 1000,
     })
 
@@ -266,20 +293,22 @@ describe('rules at publish', () => {
         : []),
     ])
 
+  let realRules: Rule[] = []
   beforeEach(() => {
+    realRules = PUBLISH_RULES.splice(0)
     PUBLISH_RULES.push(placeholderRule)
   })
   afterEach(() => {
-    PUBLISH_RULES.length = 0
+    PUBLISH_RULES.splice(0, PUBLISH_RULES.length, ...realRules)
     vi.useRealTimers()
   })
 
   test('a block finding stops the publish and nothing goes live', async () => {
     const backend = createBackend()
     await publishSubtitle(backend, 'Buona')
-    await saveSubtitleDraft(backend, '[da scrivere]', 'en')
+    const { revision } = await saveSubtitleDraft(backend, '[da scrivere]', 'en')
 
-    const outcome = await publishProfile(backend)
+    const outcome = await publishProfile(backend, { revision })
 
     expect(outcome).toEqual({
       status: 'blocked',
@@ -300,12 +329,14 @@ describe('rules at publish', () => {
 
   test('warn findings publish and come back with the release', async () => {
     const backend = createBackend()
-    await saveSubtitleDraft(backend, 'Quasi TODO')
+    const { revision } = await saveSubtitleDraft(backend, 'Quasi TODO')
 
-    const outcome = await publishProfile(backend)
+    const outcome = await publishProfile(backend, { revision })
 
-    expect(outcome.status).toBe('published')
-    expect(outcome.findings.map((finding) => finding.rule)).toEqual(['todo'])
+    expect(outcome).toMatchObject({
+      status: 'published',
+      findings: [{ rule: 'todo', severity: 'warn', locale: 'it' }],
+    })
     expect(await readPublishedSubtitle(backend)).toBe('Quasi TODO')
   })
 
@@ -313,13 +344,14 @@ describe('rules at publish', () => {
     vi.useFakeTimers()
     const backend = createBackend()
     await publishSubtitle(backend, 'Prima')
-    await saveSubtitleDraft(backend, 'Dopo [anno]')
+    const { revision } = await saveSubtitleDraft(backend, 'Dopo [anno]')
     // Scheduled while the rule set is still empty...
-    PUBLISH_RULES.length = 0
+    PUBLISH_RULES.splice(PUBLISH_RULES.indexOf(placeholderRule), 1)
     const outcome = await publishProfile(backend, {
+      revision,
       scheduledAt: Date.now() + 60_000,
     })
-    if (outcome.status === 'blocked') {
+    if (outcome.status !== 'scheduled') {
       throw new Error('Expected the release to be scheduled')
     }
     // ...then the rules are tightened before it runs.

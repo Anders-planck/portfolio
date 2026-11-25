@@ -3,14 +3,19 @@ import { ConvexError, type Infer, v } from 'convex/values'
 import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
-import { readDraftSnapshot } from './drafts'
+import { readDraftRevision, readDraftSnapshot } from './drafts'
 import { movePublishedPointers } from './pointers'
 import {
   documentFindingValidator,
   hasBlockingFinding,
   runPublishRules,
 } from './rules'
-import type { DocumentRef, Snapshot } from './snapshot'
+import {
+  type DocumentRef,
+  documentRefValidator,
+  type ReviewedDraft,
+  type Snapshot,
+} from './snapshot'
 import { readVersions, writeVersions } from './versions'
 
 /**
@@ -55,6 +60,11 @@ export const publishOutcomeValidator = v.union(
     status: v.literal('blocked'),
     findings: v.array(documentFindingValidator),
   }),
+  /** A draft changed after the owner reviewed it: review again, then publish. */
+  v.object({
+    status: v.literal('stale'),
+    documents: v.array(documentRefValidator),
+  }),
   v.object({
     status: v.union(
       v.literal('published'),
@@ -68,7 +78,7 @@ export const publishOutcomeValidator = v.union(
 type PublishOutcome = Infer<typeof publishOutcomeValidator>
 
 interface PublishRequest {
-  selection: DocumentRef[]
+  selection: ReviewedDraft[]
   note: string
   requestId: string
   /** Epoch ms. In the future: schedule the release; omitted or past: now. */
@@ -83,6 +93,10 @@ export async function publishSelection(
   const repeated = await findReleaseByRequestId(ctx, requestId)
   if (repeated !== null) {
     return toPublishOutcomeFromRelease(repeated)
+  }
+  const staleDocuments = await findStaleDrafts(ctx, selection)
+  if (staleDocuments.length > 0) {
+    return { status: 'stale', documents: staleDocuments }
   }
   const snapshots = await readSelectedDrafts(ctx, selection)
   const findings = runPublishRules(snapshots)
@@ -193,6 +207,24 @@ function toPublishOutcomeFromRelease(release: Doc<'releases'>): PublishOutcome {
   }
 }
 
+async function findStaleDrafts(
+  ctx: QueryCtx,
+  selection: ReviewedDraft[],
+): Promise<DocumentRef[]> {
+  const revisions = await Promise.all(
+    selection.map((draft) => readDraftRevision(ctx, draft)),
+  )
+  return selection
+    .filter((draft, index) => {
+      const revision = revisions[index]
+      // A missing draft is not stale: readSelectedDrafts reports it.
+      return revision !== null && revision !== draft.revision
+    })
+    .map(({ collection, key }) => ({ collection, key }))
+}
+
+// The CMS only offers documents that have a draft, so a missing one is a
+// programming error, not a result the owner has to handle.
 async function readSelectedDrafts(
   ctx: QueryCtx,
   selection: DocumentRef[],

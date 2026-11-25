@@ -57,10 +57,14 @@ export const publishSeedProfile = internalMutation({
       return null
     }
     const now = Date.now()
-    await saveDraftEdit(ctx, SEED_PROFILE, now)
+    const { revision } = await saveDraftEdit(ctx, SEED_PROFILE, now)
     const outcome = await publishSelection(
       ctx,
-      { selection: [ref], note: 'Profilo iniziale', requestId: 'seed-profile' },
+      {
+        selection: [{ ...ref, revision }],
+        note: 'Profilo iniziale',
+        requestId: 'seed-profile',
+      },
       now,
     )
     if (outcome.status === 'blocked') {
@@ -69,6 +73,9 @@ export const publishSeedProfile = internalMutation({
           .map((finding) => finding.message)
           .join('; ')}`,
       )
+    }
+    if (outcome.status !== 'published') {
+      throw new Error(`The seed profile was not published: ${outcome.status}`)
     }
     return null
   },

@@ -26,6 +26,8 @@ export default defineSchema({
   profile: defineTable({
     key: v.string(),
     ...profileFieldsValidator.fields,
+    /** Moves on every save (of shared fields or any locale). */
+    revision: v.number(),
     updatedAt: v.number(),
   }).index('by_key', ['key']),
 

@@ -7,6 +7,7 @@ import { verifyPreviewToken } from './preview'
 import {
   EMPTY_PROFILE_CONTENT_FIELDS,
   EMPTY_PROFILE_FIELDS,
+  pickProfileContentFields,
   type ProfileContentFields,
   profileContentFieldsValidator,
   profileFieldsValidator,
@@ -45,16 +46,33 @@ export async function saveDraftEdit(
   if (edit.content !== undefined && edit.locale === undefined) {
     throw new Error('A content edit needs a locale')
   }
-  const profileId = await findOrCreateProfile(ctx, edit.key, savedAt)
-  await ctx.db.patch(profileId, { ...edit.fields, updatedAt: savedAt })
+  const profile = await findOrCreateProfile(ctx, edit.key, savedAt)
+  // Every save moves the revision, so publish can tell whether the draft the
+  // owner reviewed is still the current one.
+  const revision = profile.revision + 1
+  await ctx.db.patch(profile._id, {
+    ...edit.fields,
+    revision,
+    updatedAt: savedAt,
+  })
   if (edit.locale !== undefined && edit.content !== undefined) {
     await saveProfileContent(ctx, {
-      profileId,
+      profileId: profile._id,
       locale: edit.locale,
       content: edit.content,
       savedAt,
     })
   }
+  return { revision }
+}
+
+/** The revision of a document's draft (moves on every save), or null. */
+export async function readDraftRevision(
+  ctx: QueryCtx,
+  { key }: DocumentRef,
+): Promise<number | null> {
+  const profile = await findProfile(ctx, key)
+  return profile === null ? null : profile.revision
 }
 
 /** The current draft of a document as a snapshot, or null if it has none. */
@@ -84,16 +102,7 @@ export async function readDraftSnapshot(
 function toSnapshotContentFromProfileContent(
   record: Doc<'profileContent'>,
 ): Snapshot['content'][number] {
-  return {
-    locale: record.locale,
-    statusLabel: record.statusLabel,
-    availabilityLabel: record.availabilityLabel,
-    titleLine1: record.titleLine1,
-    titleLine2: record.titleLine2,
-    subtitle: record.subtitle,
-    contactLabel: record.contactLabel,
-    languages: record.languages,
-  }
+  return { locale: record.locale, ...pickProfileContentFields(record) }
 }
 
 /** The draft a preview token was issued for; null if the token is bad or expired. */
@@ -126,13 +135,16 @@ async function findOrCreateProfile(
 ) {
   const existing = await findProfile(ctx, key)
   if (existing !== null) {
-    return existing._id
+    return existing
   }
-  return ctx.db.insert('profile', {
+  const profile = {
     key,
     ...EMPTY_PROFILE_FIELDS,
+    revision: 0,
     updatedAt: savedAt,
-  })
+  }
+  const profileId = await ctx.db.insert('profile', profile)
+  return { _id: profileId, ...profile }
 }
 
 async function saveProfileContent(

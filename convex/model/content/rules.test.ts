@@ -22,8 +22,8 @@ const emptySubtitleRule: Rule = (snapshot) =>
       message: 'Subtitle is empty',
     }))
 
-test('the server rule set starts empty, so nothing is found', () => {
-  expect(runPublishRules([SNAPSHOT])).toEqual([])
+test('with no rules nothing is found', () => {
+  expect(runPublishRules([SNAPSHOT], [])).toEqual([])
 })
 
 test('findings are tagged with the document they are about', () => {

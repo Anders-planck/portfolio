@@ -2,6 +2,7 @@ import { type Infer, v } from 'convex/values'
 
 import { type Locale, localeValidator } from './locales'
 import {
+  pickProfileContentFields,
   profileContentFieldsValidator,
   profileFieldsValidator,
 } from './profile'
@@ -21,6 +22,12 @@ export const documentRefValidator = v.object({
   key: v.string(),
 })
 export type DocumentRef = Infer<typeof documentRefValidator>
+
+/** A document picked for publish, with the draft revision the owner reviewed. */
+export const reviewedDraftValidator = documentRefValidator.extend({
+  revision: v.number(),
+})
+export type ReviewedDraft = Infer<typeof reviewedDraftValidator>
 
 /**
  * A whole document at one point in time: shared fields plus every locale.
@@ -59,14 +66,6 @@ export function toLocalizedDocumentFromSnapshot(
   if (record === undefined) {
     return { collection, key, locale, fields, content: null }
   }
-  const content = {
-    statusLabel: record.statusLabel,
-    availabilityLabel: record.availabilityLabel,
-    titleLine1: record.titleLine1,
-    titleLine2: record.titleLine2,
-    subtitle: record.subtitle,
-    contactLabel: record.contactLabel,
-    languages: record.languages,
-  }
+  const content = pickProfileContentFields(record)
   return { collection, key, locale, fields, content }
 }

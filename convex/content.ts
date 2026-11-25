@@ -17,8 +17,8 @@ import {
 } from './model/content/releases'
 import {
   collectionValidator,
-  documentRefValidator,
   localizedDocumentValidator,
+  reviewedDraftValidator,
 } from './model/content/snapshot'
 import { readPreviewTokenSecret } from './model/env'
 import { requireOwner } from './model/owner'
@@ -30,15 +30,15 @@ import { requireOwner } from './model/owner'
  * read.
  */
 
-/** Live-saves an edit to a document's draft. */
+/** Live-saves an edit; the returned revision is what publish checks against. */
 export const saveDraft = internalMutation({
   args: draftEditValidator,
-  returns: v.object({ savedAt: v.number() }),
+  returns: v.object({ savedAt: v.number(), revision: v.number() }),
   handler: async (ctx, edit) => {
     await requireOwner()
     const savedAt = Date.now()
-    await saveDraftEdit(ctx, edit, savedAt)
-    return { savedAt }
+    const { revision } = await saveDraftEdit(ctx, edit, savedAt)
+    return { savedAt, revision }
   },
 })
 
@@ -48,7 +48,7 @@ export const saveDraft = internalMutation({
  */
 export const publish = internalMutation({
   args: {
-    selection: v.array(documentRefValidator),
+    selection: v.array(reviewedDraftValidator),
     note: v.string(),
     requestId: v.string(),
     scheduledAt: v.optional(v.number()),

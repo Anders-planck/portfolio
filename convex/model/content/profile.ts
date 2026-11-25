@@ -32,6 +32,25 @@ export const profileContentFieldsValidator = v.object({
 export type ProfileFields = Infer<typeof profileFieldsValidator>
 export type ProfileContentFields = Infer<typeof profileContentFieldsValidator>
 
+/**
+ * The per-locale content fields of a record that carries more (a table row,
+ * a snapshot entry). The one place that lists them, so a new field is added
+ * here and in the validator only.
+ */
+export function pickProfileContentFields(
+  record: ProfileContentFields,
+): ProfileContentFields {
+  return {
+    statusLabel: record.statusLabel,
+    availabilityLabel: record.availabilityLabel,
+    titleLine1: record.titleLine1,
+    titleLine2: record.titleLine2,
+    subtitle: record.subtitle,
+    contactLabel: record.contactLabel,
+    languages: record.languages,
+  }
+}
+
 /** Values a document or locale record starts from before its first edit. */
 export const EMPTY_PROFILE_FIELDS: ProfileFields = {
   name: '',
