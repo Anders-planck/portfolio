@@ -2,6 +2,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { useCallback, useEffect, useRef } from 'react'
 
 import { useMotionSettings } from '../../features/motion/use-motion-settings'
+import { toAdjacentChapterIndex } from './to-adjacent-chapter-index'
 
 /**
  * Going to a chapter from the chapter index or the ‹ › navigation: scrolls
@@ -59,10 +60,13 @@ export function useChapterNavigation(
   /** Goes `step` chapters on (or back); returns where to, if anywhere. */
   const goToAdjacentChapter = useCallback(
     (step: number): number | undefined => {
-      const fromChapterIndex =
-        requestedChapterIndexRef.current ?? activeChapterIndex
-      const chapterIndex = fromChapterIndex + step
-      if (chapterIds[chapterIndex] === undefined) {
+      const chapterIndex = toAdjacentChapterIndex({
+        requestedChapterIndex: requestedChapterIndexRef.current,
+        activeChapterIndex,
+        chapterCount: chapterIds.length,
+        step,
+      })
+      if (chapterIndex === undefined) {
         return undefined
       }
       goToChapter(chapterIndex)

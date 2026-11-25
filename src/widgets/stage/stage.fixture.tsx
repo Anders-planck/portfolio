@@ -28,7 +28,10 @@ export const TEST_CHAPTERS: StageChapter[] = [
   createChapter('fine', 'Fine', 'Titolo di chiusura'),
 ]
 
-/** A reader who gets the immersive layout: a mouse, motion allowed. */
+/**
+ * A reader with a mouse and motion allowed: smooth chapter scrolling. The
+ * layout itself follows the media query (`stubScreenWidth`), as in CSS.
+ */
 export const ANIMATED_FINE_POINTER: MotionSettings = {
   mode: 'animated',
   pointer: 'fine',
