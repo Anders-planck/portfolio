@@ -20,6 +20,9 @@ export const metricDefinitionValidator = v.object({
 })
 export type MetricDefinition = Infer<typeof metricDefinitionValidator>
 
+/** The most metrics one read lists; the site has a handful. */
+export const MAX_METRICS = 200
+
 export const METRICS_TABLES = {
   metrics: defineTable({
     ...metricDefinitionValidator.fields,

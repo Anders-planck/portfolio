@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest'
 
-import { freeNumeralRule } from './numeralrule'
+import { numeralRule } from './numeralrule'
 import { EMPTY_PROFILE_CONTENT_FIELDS, EMPTY_PROFILE_FIELDS } from './profile'
 import { hasBlockingFinding, PUBLISH_RULES, runPublishRules } from './rules'
 import type { Snapshot } from './snapshot'
@@ -18,7 +18,7 @@ function toProfileSnapshot(
 }
 
 test('a figure in a localized prose field blocks with its field and locale', () => {
-  expect(freeNumeralRule(toProfileSnapshot({}, 'Da quasi 4 anni.'))).toEqual([
+  expect(numeralRule(toProfileSnapshot({}, 'Da quasi 4 anni.'))).toEqual([
     {
       rule: 'free-numeral',
       severity: 'block',
@@ -32,16 +32,14 @@ test('a figure in a localized prose field blocks with its field and locale', () 
 test('a figure in a shared prose field blocks with no locale', () => {
   const skills = { frontend: 'React 19', backend: '', infra: '' }
 
-  expect(freeNumeralRule(toProfileSnapshot({ skills }, ''))).toMatchObject([
+  expect(numeralRule(toProfileSnapshot({ skills }, ''))).toMatchObject([
     { rule: 'free-numeral', field: 'skills.frontend', locale: null },
   ])
 })
 
 test('metric references and years pass', () => {
   expect(
-    freeNumeralRule(
-      toProfileSnapshot({}, '{{m:sdk-commits}} commit dal 2023.'),
-    ),
+    numeralRule(toProfileSnapshot({}, '{{m:sdk-commits}} commit dal 2023.')),
   ).toEqual([])
 })
 
@@ -54,7 +52,7 @@ test('addresses are not prose: digits in the email and links pass', () => {
     '',
   )
 
-  expect(freeNumeralRule(snapshot)).toEqual([])
+  expect(numeralRule(snapshot)).toEqual([])
 })
 
 test('publish runs the free-numeral rule', () => {

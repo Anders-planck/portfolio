@@ -6,7 +6,7 @@ import type { MetricDefinition } from './tables'
 
 /**
  * Checks of what the owner enters in Fonti (pure). Problems are typed results
- * the CMS shows next to the field (DATA-03); they never throw.
+ * the CMS shows above the form's fields (DATA-03); they never throw.
  */
 
 // npm's own package-name grammar (lowercase, optional scope).

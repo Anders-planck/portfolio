@@ -3,9 +3,8 @@ import { type Infer, v } from 'convex/values'
 import type { QueryCtx } from '../../_generated/server'
 import { formatMetricFigure, largeNumberStyleValidator } from './format'
 import { readLargeNumberStyle, readLatestReading } from './readings'
-import { automatedSourceValidator } from './sources'
 import { metricStatusValidator, toMetricStatus } from './status'
-import { metricDefinitionValidator } from './tables'
+import { MAX_METRICS, metricDefinitionValidator } from './tables'
 
 /**
  * What Fonti shows: every metric with its last verified figure (formatted for
@@ -28,9 +27,6 @@ export const sourcesOverviewValidator = v.object({
   isGithubTokenSet: v.boolean(),
 })
 export type SourcesOverview = Infer<typeof sourcesOverviewValidator>
-
-/** The number of metrics Fonti lists at most; the site has a handful. */
-const MAX_METRICS = 200
 
 export async function readSourcesOverview(
   ctx: QueryCtx,
@@ -70,26 +66,4 @@ export async function readSourcesOverview(
     }),
   )
   return { metrics: rows, largeNumberStyle, isGithubTokenSet }
-}
-
-export const refreshTargetValidator = v.object({
-  metricId: v.id('metrics'),
-  source: automatedSourceValidator,
-  lastAttemptedAt: v.union(v.number(), v.null()),
-})
-
-/** The automated metrics, with when each was last read. */
-export async function listAutomatedMetrics(ctx: QueryCtx) {
-  const metrics = await ctx.db.query('metrics').take(MAX_METRICS)
-  return metrics.flatMap((metric) =>
-    metric.source.kind === 'manual'
-      ? []
-      : [
-          {
-            metricId: metric._id,
-            source: metric.source,
-            lastAttemptedAt: metric.lastAttempt?.attemptedAt ?? null,
-          },
-        ],
-  )
 }

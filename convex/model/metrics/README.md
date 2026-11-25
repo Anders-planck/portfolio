@@ -9,7 +9,7 @@ Domain code behind `convex/metrics.ts` (ADR 0004): every number on the site is a
 - **Manual count**: `recordManualCount` → `definitions.ts` `addManualCount`: a whole count, the day it was made and its evidence. It expires after 90 days (`status.ts`, `expired`: a warning, the value still shows).
 - **Read**: `getSourcesOverview` → `overview.ts` (Fonti rows with the figure formatted in Italian, its date, evidence and status). The GitHub token comes from `model/env.ts`; only whether it is set leaves the backend.
 - **Render**: `render.ts` `renderMetricReferences` turns prose with `{{m:key}}` (`references.ts`) into segments: text, a metric (formatted for the page locale by `format.ts`, with its verified date), or `unavailable`.
-- **Rule**: `numerals.ts` `findFreeNumerals` is the free-numeral rule; `model/content/numeralrule.ts` runs it over a document's prose fields in `PUBLISH_RULES` (a `block` finding).
+- **Rule**: `numerals.ts` `findFreeNumerals` is the free-numeral rule; `model/content/numeralrule.ts` (`numeralRule`) runs it over a document's prose fields in `PUBLISH_RULES` (a `block` finding).
 
 ## Files
 
@@ -27,7 +27,8 @@ Domain code behind `convex/metrics.ts` (ADR 0004): every number on the site is a
 | `tables.ts` | `metrics`, `metricReadings`, `metricSettings` (spread into `convex/schema.ts`). |
 | `readings.ts` | Readings and the rounding setting in the database. |
 | `definitions.ts` | Creating metrics and recording manual counts. |
-| `overview.ts` | The Fonti rows and the refresh targets. |
+| `overview.ts` | The Fonti rows. |
+| `targets.ts` | The automated metrics the refresh reads. |
 | `refresh.ts` | The refresh action. |
 | `seed.ts` | The metrics listed in the `cms-fonti` mockup. |
 

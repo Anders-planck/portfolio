@@ -46,6 +46,7 @@ import type * as model_metrics_seed from "../model/metrics/seed.js";
 import type * as model_metrics_sources from "../model/metrics/sources.js";
 import type * as model_metrics_status from "../model/metrics/status.js";
 import type * as model_metrics_tables from "../model/metrics/tables.js";
+import type * as model_metrics_targets from "../model/metrics/targets.js";
 import type * as model_owner from "../model/owner.js";
 import type * as seed from "../seed.js";
 
@@ -94,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   "model/metrics/sources": typeof model_metrics_sources;
   "model/metrics/status": typeof model_metrics_status;
   "model/metrics/tables": typeof model_metrics_tables;
+  "model/metrics/targets": typeof model_metrics_targets;
   "model/owner": typeof model_owner;
   seed: typeof seed;
 }>;

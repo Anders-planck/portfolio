@@ -6,7 +6,11 @@ import { Table, type TableColumn } from '@astryxdesign/core/Table'
 import { Text } from '@astryxdesign/core/Text'
 
 import { SOURCES_MESSAGES } from './sources-messages'
-import { type SourceRow, toSourceRowViewFromRow } from './to-source-row-view'
+import {
+  type SourceRow,
+  type SourceRowView,
+  toSourceRowViewFromRow,
+} from './to-source-row-view'
 
 export interface SourcesTableProps {
   rows: SourceRow[]
@@ -15,16 +19,19 @@ export interface SourcesTableProps {
 
 const { columns } = SOURCES_MESSAGES
 
+/** A row with its view, built once for all its cells. */
+type ViewedRow = SourceRow & { view: SourceRowView }
+
 function toColumns(
   onOpenManualCount: SourcesTableProps['onOpenManualCount'],
-): TableColumn<SourceRow>[] {
+): TableColumn<ViewedRow>[] {
   return [
     {
       key: 'value',
       header: columns.value,
       renderCell: (row) => (
         <VStack gap={1}>
-          <Text weight="bold">{toSourceRowViewFromRow(row).value}</Text>
+          <Text weight="bold">{row.view.value}</Text>
           {row.source.kind === 'manual' && (
             <Button
               label={SOURCES_MESSAGES.recordCount}
@@ -54,27 +61,27 @@ function toColumns(
     {
       key: 'kind',
       header: columns.kind,
-      renderCell: (row) => toSourceRowViewFromRow(row).kind,
+      renderCell: (row) => row.view.kind,
     },
     {
       key: 'origin',
       header: columns.origin,
       renderCell: (row) => (
         <Text type="code" color="secondary">
-          {toSourceRowViewFromRow(row).origin}
+          {row.view.origin}
         </Text>
       ),
     },
     {
       key: 'cadence',
       header: columns.cadence,
-      renderCell: (row) => toSourceRowViewFromRow(row).cadence,
+      renderCell: (row) => row.view.cadence,
     },
     {
       key: 'status',
       header: columns.status,
       renderCell: (row) => {
-        const { status } = toSourceRowViewFromRow(row)
+        const { status } = row.view
         return (
           <VStack gap={1}>
             <HStack gap={2} vAlign="center">
@@ -98,7 +105,7 @@ export function SourcesTable({ rows, onOpenManualCount }: SourcesTableProps) {
   return (
     <Table
       aria-label={SOURCES_MESSAGES.tableLabel}
-      data={rows}
+      data={rows.map((row) => ({ ...row, view: toSourceRowViewFromRow(row) }))}
       columns={toColumns(onOpenManualCount)}
       idKey="key"
       verticalAlign="top"

@@ -18,14 +18,16 @@ import {
 } from './model/metrics/definitions'
 import { largeNumberStyleValidator } from './model/metrics/format'
 import {
-  listAutomatedMetrics,
   readSourcesOverview,
-  refreshTargetValidator,
   sourcesOverviewValidator,
 } from './model/metrics/overview'
 import { recordReading, saveLargeNumberStyle } from './model/metrics/readings'
 import { refreshSources } from './model/metrics/refresh'
 import { metricDefinitionValidator } from './model/metrics/tables'
+import {
+  listAutomatedMetrics,
+  refreshTargetValidator,
+} from './model/metrics/targets'
 import { requireOwner } from './model/owner'
 
 /**
