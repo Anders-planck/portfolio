@@ -66,14 +66,30 @@ describe('owner sessions', () => {
     )
   })
 
-  test('a session id that is not the owner’s is refused', async () => {
+  test('revoking the same session twice ends it once, without an error', async () => {
+    const { here, elsewhere } = await createBackendWithTwoSessions()
+    const revoke = () =>
+      here.owner.mutation(api.sessions.revokeSession, {
+        sessionId: elsewhere.sessionId,
+      })
+
+    await revoke()
+    await expect(revoke()).resolves.toBeNull()
+    expect(await here.owner.query(api.sessions.listSessions, {})).toHaveLength(
+      1,
+    )
+  })
+
+  test('a session id that is not the owner’s is left alone', async () => {
     const { here } = await createBackendWithTwoSessions()
 
-    await expect(
-      here.owner.mutation(api.sessions.revokeSession, {
-        sessionId: 'someone-else',
-      }),
-    ).rejects.toThrow(ConvexError)
+    await here.owner.mutation(api.sessions.revokeSession, {
+      sessionId: 'someone-else',
+    })
+
+    expect(await here.owner.query(api.sessions.listSessions, {})).toHaveLength(
+      2,
+    )
   })
 
   test('revoking all sessions signs the owner out everywhere', async () => {

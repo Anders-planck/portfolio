@@ -1,4 +1,4 @@
-import { ConvexError, type Infer, v } from 'convex/values'
+import { type Infer, v } from 'convex/values'
 
 import { components } from '../_generated/api'
 import type { Doc } from '../_generated/dataModel'
@@ -35,7 +35,11 @@ export async function listOwnerSessions(
   }))
 }
 
-/** Ends one of the owner's sessions; an id that is not theirs is refused. */
+/**
+ * Ends one of the owner's sessions. An id that is not among them (already
+ * ended, or never theirs) is left alone, so a repeated revoke is a no-op
+ * (DATA-06) and no other user's session is ever touched.
+ */
 export async function revokeOwnerSession(
   ctx: MutationCtx,
   owner: Doc<'users'>,
@@ -43,7 +47,7 @@ export async function revokeOwnerSession(
 ) {
   const sessions = await listOwnerSessions(ctx, owner)
   if (!sessions.some((session) => session.sessionId === sessionId)) {
-    throw new ConvexError({ kind: 'unknown-session' })
+    return
   }
   await ctx.runMutation(components.auth.public.revokeSessions, {
     sessionIds: [sessionId],
