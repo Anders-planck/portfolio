@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { api } from './_generated/api'
 import type { Id } from './_generated/dataModel'
-import type { UploadRequest } from './model/media/files'
+import { toObjectKeyFromUpload, type UploadRequest } from './model/media/files'
 import {
   stubMediaStorageEnv,
   stubR2Bucket,
@@ -43,16 +43,17 @@ async function createConfiguredOwner() {
 }
 
 /** Upload URL, the browser's PUT, completion: the whole "Carica". */
-async function uploadScreenshot(
+async function uploadMedia(
   owner: SignedInBackend,
   bucket: ReturnType<typeof stubR2Bucket>,
+  request: UploadRequest = SCREENSHOT,
 ) {
-  await owner.action(api.media.createUploadUrl, SCREENSHOT)
-  bucket.putObject(OBJECT_KEY, {
-    contentType: 'image/png',
-    contentLength: SCREENSHOT.bytes,
+  await owner.action(api.media.createUploadUrl, request)
+  bucket.putObject(toObjectKeyFromUpload(request), {
+    contentType: request.mime,
+    contentLength: request.bytes,
   })
-  const completion = await owner.action(api.media.completeUpload, SCREENSHOT)
+  const completion = await owner.action(api.media.completeUpload, request)
   if (completion.kind !== 'recorded') {
     throw new Error(`Expected a recorded upload, got ${completion.kind}`)
   }
@@ -103,7 +104,7 @@ describe('completing an upload', () => {
   test('a stored upload becomes media with its public URL and no usage yet', async () => {
     const { owner, bucket } = await createConfiguredOwner()
 
-    await uploadScreenshot(owner, bucket)
+    await uploadMedia(owner, bucket)
 
     const library = await owner.query(api.media.listMedia, {})
     expect(library).toMatchObject({
@@ -128,7 +129,7 @@ describe('completing an upload', () => {
     const { owner, bucket } = await createConfiguredOwner()
     vi.stubEnv('IMAGE_TRANSFORM_ORIGIN', 'https://example.com')
 
-    await uploadScreenshot(owner, bucket)
+    await uploadMedia(owner, bucket)
 
     const [entry] = (await owner.query(api.media.listMedia, {})).media
     expect(entry?.preview?.srcSet).toContain(
@@ -162,7 +163,7 @@ describe('completing an upload', () => {
 
   test('completing twice (double click, retry) records one media', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    const mediaId = await uploadScreenshot(owner, bucket)
+    const mediaId = await uploadMedia(owner, bucket)
 
     expect(await owner.action(api.media.completeUpload, SCREENSHOT)).toEqual({
       kind: 'recorded',
@@ -191,7 +192,7 @@ describe('completing an upload', () => {
 describe('alt text', () => {
   test('the owner’s alt is stored per locale as reviewed', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    const mediaId = await uploadScreenshot(owner, bucket)
+    const mediaId = await uploadMedia(owner, bucket)
 
     await owner.mutation(api.media.saveAlt, {
       mediaId,
@@ -211,7 +212,7 @@ describe('alt text', () => {
 
   test('alt text over the limit is refused', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    const mediaId = await uploadScreenshot(owner, bucket)
+    const mediaId = await uploadMedia(owner, bucket)
 
     await expect(
       owner.mutation(api.media.saveAlt, {
@@ -258,7 +259,7 @@ describe('publish and usage', () => {
   // points at, whatever the field.
   test('a document pointing at an image without alt in its locale is blocked', async () => {
     const { owner, bucket } = await createConfiguredOwner()
-    const mediaId = await uploadScreenshot(owner, bucket)
+    const mediaId = await uploadMedia(owner, bucket)
     const { revision } = await saveProfilePointingAt(owner, mediaId)
 
     expect(await publishProfile(owner, revision)).toMatchObject({
@@ -279,15 +280,8 @@ describe('publish and usage', () => {
   test('the published CV is the site’s CV link, and Media shows where it is used', async () => {
     const { owner, bucket } = await createConfiguredOwner()
     expect(await owner.query(api.media.getPublishedCv, {})).toBeNull()
-    bucket.putObject(`media/${CV.requestId}/cv-anders-planck.pdf`, {
-      contentType: 'application/pdf',
-      contentLength: CV.bytes,
-    })
-    const completion = await owner.action(api.media.completeUpload, CV)
-    if (completion.kind !== 'recorded') {
-      throw new Error(`Expected a recorded upload, got ${completion.kind}`)
-    }
-    const { revision } = await saveProfilePointingAt(owner, completion.mediaId)
+    const cvMediaId = await uploadMedia(owner, bucket, CV)
+    const { revision } = await saveProfilePointingAt(owner, cvMediaId)
 
     await publishProfile(owner, revision)
 
