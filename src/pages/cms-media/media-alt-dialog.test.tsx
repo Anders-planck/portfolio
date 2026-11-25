@@ -1,11 +1,13 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { ConvexError } from 'convex/values'
 import { afterEach, expect, test, vi } from 'vitest'
 
 import {
   MEDIA_LIMITS,
   SCREENSHOT_ENTRY,
 } from '../../entities/media/media.fixture'
+import { RefusalBoundary } from '../../shared/convex/refusal-boundary.fixture'
 import { MediaAltDialog } from './media-alt-dialog'
 
 afterEach(cleanup)
@@ -13,12 +15,14 @@ afterEach(cleanup)
 function renderDialog(onSaveAlt: () => Promise<void>) {
   const onClose = vi.fn()
   render(
-    <MediaAltDialog
-      entry={SCREENSHOT_ENTRY}
-      maxAltLength={MEDIA_LIMITS.maxAltLength}
-      onSaveAlt={onSaveAlt}
-      onClose={onClose}
-    />,
+    <RefusalBoundary>
+      <MediaAltDialog
+        entry={SCREENSHOT_ENTRY}
+        maxAltLength={MEDIA_LIMITS.maxAltLength}
+        onSaveAlt={onSaveAlt}
+        onClose={onClose}
+      />
+    </RefusalBoundary>,
   )
   return onClose
 }
@@ -74,4 +78,16 @@ test('the close button closes the dialog', () => {
   fireEvent.click(screen.getByRole('button', { name: /^(close|chiudi)$/i }))
 
   expect(onClose).toHaveBeenCalled()
+})
+
+test('a backend refusal goes to the error boundary, not to "Non salvato"', async () => {
+  renderDialog(() => Promise.reject(new ConvexError({ kind: 'not-owner' })))
+  const english = screen.getByRole('textbox', { name: 'Alt · English' })
+
+  fireEvent.change(english, { target: { value: 'Chat' } })
+  fireEvent.blur(english)
+
+  expect(await screen.findByText('refused: not-owner')).toBeDefined()
+  // The editor gave way to the boundary instead of offering a retry.
+  expect(screen.queryByRole('textbox')).toBeNull()
 })

@@ -53,7 +53,8 @@ export async function signUploadUrl(
 }
 
 const storedObjectHeadersSchema = z.object({
-  contentLength: z.coerce.number().int().nonnegative(),
+  // A HEAD answer without a size is a broken reply, not an empty file.
+  contentLength: z.string().regex(/^\d+$/).transform(Number),
   contentType: z.string().min(1),
 })
 export type StoredObject = z.infer<typeof storedObjectHeadersSchema>

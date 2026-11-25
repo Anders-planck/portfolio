@@ -2,10 +2,10 @@ import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Text } from '@astryxdesign/core/Text'
 import { TextArea } from '@astryxdesign/core/TextArea'
-import { ConvexError } from 'convex/values'
 import { useState } from 'react'
 
 import type { MediaEntry } from '../../entities/media/media-library-query-options'
+import { useBackendRefusal } from '../../shared/convex/use-backend-refusal'
 import { CMS_MEDIA_MESSAGES } from '../../shared/i18n/cms-media-messages'
 import { type Locale, LOCALES } from '../../shared/i18n/locale'
 
@@ -98,6 +98,7 @@ function AltField({
 }) {
   const [alt, setAlt] = useState(savedAlt)
   const [saveState, setSaveState] = useState<SaveState>('unchanged')
+  const takeRefusal = useBackendRefusal()
 
   const saveAlt = async () => {
     if (alt.trim() === savedAlt) {
@@ -107,12 +108,10 @@ function AltField({
       await onSaveAlt({ locale, alt })
       setSaveState('saved')
     } catch (error) {
-      // A refusal from the backend (signed out, not the owner) throws, and
-      // the CMS gate takes over (ADR 0005); only a lost save is shown here.
-      if (error instanceof ConvexError) {
-        throw error
+      // Only a lost save is shown here; a backend refusal goes to the route.
+      if (!takeRefusal(error)) {
+        setSaveState('failed')
       }
-      setSaveState('failed')
     }
   }
 

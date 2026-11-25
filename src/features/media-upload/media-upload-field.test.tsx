@@ -1,9 +1,14 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { ConvexError } from 'convex/values'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 
 import type { Id } from '../../../convex/_generated/dataModel'
-import { MediaUploadField } from './media-upload-field'
+import { RefusalBoundary } from '../../shared/convex/refusal-boundary.fixture'
+import {
+  MediaUploadField,
+  type MediaUploadFieldProps,
+} from './media-upload-field'
 
 const MEDIA_ID = 'media-one' as Id<'media'>
 
@@ -19,38 +24,48 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-function renderField(
-  onCompleteUpload: () => Promise<
-    | { kind: 'recorded'; mediaId: Id<'media'> }
-    | { kind: 'refused'; reason: 'not-uploaded' }
-  >,
-) {
-  const onCreateUploadUrl = vi.fn(() =>
-    Promise.resolve({ kind: 'ready' as const, uploadUrl: 'https://r2/put' }),
-  )
+type Commands = Pick<
+  MediaUploadFieldProps,
+  'onCreateUploadUrl' | 'onCompleteUpload'
+>
+
+const READY_URL: Commands['onCreateUploadUrl'] = () =>
+  Promise.resolve({ kind: 'ready', uploadUrl: 'https://r2/put' })
+const RECORDED: Commands['onCompleteUpload'] = () =>
+  Promise.resolve({ kind: 'recorded', mediaId: MEDIA_ID })
+
+/** The field inside a boundary that shows a backend refusal it catches. */
+function renderField({
+  onCreateUploadUrl = READY_URL,
+  onCompleteUpload = RECORDED,
+}: Partial<Commands> = {}) {
   render(
-    <MediaUploadField
-      isDisabled={false}
-      acceptedMimes={['image/png', 'application/pdf']}
-      maxBytes={10 * 1024 * 1024}
-      onCreateUploadUrl={onCreateUploadUrl}
-      onCompleteUpload={onCompleteUpload}
-    />,
+    <RefusalBoundary>
+      <MediaUploadField
+        isDisabled={false}
+        acceptedMimes={['image/png', 'application/pdf']}
+        maxBytes={10 * 1024 * 1024}
+        onCreateUploadUrl={onCreateUploadUrl}
+        onCompleteUpload={onCompleteUpload}
+      />
+    </RefusalBoundary>,
   )
-  return onCreateUploadUrl
 }
 
-function pickPdf() {
+function pickFile(file: File) {
   const input = document.querySelector('input[type="file"]')
   if (!(input instanceof HTMLInputElement)) {
     throw new Error('No file input')
   }
-  const file = new File(['%PDF-1.7'], 'cv.pdf', { type: 'application/pdf' })
   fireEvent.change(input, { target: { files: [file] } })
 }
 
+function pickPdf() {
+  pickFile(new File(['%PDF-1.7'], 'cv.pdf', { type: 'application/pdf' }))
+}
+
 test('picking a file uploads it at once and says so', async () => {
-  renderField(() => Promise.resolve({ kind: 'recorded', mediaId: MEDIA_ID }))
+  renderField()
 
   pickPdf()
 
@@ -58,35 +73,26 @@ test('picking a file uploads it at once and says so', async () => {
 })
 
 test('a retry repeats the same upload request', async () => {
+  const onCreateUploadUrl = vi.fn(READY_URL)
   const onCompleteUpload = vi
-    .fn()
+    .fn<Commands['onCompleteUpload']>()
     .mockResolvedValueOnce({ kind: 'refused', reason: 'not-uploaded' })
     .mockResolvedValueOnce({ kind: 'recorded', mediaId: MEDIA_ID })
-  const onCreateUploadUrl = renderField(onCompleteUpload)
+  renderField({ onCreateUploadUrl, onCompleteUpload })
 
   pickPdf()
   fireEvent.click(await screen.findByRole('button', { name: 'Riprova' }))
 
   expect(await screen.findByText('cv.pdf caricato.')).toBeDefined()
-  const [first, second] = onCreateUploadUrl.mock.calls.map(
-    (call: unknown[]) => call[0],
-  )
+  const [first, second] = onCreateUploadUrl.mock.calls.map((call) => call[0])
   expect(second).toEqual(first)
 })
 
 test('a refusal a retry cannot fix offers no retry, and names the limit', async () => {
-  const onCreateUploadUrl = vi.fn(() =>
-    Promise.resolve({ kind: 'refused' as const, reason: 'too-large' as const }),
-  )
-  render(
-    <MediaUploadField
-      isDisabled={false}
-      acceptedMimes={['image/png', 'application/pdf']}
-      maxBytes={10 * 1024 * 1024}
-      onCreateUploadUrl={onCreateUploadUrl}
-      onCompleteUpload={vi.fn()}
-    />,
-  )
+  renderField({
+    onCreateUploadUrl: () =>
+      Promise.resolve({ kind: 'refused', reason: 'too-large' }),
+  })
 
   pickPdf()
 
@@ -101,16 +107,10 @@ test('an image the browser cannot read is never uploaded', async () => {
     'createImageBitmap',
     vi.fn(() => Promise.reject(new Error('undecodable'))),
   )
-  const onCreateUploadUrl = renderField(() =>
-    Promise.resolve({ kind: 'recorded', mediaId: MEDIA_ID }),
-  )
-  const input = document.querySelector('input[type="file"]')
-  if (!(input instanceof HTMLInputElement)) {
-    throw new Error('No file input')
-  }
-  const png = new File(['not a png'], 'shot.png', { type: 'image/png' })
+  const onCreateUploadUrl = vi.fn(READY_URL)
+  renderField({ onCreateUploadUrl })
 
-  fireEvent.change(input, { target: { files: [png] } })
+  pickFile(new File(['not a png'], 'shot.png', { type: 'image/png' }))
 
   expect(
     await screen.findByText(
@@ -122,15 +122,9 @@ test('an image the browser cannot read is never uploaded', async () => {
 })
 
 test('a lost connection says the upload was interrupted and offers a retry', async () => {
-  render(
-    <MediaUploadField
-      isDisabled={false}
-      acceptedMimes={['image/png', 'application/pdf']}
-      maxBytes={10 * 1024 * 1024}
-      onCreateUploadUrl={() => Promise.reject(new Error('Connection lost'))}
-      onCompleteUpload={vi.fn()}
-    />,
-  )
+  renderField({
+    onCreateUploadUrl: () => Promise.reject(new Error('Connection lost')),
+  })
 
   pickPdf()
 
@@ -138,4 +132,16 @@ test('a lost connection says the upload was interrupted and offers a retry', asy
     await screen.findByText('Caricamento interrotto. Riprova.'),
   ).toBeDefined()
   expect(screen.getByRole('button', { name: 'Riprova' })).toBeDefined()
+})
+
+test('a backend refusal goes to the error boundary, not to a retry', async () => {
+  renderField({
+    onCreateUploadUrl: () =>
+      Promise.reject(new ConvexError({ kind: 'signed-out' })),
+  })
+
+  pickPdf()
+
+  expect(await screen.findByText('refused: signed-out')).toBeDefined()
+  expect(screen.queryByText('Caricamento interrotto. Riprova.')).toBeNull()
 })
