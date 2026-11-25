@@ -1,6 +1,7 @@
 import { type Infer, v } from 'convex/values'
 
 import { localeValidator } from './locales'
+import { freeNumeralRule } from './numeralrule'
 import { collectionValidator, type Snapshot } from './snapshot'
 
 /**
@@ -29,8 +30,8 @@ export type DocumentFinding = Infer<typeof documentFindingValidator>
 
 export type Rule = (snapshot: Snapshot) => Finding[]
 
-/** The server-side rule set. Empty until the rules engine lands. */
-export const PUBLISH_RULES: readonly Rule[] = []
+/** The server-side rule set; the other rules land with ticket 15a (#22). */
+export const PUBLISH_RULES: readonly Rule[] = [freeNumeralRule]
 
 export function runPublishRules(
   snapshots: Snapshot[],

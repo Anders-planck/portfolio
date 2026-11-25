@@ -20,6 +20,7 @@ Domain code behind `convex/content.ts` (ADR 0003). The functions there are thin:
 | `snapshot.ts` | Collections, the snapshot of a whole document, its per-locale view. |
 | `drafts.ts` | Draft writes, draft reads as snapshots, draft reads for preview. |
 | `rules.ts` | The publish rules hook and finding shape (`{rule, severity, field, locale, message}`). |
+| `numeralrule.ts` | The free-numeral rule (ADR 0004) over a document's prose fields; the finder is `model/metrics/numerals.ts`. |
 | `versions.ts` | Writing and reading immutable versions. |
 | `pointers.ts` | Published pointers, the public read, the live set of the whole site. |
 | `limits.ts` | Limits of one publish request (pure): size, duplicates, note length. |
