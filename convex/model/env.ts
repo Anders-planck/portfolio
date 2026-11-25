@@ -90,7 +90,7 @@ export function readTestSignInSecret(): string | null {
   if (secret === undefined || secret === '') {
     return null
   }
-  if (!isLoopbackDeploymentUrl(process.env.CONVEX_CLOUD_URL)) {
+  if (!isLocalBackend()) {
     return null
   }
   if (secret.length < MIN_TEST_SIGN_IN_SECRET_LENGTH) {

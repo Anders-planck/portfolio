@@ -2,6 +2,7 @@ import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog'
 import { Layout, LayoutContent, VStack } from '@astryxdesign/core/Layout'
 import { Text } from '@astryxdesign/core/Text'
 import { TextArea } from '@astryxdesign/core/TextArea'
+import { ConvexError } from 'convex/values'
 import { useState } from 'react'
 
 import type { MediaEntry } from '../../entities/media/media-library-query-options'
@@ -105,7 +106,12 @@ function AltField({
     try {
       await onSaveAlt({ locale, alt })
       setSaveState('saved')
-    } catch {
+    } catch (error) {
+      // A refusal from the backend (signed out, not the owner) throws, and
+      // the CMS gate takes over (ADR 0005); only a lost save is shown here.
+      if (error instanceof ConvexError) {
+        throw error
+      }
       setSaveState('failed')
     }
   }

@@ -67,7 +67,7 @@ export async function readMediaLibrary(ctx: QueryCtx) {
   ])
   const media = await Promise.all(
     rows.map(async (row) =>
-      toMediaEntry(row, {
+      toMediaEntryFromRow(row, {
         publicOrigin: settings?.publicOrigin ?? null,
         transformOrigin,
         alts: await readAltRecords(ctx, row._id),
@@ -87,7 +87,7 @@ export async function readMediaLibrary(ctx: QueryCtx) {
   }
 }
 
-function toMediaEntry(
+function toMediaEntryFromRow(
   row: Doc<'media'>,
   related: {
     publicOrigin: string | null
@@ -101,13 +101,7 @@ function toMediaEntry(
     related.publicOrigin === null
       ? null
       : toPublicObjectUrl(related.publicOrigin, row.objectKey)
-  const preview =
-    url === null || kind !== 'image' || row.widthPx === null
-      ? null
-      : toImageSources(
-          { originalUrl: url, widthPx: row.widthPx },
-          related.transformOrigin,
-        )
+  const preview = toPreview(url, row.widthPx, related.transformOrigin)
   return {
     mediaId: row._id,
     fileName: row.fileName,
@@ -138,4 +132,17 @@ function toMissingAltLocales(
   }
   const withAlt = listLocalesWithAlt(alts)
   return LOCALES.filter((locale) => !withAlt.includes(locale))
+}
+
+/** Image sources for a preview; none for a file or while storage is off. */
+function toPreview(
+  url: string | null,
+  widthPx: number | null,
+  transformOrigin: string | null,
+) {
+  // Only images have a pixel width (`files.ts` checks it on upload).
+  if (url === null || widthPx === null) {
+    return null
+  }
+  return toImageSources({ originalUrl: url, widthPx }, transformOrigin)
 }
