@@ -8,6 +8,7 @@ import { listLocalesWithAlt, MAX_ALT_LENGTH, readAltRecords } from './alts'
 import {
   MAX_MEDIA_BYTES,
   MEDIA_MIMES,
+  mediaKindValidator,
   mediaMimeValidator,
   toMediaKindFromMime,
 } from './files'
@@ -22,7 +23,7 @@ const mediaEntryValidator = v.object({
   mediaId: v.id('media'),
   fileName: v.string(),
   mime: mediaMimeValidator,
-  kind: v.union(v.literal('image'), v.literal('file')),
+  kind: mediaKindValidator,
   bytes: v.number(),
   widthPx: v.union(v.number(), v.null()),
   heightPx: v.union(v.number(), v.null()),

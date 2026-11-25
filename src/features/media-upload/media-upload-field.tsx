@@ -5,7 +5,11 @@ import { Text } from '@astryxdesign/core/Text'
 
 import { CMS_MEDIA_MESSAGES } from '../../shared/i18n/cms-media-messages'
 import type { UploadCommands } from './upload-media-file'
-import { type UploadState, useMediaUpload } from './use-media-upload'
+import {
+  canRetryUpload,
+  type UploadState,
+  useMediaUpload,
+} from './use-media-upload'
 
 const UPLOAD_COPY = CMS_MEDIA_MESSAGES.upload
 
@@ -27,10 +31,10 @@ export function MediaUploadField({
   onCreateUploadUrl,
   onCompleteUpload,
 }: MediaUploadFieldProps) {
-  const { uploadState, startUpload, retryUpload } = useMediaUpload({
-    createUploadUrl: onCreateUploadUrl,
-    completeUpload: onCompleteUpload,
-  })
+  const { uploadState, startUpload, retryUpload } = useMediaUpload(
+    { createUploadUrl: onCreateUploadUrl, completeUpload: onCompleteUpload },
+    acceptedMimes,
+  )
 
   return (
     <VStack gap={2}>
@@ -52,13 +56,14 @@ export function MediaUploadField({
         <Text type="supporting" role="status">
           {toUploadStatusText(uploadState)}
         </Text>
-        {uploadState.kind === 'failed' && uploadState.canRetry && (
-          <Button
-            label={UPLOAD_COPY.retry}
-            size="sm"
-            clickAction={retryUpload}
-          />
-        )}
+        {uploadState.kind === 'failed' &&
+          canRetryUpload(uploadState.problem) && (
+            <Button
+              label={UPLOAD_COPY.retry}
+              size="sm"
+              clickAction={retryUpload}
+            />
+          )}
       </HStack>
     </VStack>
   )

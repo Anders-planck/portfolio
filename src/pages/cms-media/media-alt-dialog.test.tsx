@@ -10,7 +10,7 @@ import { MediaAltDialog } from './media-alt-dialog'
 
 afterEach(cleanup)
 
-function renderDialog(onSaveAlt: () => Promise<unknown>) {
+function renderDialog(onSaveAlt: () => Promise<void>) {
   const onClose = vi.fn()
   render(
     <MediaAltDialog
@@ -37,7 +37,7 @@ test('each locale opens with its saved alt', () => {
 })
 
 test('a changed alt saves when the field loses focus, and says so', async () => {
-  const onSaveAlt = vi.fn(() => Promise.resolve({ savedAt: 1 }))
+  const onSaveAlt = vi.fn(() => Promise.resolve())
   renderDialog(onSaveAlt)
   const english = screen.getByRole('textbox', { name: 'Alt · English' })
 
@@ -49,7 +49,7 @@ test('a changed alt saves when the field loses focus, and says so', async () => 
 })
 
 test('leaving a field unchanged saves nothing', () => {
-  const onSaveAlt = vi.fn(() => Promise.resolve({ savedAt: 1 }))
+  const onSaveAlt = vi.fn(() => Promise.resolve())
   renderDialog(onSaveAlt)
 
   fireEvent.blur(screen.getByRole('textbox', { name: 'Alt · Italiano' }))

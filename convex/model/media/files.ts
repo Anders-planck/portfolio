@@ -23,7 +23,8 @@ export function isMediaMime(value: string): value is MediaMime {
 }
 
 /** Images get alt text and variants; files are only linked. */
-export type MediaKind = 'image' | 'file'
+export const mediaKindValidator = v.union(v.literal('image'), v.literal('file'))
+export type MediaKind = Infer<typeof mediaKindValidator>
 
 export function toMediaKindFromMime(mime: MediaMime): MediaKind {
   return mime === 'application/pdf' ? 'file' : 'image'

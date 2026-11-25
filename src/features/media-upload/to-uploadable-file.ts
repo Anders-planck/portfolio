@@ -14,17 +14,20 @@ export interface UploadableFile {
   heightPx: number | null
 }
 
-const REENCODED_TYPES: readonly string[] = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-]
-
 /** High enough that a screenshot shows no artefacts, well below lossless size. */
 const LOSSY_QUALITY = 0.92
 
-export async function toUploadableFile(file: File): Promise<UploadableFile> {
-  if (!REENCODED_TYPES.includes(file.type)) {
+/**
+ * `acceptedMimes` is the server's allowlist: every image type in it is
+ * re-encoded, anything else goes as it is (and the server decides).
+ */
+export async function toUploadableFile(
+  file: File,
+  acceptedMimes: readonly string[],
+): Promise<UploadableFile> {
+  const isAcceptedImage =
+    file.type.startsWith('image/') && acceptedMimes.includes(file.type)
+  if (!isAcceptedImage) {
     // PDFs and types the server refuses (it decides, with its own message).
     return {
       body: file,

@@ -15,7 +15,7 @@ export interface MediaAltDialogProps {
   entry: MediaEntry | null
   /** The server's limit (`media.listMedia` limits). */
   maxAltLength: number
-  onSaveAlt: (edit: { locale: Locale; alt: string }) => Promise<unknown>
+  onSaveAlt: (edit: { locale: Locale; alt: string }) => Promise<void>
   onClose: () => void
 }
 

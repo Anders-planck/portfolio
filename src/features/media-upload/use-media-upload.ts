@@ -17,27 +17,31 @@ export type UploadState =
   | { kind: 'idle' }
   | { kind: 'uploading'; fileName: string }
   | { kind: 'recorded'; fileName: string }
-  | {
-      kind: 'failed'
-      fileName: string
-      problem: UploadProblem | 'interrupted' | 'unreadable-image'
-      canRetry: boolean
-    }
+  | { kind: 'failed'; fileName: string; problem: UploadFailure }
+
+/** Why the last upload failed: the server's answer or the call itself. */
+export type UploadFailure = UploadProblem | 'interrupted' | 'unreadable-image'
 
 interface PendingUpload {
   requestId: string
   file: UploadableFile
 }
 
-/** Problems a retry of the same request can fix. */
-const RETRYABLE_PROBLEMS: readonly UploadProblem[] = [
+/** Failures a retry of the same request can fix. */
+const RETRYABLE_FAILURES: readonly UploadFailure[] = [
+  'interrupted',
   'not-uploaded',
   'not-stored',
   'mismatch',
 ]
 
+export function canRetryUpload(failure: UploadFailure) {
+  return RETRYABLE_FAILURES.includes(failure)
+}
+
 export function useMediaUpload(
   commands: Pick<UploadCommands, 'createUploadUrl' | 'completeUpload'>,
+  acceptedMimes: readonly string[],
 ) {
   const [uploadState, setUploadState] = useState<UploadState>({
     kind: 'idle',
@@ -65,21 +69,17 @@ export function useMediaUpload(
       kind: 'failed',
       fileName,
       problem: outcome.problem,
-      canRetry:
-        outcome.problem === 'interrupted' ||
-        RETRYABLE_PROBLEMS.includes(outcome.problem),
     })
   }
 
   const startUpload = async (picked: File) => {
     setUploadState({ kind: 'uploading', fileName: picked.name })
-    const file = await toUploadableFile(picked).catch(() => null)
+    const file = await toUploadableFile(picked, acceptedMimes).catch(() => null)
     if (file === null) {
       setUploadState({
         kind: 'failed',
         fileName: picked.name,
         problem: 'unreadable-image',
-        canRetry: false,
       })
       return
     }

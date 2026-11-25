@@ -24,7 +24,7 @@ export interface MediaPageProps {
     mediaId: MediaEntry['mediaId']
     locale: Locale
     alt: string
-  }) => Promise<unknown>
+  }) => Promise<{ savedAt: number }>
 }
 
 /**
