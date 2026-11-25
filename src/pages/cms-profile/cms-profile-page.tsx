@@ -9,12 +9,12 @@ import { Text } from '@astryxdesign/core/Text'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
+import { SaveStatus } from '../../entities/draft/save-status'
 import {
   type EditableProfileDraft,
   profileDraftQueryOptions,
 } from '../../entities/profile/profile-draft'
 import { ProfileEditor } from '../../features/profile-editor/profile-editor'
-import { SaveStatus } from '../../features/profile-editor/save-status'
 import { useProfileAutosave } from '../../features/profile-editor/use-profile-autosave'
 import { PublishProfileButton } from '../../features/publish-profile/publish-profile-button'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'

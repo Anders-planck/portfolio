@@ -3,7 +3,10 @@ import { Link } from '@astryxdesign/core/Link'
 import { Stack } from '@astryxdesign/core/Stack'
 import { useQuery } from '@tanstack/react-query'
 
-import { profileQueryOptions } from '../../entities/profile/profile-query-options'
+import {
+  profileQueryOptions,
+  toPublishedProfile,
+} from '../../entities/profile/profile-query-options'
 import { useReveal } from '../../features/motion/use-reveal'
 import { toPathnameInLocale } from '../../shared/i18n/locale'
 import { useLocale } from '../../shared/i18n/use-locale'
@@ -20,7 +23,7 @@ export function SiteFooter() {
   const locale = useLocale()
   const { site, navigation } = useMessages()
   const revealRef = useReveal<HTMLDivElement>()
-  const { data: profile } = useQuery(profileQueryOptions(locale))
+  const profile = toPublishedProfile(useQuery(profileQueryOptions(locale)).data)
 
   return (
     <LayoutFooter role="contentinfo" label={navigation.footerLabel} hasDivider>
@@ -49,7 +52,7 @@ export function SiteFooter() {
             {navigation.cv}
           </Link>
         </Stack>
-        {profile === undefined || profile === null ? null : (
+        {profile === null ? null : (
           <Stack direction="horizontal" gap={4} wrap="wrap">
             <Link href={`mailto:${profile.fields.email}`} color="secondary">
               {profile.fields.email}

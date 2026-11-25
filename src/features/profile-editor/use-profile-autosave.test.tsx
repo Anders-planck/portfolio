@@ -2,7 +2,8 @@
 import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { AUTOSAVE_DELAY_MS, useProfileAutosave } from './use-profile-autosave'
+import { AUTOSAVE_DELAY_MS } from '../../entities/draft/use-draft-autosave'
+import { useProfileAutosave } from './use-profile-autosave'
 
 // The hook's one dependency on Convex: each test decides how saving goes.
 const saveDraft = vi.hoisted(() => vi.fn())

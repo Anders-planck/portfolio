@@ -3,7 +3,7 @@ import { HStack } from '@astryxdesign/core/Stack'
 import { Text } from '@astryxdesign/core/Text'
 
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
-import type { SaveState } from './use-profile-autosave'
+import type { SaveState } from './use-draft-autosave'
 
 const SAVE_COPY = CMS_MESSAGES.save
 

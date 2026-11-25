@@ -68,6 +68,7 @@ import type * as model_notes_published from "../model/notes/published.js";
 import type * as model_notes_render from "../model/notes/render.js";
 import type * as model_notes_rendered from "../model/notes/rendered.js";
 import type * as model_notes_seed from "../model/notes/seed.js";
+import type * as model_notes_simpleblocks from "../model/notes/simpleblocks.js";
 import type * as model_notes_tables from "../model/notes/tables.js";
 import type * as model_notes_views from "../model/notes/views.js";
 import type * as model_owner from "../model/owner.js";
@@ -146,6 +147,7 @@ declare const fullApi: ApiFromModules<{
   "model/notes/render": typeof model_notes_render;
   "model/notes/rendered": typeof model_notes_rendered;
   "model/notes/seed": typeof model_notes_seed;
+  "model/notes/simpleblocks": typeof model_notes_simpleblocks;
   "model/notes/tables": typeof model_notes_tables;
   "model/notes/views": typeof model_notes_views;
   "model/owner": typeof model_owner;

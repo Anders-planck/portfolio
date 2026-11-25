@@ -11,6 +11,7 @@ export const CMS_MESSAGES = {
     quality: 'Qualità',
     overview: 'Panoramica',
     profile: 'Profilo',
+    notes: 'Note',
     sources: 'Fonti dei numeri',
     viewSite: 'Vedi il sito',
   },
@@ -95,5 +96,105 @@ export const CMS_MESSAGES = {
     blocked: 'Pubblicazione bloccata dai controlli',
     failed: 'Pubblicazione non riuscita',
     networkError: 'Pubblicazione non confermata: riprova.',
+  },
+  notes: {
+    title: 'Note',
+    description:
+      'Articoli in Markdown. Una nota pubblicata compare in Note, nella lingua di chi legge o in quella di riserva.',
+    create: 'Nuova nota',
+    createFailed: 'Non riesco a creare la nota: riprova.',
+    loading: 'Caricamento delle note…',
+    errorTitle: 'Non riesco a leggere le note',
+    emptyTitle: 'Ancora nessuna nota',
+    emptyFilterTitle: 'Nessuna nota in questo stato',
+    statusFilterLabel: 'Filtra per stato',
+    statusFilters: {
+      all: 'Tutte',
+      published: 'Pubblicate',
+      draft: 'Bozze',
+      scheduled: 'Programmate',
+    },
+    filterOption: (label: string, count: string) => `${label} · ${count}`,
+    columns: {
+      title: 'Titolo',
+      topic: 'Tema',
+      status: 'Stato',
+      locales: 'Lingue',
+      reading: 'Lettura',
+    },
+    untitled: 'Nota senza titolo',
+    localeSeparator: ' · ',
+    noReading: '—',
+    readingTime: (minutes: string) => `${minutes} min`,
+    statuses: {
+      draft: 'Bozza',
+      scheduled: (date: string) => `Programmata · ${date}`,
+      published: (date: string) => `Pubblicata · ${date}`,
+    },
+    topics: { ai: 'AI', mobile: 'Mobile', architecture: 'Architettura' },
+    editor: {
+      back: 'Tutte le note',
+      notFoundTitle: 'Questa nota non esiste',
+      loading: 'Caricamento della bozza…',
+      errorTitle: 'Non riesco a leggere la bozza',
+      localeLabel: 'Lingua dei testi',
+      contentSection: 'Testo',
+      fields: {
+        title: 'Titolo',
+        summary: 'Sintesi',
+        summaryHelp:
+          'Una frase sotto il titolo in Note; è anche la descrizione per i motori di ricerca.',
+        body: 'Testo in Markdown',
+        bodyHelp:
+          'Titoli ## e ###, elenchi, citazioni, codice. Direttive: :::case{title="…"} … :::, ::metric[etichetta]{key="…"}, ::figure[didascalia]{media="…"}. Ogni numero è un riferimento {{m:chiave}}.',
+        slug: 'Slug',
+        slugHelp: 'L’indirizzo della nota: /note/slug, uguale in ogni lingua.',
+        topic: 'Tema',
+        linkedProjects: 'Collegata a',
+        linkedProjectsHelp: 'Mostrata anche nelle pagine di questi progetti.',
+        noProjects: 'Nessun progetto ancora',
+      },
+      previewSection: 'Anteprima della bozza salvata',
+      publicationSection: 'Pubblicazione',
+      structureSection: 'Struttura',
+      structureEmpty: 'Nessun titolo ancora.',
+      readingSummary: (minutes: string, words: string) =>
+        `${minutes} min · ${words} parole`,
+      checksSection: 'Controlli',
+      checksPassed: 'Nessun problema: la nota si può pubblicare.',
+      translatedIn: (locales: string) => `Tradotta in: ${locales}`,
+    },
+    findings: {
+      'note-slug':
+        'Lo slug deve essere fatto di parole minuscole unite da trattini.',
+      'note-slug-taken': 'Un’altra nota usa già questo slug.',
+      'note-title': 'Manca il titolo (serve almeno quello italiano).',
+      'note-unknown-directive':
+        'Una direttiva non esiste: usa case, metric o figure.',
+      'note-malformed-directive':
+        'Gli attributi di una direttiva si scrivono chiave="valore".',
+      'note-missing-attribute':
+        'A una direttiva manca un attributo: title per case, key per metric, media per figure.',
+      'note-unclosed-directive': 'Un blocco :::case non è chiuso da :::.',
+      'note-nested-block':
+        'Dentro un case vanno solo paragrafi, elenchi, citazioni e codice.',
+      'note-figure-unavailable':
+        'Le immagini compariranno quando ci saranno i media: per ora la figura non si vede.',
+      'free-numeral':
+        'C’è un numero scritto a mano: usa un riferimento {{m:chiave}}.',
+      'unknown-metric': 'Il riferimento nomina una metrica che non esiste.',
+      'malformed-metric-reference':
+        'Un riferimento a metrica è scritto male: {{m:chiave}}.',
+    },
+    severities: { block: 'Blocca la pubblicazione', warn: 'Avviso' },
+    sharedField: 'tutte le lingue',
+    otherFinding: (rule: string) => `Regola non rispettata: ${rule}`,
+    findingWhere: (field: string, locale: string) => `${field} · ${locale}`,
+  },
+  release: {
+    publishNow: 'Pubblica ora',
+    scheduleAt: 'Programma la pubblicazione',
+    scheduleAction: 'Programma',
+    schedulePast: 'Scegli una data futura.',
   },
 } as const

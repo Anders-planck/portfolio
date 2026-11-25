@@ -1,4 +1,4 @@
-/** A publish of the Profile draft at the revision the owner saw. */
+/** A publish of a draft at the revision the owner saw. */
 export interface PublishRequest {
   revision: number
   /** Idempotency key: the backend answers a repeat with the first release. */
