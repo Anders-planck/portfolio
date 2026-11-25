@@ -45,7 +45,7 @@ export interface NoteDraft {
 const NOTE_KEY_PATTERN = /^[a-z0-9-]{8,64}$/
 
 /** Refuses a key the editor never makes (a forged or broken call). */
-export function checkNoteKey(key: string) {
+function checkNoteKey(key: string) {
   if (!NOTE_KEY_PATTERN.test(key)) {
     throw new ConvexError({ kind: 'invalid-note-key' })
   }

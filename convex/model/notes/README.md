@@ -22,5 +22,5 @@ The `note` collection of the content store (ADR 0003): articles in Markdown with
 - A note's public date is when it first went live: publish records it once per key in `noteFirstPublications` (`firstpublication.ts`, called from `content/releases.ts`), so publishing an edit, a scheduled release or a rollback never moves it. The Note list and "next" go newest first by that date.
 - "Next" is the next older **published** note: unpublished notes are never read by the site.
 - The slug is shared by every locale (`/note/<slug>`); the key never changes. Per-locale slugs (resolution 19) are deferred to ticket 16 (#25).
-- The key is an editor-made id (`checkNoteKey`); `createNote` and `saveDraft` refuse any other. Reads list at most `MAX_NOTES` notes, and that cap is never passed: `createNote` returns `limit-reached` and a publish past it is blocked.
+- The key is an editor-made id: `createNote` and `saveDraft` both refuse any other through `createNoteDraft`. Reads list at most `MAX_NOTES` notes, and that cap is never passed: `createNote` returns `limit-reached` and a publish past it is blocked.
 - Linked project keys are not checked yet: the publish rule against the projects collection comes with it (TODO(#17), ticket 09).
