@@ -48,8 +48,11 @@ export function ChapterNavigation({
         }}
       />
       <Text aria-live="polite" weight="semibold" className="whitespace-nowrap">
-        {toChapterNumber(activeChapterIndex)} /{' '}
-        {toChapterNumber(lastChapterIndex)} · {activeChapter?.eyebrow}
+        {immersive.chapterPosition(
+          toChapterNumber(activeChapterIndex),
+          toChapterNumber(lastChapterIndex),
+          activeChapter?.eyebrow ?? '',
+        )}
       </Text>
       <Button
         label={immersive.nextChapter}

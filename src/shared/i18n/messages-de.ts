@@ -44,6 +44,10 @@ export const MESSAGES_DE: Messages = {
     blockLabel: 'Block',
     blockKeyboardHint: 'Die Pfeiltasten links und rechts drehen den Block.',
     blockCursorLabel: 'Ziehen',
+    chapterEyebrow: (chapterNumber, eyebrow) => `${chapterNumber} / ${eyebrow}`,
+    chapterIndexStep: (chapterNumber, eyebrow) => `${chapterNumber} ${eyebrow}`,
+    chapterPosition: (chapterNumber, lastChapterNumber, eyebrow) =>
+      `${chapterNumber} / ${lastChapterNumber} · ${eyebrow}`,
     frontFace: (faceNumber, faceLabel) => `${faceNumber} · ${faceLabel}`,
   },
   immersiveDemo: {

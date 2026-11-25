@@ -33,7 +33,10 @@ export function ChapterIndex({
           step={chapterIndex}
           // The number sits in the label, not in a custom indicator, so the
           // step button's accessible name contains all its visible text.
-          label={`${toChapterNumber(chapterIndex)} ${chapter.eyebrow}`}
+          label={immersive.chapterIndexStep(
+            toChapterNumber(chapterIndex),
+            chapter.eyebrow,
+          )}
           indicator="none"
         />
       ))}

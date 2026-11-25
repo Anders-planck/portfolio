@@ -43,6 +43,10 @@ export const MESSAGES_EN: Messages = {
     blockLabel: 'Block',
     blockKeyboardHint: 'Left and right arrows turn the block.',
     blockCursorLabel: 'Drag',
+    chapterEyebrow: (chapterNumber, eyebrow) => `${chapterNumber} / ${eyebrow}`,
+    chapterIndexStep: (chapterNumber, eyebrow) => `${chapterNumber} ${eyebrow}`,
+    chapterPosition: (chapterNumber, lastChapterNumber, eyebrow) =>
+      `${chapterNumber} / ${lastChapterNumber} · ${eyebrow}`,
     frontFace: (faceNumber, faceLabel) => `${faceNumber} · ${faceLabel}`,
   },
   immersiveDemo: {

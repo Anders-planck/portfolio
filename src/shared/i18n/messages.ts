@@ -63,6 +63,16 @@ export interface Messages {
     blockKeyboardHint: string
     /** The cursor label over the Block. */
     blockCursorLabel: string
+    /** A chapter's eyebrow, e.g. "01 / Discipline". */
+    chapterEyebrow: (chapterNumber: string, eyebrow: string) => string
+    /** A step of the chapter index, e.g. "01 Discipline". */
+    chapterIndexStep: (chapterNumber: string, eyebrow: string) => string
+    /** The active chapter in the ‹ › navigation, e.g. "01 / 05 · Discipline". */
+    chapterPosition: (
+      chapterNumber: string,
+      lastChapterNumber: string,
+      eyebrow: string,
+    ) => string
     /** The face that looks at the reader, e.g. "02 · Backend". */
     frontFace: (faceNumber: string, faceLabel: string) => string
   }

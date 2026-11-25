@@ -3,6 +3,7 @@ import { Stack } from '@astryxdesign/core/Stack'
 import { Text } from '@astryxdesign/core/Text'
 import { useId } from 'react'
 
+import { useMessages } from '../../shared/i18n/use-messages'
 import type { StageChapter } from './stage-chapter'
 import { toChapterNumber } from './to-chapter-number'
 
@@ -21,12 +22,16 @@ export function ChapterSection({
   chapterIndex: number
   lengthInViewports?: number
 }) {
+  const { immersive } = useMessages()
   const headingId = useId()
   const isPinned = lengthInViewports !== undefined
   const text = (
     <Stack gap={4}>
       <Text type="code" color="secondary">
-        {toChapterNumber(chapterIndex)} / {chapter.eyebrow}
+        {immersive.chapterEyebrow(
+          toChapterNumber(chapterIndex),
+          chapter.eyebrow,
+        )}
       </Text>
       <Heading level={chapterIndex === 0 ? 1 : 2} id={headingId}>
         {chapter.title}
