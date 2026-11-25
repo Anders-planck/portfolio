@@ -93,8 +93,8 @@ function renderFigure(
   rendering: NoteRendering,
 ): RenderedBlock[] {
   const figure = rendering.figures.get(block.mediaId)
-  const alt = figure?.alts.get(rendering.locale) ?? ''
-  if (figure === undefined || alt.trim() === '') {
+  const alt = figure?.alts.get(rendering.locale)
+  if (figure === undefined || alt === undefined) {
     return []
   }
   const { sources, widthPx, heightPx } = figure

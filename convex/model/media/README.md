@@ -28,6 +28,7 @@ Domain code behind `convex/media.ts` (ADR 0014, story 41): images and files on R
 | `alts.ts` | Alt records: reading, the owner's save. |
 | `references.ts` | Where a document points at media, and which kind each field shows (pure). |
 | `figures.ts` | The images note figures show, for rendering. |
+| `written.ts` | Media named by ids as documents write them, with their written alt (rule and figures). |
 | `usage.ts` | Which documents use which media, drafts and live. |
 | `rulemedia.ts` | What the media rule knows about referenced media. |
 | `library.ts` | The CMS Media listing. |

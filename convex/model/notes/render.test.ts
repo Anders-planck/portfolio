@@ -92,15 +92,6 @@ test('the metric directive carries the reading and its date', () => {
   ])
 })
 
-test('figures render nothing until media exists (ticket 12)', () => {
-  expect(render('::figure[Schema]{media="m1"}\n\nDopo').blocks).toEqual([
-    {
-      kind: 'paragraph',
-      inlines: [{ kind: 'text', text: 'Dopo', marks: [] }],
-    },
-  ])
-})
-
 test('the outline lists headings and cases by anchor, in reading order', () => {
   expect(
     render('## Primo\n### Dentro\n:::case{title="Il metodo"}\nx\n:::').outline,

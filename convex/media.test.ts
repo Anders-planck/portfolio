@@ -353,7 +353,73 @@ describe('publish and usage', () => {
       },
     ])
   })
+})
 
+describe('figures on the site', () => {
+  test('the published note shows the figure with its sources and the alt of its locale', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+    const mediaId = await uploadMedia(owner, bucket)
+    await owner.mutation(api.media.saveAlt, {
+      mediaId,
+      locale: 'it',
+      alt: 'Chat di Bussola',
+    })
+    const { revision } = await saveNoteWithFigure(owner, mediaId)
+    await publishDocument(
+      owner,
+      { collection: 'note', key: 'figure-note' },
+      revision,
+    )
+
+    const page = await owner.query(api.notes.getPublished, {
+      slug: 'con-figura',
+    })
+
+    const original = `${TEST_MEDIA_ORIGIN}/${OBJECT_KEY}`
+    expect(page?.translations[0]?.blocks).toContainEqual({
+      kind: 'figure',
+      image: {
+        src: original,
+        srcSet: null,
+        widthPx: 1440,
+        heightPx: 900,
+        alt: 'Chat di Bussola',
+      },
+      caption: [{ kind: 'text', text: 'La chat', marks: [] }],
+    })
+  })
+
+  test('without storage configured a published figure is not shown', async () => {
+    const { owner, bucket } = await createConfiguredOwner()
+    const mediaId = await uploadMedia(owner, bucket)
+    await owner.mutation(api.media.saveAlt, {
+      mediaId,
+      locale: 'it',
+      alt: 'Chat di Bussola',
+    })
+    const { revision } = await saveNoteWithFigure(owner, mediaId)
+    await publishDocument(
+      owner,
+      { collection: 'note', key: 'figure-note' },
+      revision,
+    )
+    vi.stubEnv('R2_ACCOUNT_ID', '')
+    vi.stubEnv('R2_BUCKET', '')
+    vi.stubEnv('R2_ACCESS_KEY_ID', '')
+    vi.stubEnv('R2_SECRET_ACCESS_KEY', '')
+    vi.stubEnv('MEDIA_PUBLIC_ORIGIN', '')
+
+    const page = await owner.query(api.notes.getPublished, {
+      slug: 'con-figura',
+    })
+
+    expect(
+      page?.translations[0]?.blocks.some((block) => block.kind === 'figure'),
+    ).toBe(false)
+  })
+})
+
+describe('what else the media rule blocks, and the CV', () => {
   test('a figure naming no media blocks', async () => {
     const { owner } = await createConfiguredOwner()
     const { revision } = await saveNoteWithFigure(owner, 'not-a-media-id')

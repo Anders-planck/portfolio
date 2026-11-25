@@ -4,10 +4,10 @@ import type { Doc } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
 import type { Locale } from '../content/locales'
 import { readImageTransformOrigin, readMediaStorageSettings } from '../env'
-import { readAltRecords } from './alts'
 import { toMediaKindFromMime } from './files'
 import { toPublicObjectUrl } from './storage'
 import { type ImageSources, toImageSources } from './variants'
+import { readWrittenMedia } from './written'
 
 /**
  * Images shown by note figures (`::figure{media="…"}`): sources with their
@@ -27,7 +27,7 @@ export interface FigureMedia {
   sources: ImageSources
   widthPx: number
   heightPx: number
-  /** Alt text by locale; a locale without one shows no figure. */
+  /** Written alt text by locale; a locale without one shows no figure. */
   alts: ReadonlyMap<Locale, string>
 }
 
@@ -45,18 +45,16 @@ export async function readFigureMedia(
     return new Map()
   }
   const transformOrigin = readImageTransformOrigin()
-  const entries = await Promise.all(
-    [...new Set(writtenIds)].map(async (writtenId) => {
-      const mediaId = ctx.db.normalizeId('media', writtenId)
-      const media = mediaId === null ? null : await ctx.db.get(mediaId)
-      if (media === null || !isSizedImage(media)) {
-        return null
+  const written = await readWrittenMedia(ctx, writtenIds)
+  return new Map(
+    [...written].flatMap(([writtenId, { media, altByLocale }]) => {
+      if (!isSizedImage(media)) {
+        return []
       }
       const originalUrl = toPublicObjectUrl(
         settings.publicOrigin,
         media.objectKey,
       )
-      const alts = await readAltRecords(ctx, media._id)
       const figure: FigureMedia = {
         sources: toImageSources(
           { originalUrl, widthPx: media.widthPx },
@@ -64,12 +62,11 @@ export async function readFigureMedia(
         ),
         widthPx: media.widthPx,
         heightPx: media.heightPx,
-        alts: new Map(alts.map((record) => [record.locale, record.alt])),
+        alts: altByLocale,
       }
-      return [writtenId, figure] as const
+      return [[writtenId, figure] as const]
     }),
   )
-  return new Map(entries.filter((entry) => entry !== null))
 }
 
 /** An image with its pixel size (every image has one; files have none). */

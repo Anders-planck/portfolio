@@ -7,11 +7,14 @@ import { NoteRuns } from './note-runs'
 type FigureBlock = Extract<NoteBlock, { kind: 'figure' }>
 
 /**
- * Which width the image takes in the reading column, for the browser's pick
- * from `srcset`: the full viewport on a phone, the note column (about 46rem)
- * beyond it.
+ * Which width the image takes, for the browser's pick from `srcset`. It
+ * follows the note page's grid (`pages/note/note-page.tsx`): from Tailwind's
+ * `lg` breakpoint the article spans three of four columns, below it the
+ * whole width. `sizes` is an HTML attribute, so it cannot read CSS tokens.
  */
-const FIGURE_SIZES = '(max-width: 48rem) 100vw, 46rem'
+const GRID_MIN_WIDTH = '64rem'
+const ARTICLE_SHARE_OF_VIEWPORT = '75vw'
+const FIGURE_SIZES = `(min-width: ${GRID_MIN_WIDTH}) ${ARTICLE_SHARE_OF_VIEWPORT}, 100vw`
 
 /**
  * A `::figure` of a note: its image from Media, with the AVIF/WebP variants

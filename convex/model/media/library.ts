@@ -4,7 +4,7 @@ import type { Doc } from '../../_generated/dataModel'
 import type { QueryCtx } from '../../_generated/server'
 import { LOCALES, localeValidator } from '../content/locales'
 import { readImageTransformOrigin, readMediaStorageSettings } from '../env'
-import { listLocalesWithAlt, MAX_ALT_LENGTH, readAltRecords } from './alts'
+import { MAX_ALT_LENGTH, readAltRecords, toAltByLocale } from './alts'
 import {
   MAX_MEDIA_BYTES,
   MEDIA_MIMES,
@@ -130,8 +130,8 @@ function toMissingAltLocales(
   if (kind === 'file') {
     return []
   }
-  const withAlt = listLocalesWithAlt(alts)
-  return LOCALES.filter((locale) => !withAlt.includes(locale))
+  const altByLocale = toAltByLocale(alts)
+  return LOCALES.filter((locale) => !altByLocale.has(locale))
 }
 
 /** Image sources for a preview; none for a file or while storage is off. */

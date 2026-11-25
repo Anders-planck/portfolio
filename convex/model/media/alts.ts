@@ -24,13 +24,15 @@ export const altSaveOutcomeValidator = v.union(
 )
 export type AltSaveOutcome = Infer<typeof altSaveOutcomeValidator>
 
-/** Locales whose alt text is written (not blank): the one test of "has alt". */
-export function listLocalesWithAlt(
+/** Written alt text by locale (blank ones left out): the one test of "has alt". */
+export function toAltByLocale(
   alts: readonly Pick<Doc<'mediaAlt'>, 'locale' | 'alt'>[],
-): Locale[] {
-  return alts
-    .filter((record) => record.alt.trim() !== '')
-    .map((record) => record.locale)
+): Map<Locale, string> {
+  return new Map(
+    alts
+      .filter((record) => record.alt.trim() !== '')
+      .map((record) => [record.locale, record.alt]),
+  )
 }
 
 export function readAltRecords(

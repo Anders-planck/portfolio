@@ -48,6 +48,7 @@ import type * as model_media_tables from "../model/media/tables.js";
 import type * as model_media_uploads from "../model/media/uploads.js";
 import type * as model_media_usage from "../model/media/usage.js";
 import type * as model_media_variants from "../model/media/variants.js";
+import type * as model_media_written from "../model/media/written.js";
 import type * as model_metrics_adapters from "../model/metrics/adapters.js";
 import type * as model_metrics_attempts from "../model/metrics/attempts.js";
 import type * as model_metrics_checks from "../model/metrics/checks.js";
@@ -143,6 +144,7 @@ declare const fullApi: ApiFromModules<{
   "model/media/uploads": typeof model_media_uploads;
   "model/media/usage": typeof model_media_usage;
   "model/media/variants": typeof model_media_variants;
+  "model/media/written": typeof model_media_written;
   "model/metrics/adapters": typeof model_metrics_adapters;
   "model/metrics/attempts": typeof model_metrics_attempts;
   "model/metrics/checks": typeof model_metrics_checks;
