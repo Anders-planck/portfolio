@@ -1,3 +1,4 @@
+import type { Rect } from './to-untransformed-rect'
 import type { ViewportPosition } from './viewport-position'
 
 export interface MagneticOptions {
@@ -16,7 +17,7 @@ interface MagneticShift {
  * centre while the pointer is within the radius, nothing outside it.
  */
 export function toMagneticShift(
-  rect: Pick<DOMRect, 'left' | 'top' | 'width' | 'height'>,
+  rect: Rect,
   pointer: ViewportPosition,
   { radiusPx, strength }: MagneticOptions,
 ): MagneticShift | undefined {

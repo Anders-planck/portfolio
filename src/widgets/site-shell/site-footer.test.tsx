@@ -38,6 +38,21 @@ test('the footer links home, every section and the Profile contacts', async () =
   ])
 })
 
+test('a Profile that cannot be read leaves the footer without contacts', async () => {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+        queryFn: () => Promise.reject(new Error('Convex unreachable')),
+      },
+    },
+  })
+  renderAtPath(<SiteFooter />, '/fr', queryClient)
+  expect(await screen.findByRole('contentinfo')).toBeDefined()
+  expect(screen.getByRole('link', { name: 'anders/planck' })).toBeDefined()
+  expect(screen.queryByRole('link', { name: 'GitHub' })).toBeNull()
+})
+
 test('before a Profile is published the footer has no contacts', async () => {
   renderFooterAt('/fr', null)
   expect(await screen.findByRole('contentinfo')).toBeDefined()
