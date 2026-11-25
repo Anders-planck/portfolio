@@ -54,68 +54,24 @@ export function ProfileEditor({
 
   return (
     <VStack gap={8}>
-      <Section>
-        <FormLayout>
-          <Heading level={2}>{PROFILE_COPY.heroSection}</Heading>
-          <Switch
-            label={PROFILE_COPY.fields.isAvailable}
-            value={fields.isAvailable}
-            onChange={(isAvailable) => {
-              editFields({ isAvailable })
-            }}
-          />
-          {HERO_LINE_FIELDS.map((field) => (
-            <TextInput
-              key={field}
-              label={PROFILE_COPY.fields[field]}
-              value={content[field]}
-              onChange={(value) => {
-                editContent({ [field]: value })
-              }}
-            />
-          ))}
-          <TextArea
-            label={PROFILE_COPY.fields.subtitle}
-            value={content.subtitle}
-            onChange={(subtitle) => {
-              editContent({ subtitle })
-            }}
-          />
-        </FormLayout>
-      </Section>
-      <Section>
-        <FormLayout>
-          <Heading level={2}>{PROFILE_COPY.contactSection}</Heading>
-          <TextInput
-            label={PROFILE_COPY.fields.name}
-            value={fields.name}
-            onChange={(name) => {
-              editFields({ name })
-            }}
-          />
-          <TextInput
-            type="email"
-            label={PROFILE_COPY.fields.email}
-            value={fields.email}
-            onChange={(email) => {
-              editFields({ email })
-            }}
-          />
-          <TextInput
-            label={PROFILE_COPY.fields.contactLabel}
-            value={content.contactLabel}
-            onChange={(contactLabel) => {
-              editContent({ contactLabel })
-            }}
-          />
-          <ProfileLinksEditor
-            links={fields.links}
-            onChange={(links) => {
-              editFields({ links })
-            }}
-          />
-        </FormLayout>
-      </Section>
+      <ProfileHeroSection
+        isAvailable={fields.isAvailable}
+        content={content}
+        onAvailabilityChange={(isAvailable) => {
+          editFields({ isAvailable })
+        }}
+        onContentChange={editContent}
+      />
+      <ProfileContactSection
+        name={fields.name}
+        email={fields.email}
+        links={fields.links}
+        contactLabel={content.contactLabel}
+        onFieldsChange={editFields}
+        onContactLabelChange={(contactLabel) => {
+          editContent({ contactLabel })
+        }}
+      />
       <ProfileSkillsSection
         skills={fields.skills}
         languages={content.languages}
@@ -159,6 +115,98 @@ function ProfileSkillsSection({
           label={PROFILE_COPY.fields.languages}
           value={languages}
           onChange={onLanguagesChange}
+        />
+      </FormLayout>
+    </Section>
+  )
+}
+
+function ProfileHeroSection({
+  isAvailable,
+  content,
+  onAvailabilityChange,
+  onContentChange,
+}: {
+  isAvailable: boolean
+  content: ProfileContent
+  onAvailabilityChange: (isAvailable: boolean) => void
+  onContentChange: (edit: Partial<ProfileContent>) => void
+}) {
+  return (
+    <Section>
+      <FormLayout>
+        <Heading level={2}>{PROFILE_COPY.heroSection}</Heading>
+        <Switch
+          label={PROFILE_COPY.fields.isAvailable}
+          value={isAvailable}
+          onChange={onAvailabilityChange}
+        />
+        {HERO_LINE_FIELDS.map((field) => (
+          <TextInput
+            key={field}
+            label={PROFILE_COPY.fields[field]}
+            value={content[field]}
+            onChange={(value) => {
+              onContentChange({ [field]: value })
+            }}
+          />
+        ))}
+        <TextArea
+          label={PROFILE_COPY.fields.subtitle}
+          value={content.subtitle}
+          onChange={(subtitle) => {
+            onContentChange({ subtitle })
+          }}
+        />
+      </FormLayout>
+    </Section>
+  )
+}
+
+function ProfileContactSection({
+  name,
+  email,
+  links,
+  contactLabel,
+  onFieldsChange,
+  onContactLabelChange,
+}: {
+  name: string
+  email: string
+  links: ProfileFields['links']
+  contactLabel: string
+  onFieldsChange: (edit: Partial<ProfileFields>) => void
+  onContactLabelChange: (contactLabel: string) => void
+}) {
+  return (
+    <Section>
+      <FormLayout>
+        <Heading level={2}>{PROFILE_COPY.contactSection}</Heading>
+        <TextInput
+          label={PROFILE_COPY.fields.name}
+          value={name}
+          onChange={(nextName) => {
+            onFieldsChange({ name: nextName })
+          }}
+        />
+        <TextInput
+          type="email"
+          label={PROFILE_COPY.fields.email}
+          value={email}
+          onChange={(nextEmail) => {
+            onFieldsChange({ email: nextEmail })
+          }}
+        />
+        <TextInput
+          label={PROFILE_COPY.fields.contactLabel}
+          value={contactLabel}
+          onChange={onContactLabelChange}
+        />
+        <ProfileLinksEditor
+          links={links}
+          onChange={(nextLinks) => {
+            onFieldsChange({ links: nextLinks })
+          }}
         />
       </FormLayout>
     </Section>

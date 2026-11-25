@@ -6,7 +6,6 @@ export const CMS_MESSAGES = {
   documentTitle: 'CMS · Anders Planck',
   brand: 'CMS',
   navigation: {
-    label: 'Navigazione del CMS',
     content: 'Contenuti',
     site: 'Sito',
     quality: 'Qualità',

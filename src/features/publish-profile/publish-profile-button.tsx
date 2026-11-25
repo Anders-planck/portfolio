@@ -90,6 +90,8 @@ function PublishStateBanner({ publishState }: { publishState: PublishState }) {
       return <Banner status="warning" title={PUBLISH_COPY.stale} />
     case 'blocked':
     case 'failed':
+      // A finding's message is the rules engine's owner-facing copy (in
+      // Italian, PLAN: rules engine), so it is shown as it comes.
       return (
         <Banner
           status="error"
