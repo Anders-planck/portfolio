@@ -1,6 +1,10 @@
 import { expect, type Page, test } from '@playwright/test'
 
-import { findBlock, openImmersiveDemo } from './immersive-stage.fixture'
+import {
+  findBlock,
+  openImmersiveDemo,
+  readBlockCentre,
+} from './immersive-stage.fixture'
 
 declare global {
   interface Window {
@@ -57,11 +61,10 @@ test('the Block follows the pointer without a React render', async ({
   await countReactCommits(page)
   await openImmersiveDemo(page)
   expect(await readCommitCount(page)).toBeGreaterThan(0)
-  const box = await findBlock(page).boundingBox()
-  expect(box).not.toBeNull()
+  const centre = await readBlockCentre(page)
   const before = await readCommitCount(page)
   for (let frame = 0; frame < FRAME_COUNT; frame += 1) {
-    await page.mouse.move((box?.x ?? 0) + frame * 4, (box?.y ?? 0) + frame * 3)
+    await page.mouse.move(centre.left + frame * 4, centre.top + frame * 3)
     await waitForFrame(page)
   }
   expect(await readCommitCount(page)).toBe(before)

@@ -14,7 +14,7 @@ import { DEMO_COPY, type DemoCopy } from './immersive-demo-copy'
  * fixture; every word is placeholder copy from `immersive-demo-copy.ts`, per locale. Tickets
  * 08–10 feed the Stage from Convex instead.
  */
-function toDemoChapters({ chapters }: DemoCopy): StageChapter[] {
+function toDemoChaptersFromCopy({ chapters }: DemoCopy): StageChapter[] {
   const demoChapters = [
     { id: 'apertura', copy: chapters.opening, yawDeg: 20, scale: 1 },
     { id: 'scorrimento', copy: chapters.scroll, yawDeg: 140, scale: 0.9 },
@@ -37,7 +37,7 @@ function toDemoChapters({ chapters }: DemoCopy): StageChapter[] {
   }))
 }
 
-function toDemoFaces({ faceLabels, faceDetail }: DemoCopy): BlockFaces {
+function toDemoFacesFromCopy({ faceLabels, faceDetail }: DemoCopy): BlockFaces {
   const [first, second, third, fourth] = faceLabels
   return [
     { key: 'first', label: first, detail: faceDetail, tone: 'surface' },
@@ -53,8 +53,8 @@ function toDemoFaces({ faceLabels, faceDetail }: DemoCopy): BlockFaces {
  */
 export function ImmersiveDemoPage() {
   const demoCopy = DEMO_COPY[useLocale()]
-  const chapters = useMemo(() => toDemoChapters(demoCopy), [demoCopy])
-  const faces = useMemo(() => toDemoFaces(demoCopy), [demoCopy])
+  const chapters = useMemo(() => toDemoChaptersFromCopy(demoCopy), [demoCopy])
+  const faces = useMemo(() => toDemoFacesFromCopy(demoCopy), [demoCopy])
   // A plain Stack, not LayoutContent: that one scrolls on its own, and an
   // inner scroller would unpin the scene (window scroll, ADR 0008).
   return (

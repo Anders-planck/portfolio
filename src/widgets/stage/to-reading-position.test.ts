@@ -3,7 +3,7 @@ import { expect, test } from 'vitest'
 import {
   toReadingPosition,
   toScrollYAtReadingPosition,
-} from './reading-position'
+} from './to-reading-position'
 
 const VIEWPORT_HEIGHT_PX = 800
 

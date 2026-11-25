@@ -3,7 +3,7 @@ import {
   type ReadingPosition,
   toReadingPosition,
   toScrollYAtReadingPosition,
-} from './reading-position'
+} from './to-reading-position'
 
 /**
  * Keeps the reader on the same point of the same chapter when the layout

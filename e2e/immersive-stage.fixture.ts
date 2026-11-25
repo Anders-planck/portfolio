@@ -10,6 +10,15 @@ export function findBlock(page: Page) {
   return page.getByRole('slider', { name: 'Blocco' })
 }
 
+/** The centre of the Block on screen; fails the test if it is not there. */
+export async function readBlockCentre(page: Page) {
+  const box = await findBlock(page).boundingBox()
+  if (box === null) {
+    throw new Error('the Block is not on screen')
+  }
+  return { left: box.x + box.width / 2, top: box.y + box.height / 2 }
+}
+
 export function findChapterIndex(page: Page) {
   return page.getByRole('list', { name: 'Capitoli' })
 }

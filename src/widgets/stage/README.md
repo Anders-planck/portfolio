@@ -26,7 +26,7 @@ project pages give it their chapters and Block faces as data (`StageChapter`,
 - `use-chapter-navigation.ts`: index and ‹ › scroll to a chapter and replace
   the address hash; ‹ › step from the chapter last asked for while the scroll
   is on its way. `chapter-navigation.tsx` announces only after ‹ ›.
-- `keep-reading-position.ts` (`reading-position.ts`): when the layout flips
+- `keep-reading-position.ts` (`to-reading-position.ts`): when the layout flips
   (resize across 1024px, pointer or reduced-motion change), puts the same
   point of the same chapter back under the middle line. Never uses the hash.
 

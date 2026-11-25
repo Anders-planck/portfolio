@@ -1,6 +1,10 @@
 import { expect, test } from '@playwright/test'
 
-import { findBlock, openImmersiveDemo } from './immersive-stage.fixture'
+import {
+  findBlock,
+  openImmersiveDemo,
+  readBlockCentre,
+} from './immersive-stage.fixture'
 
 test('the arrow keys turn the focused Block a face at a time', async ({
   page,
@@ -24,17 +28,11 @@ test('a drag turns the Block and it snaps to a face on release', async ({
 }) => {
   await openImmersiveDemo(page)
   const block = findBlock(page)
-  const box = await block.boundingBox()
-  expect(box).not.toBeNull()
-  if (box === null) {
-    return
-  }
-  const centreX = box.x + box.width / 2
-  const centreY = box.y + box.height / 2
-  await page.mouse.move(centreX, centreY)
+  const centre = await readBlockCentre(page)
+  await page.mouse.move(centre.left, centre.top)
   await page.mouse.down()
   // About a quarter turn: the scroll pose (20°) plus the drag passes 45°.
-  await page.mouse.move(centreX + 120, centreY, { steps: 8 })
+  await page.mouse.move(centre.left + 120, centre.top, { steps: 8 })
   await expect(block.locator('[data-dragging]')).toHaveCount(1)
   await page.mouse.up()
 
@@ -45,12 +43,8 @@ test('a drag turns the Block and it snaps to a face on release', async ({
 test('a click without movement is not a drag', async ({ page }) => {
   await openImmersiveDemo(page)
   const block = findBlock(page)
-  const box = await block.boundingBox()
-  expect(box).not.toBeNull()
-  await page.mouse.move(
-    (box?.x ?? 0) + (box?.width ?? 0) / 2,
-    (box?.y ?? 0) + (box?.height ?? 0) / 2,
-  )
+  const centre = await readBlockCentre(page)
+  await page.mouse.move(centre.left, centre.top)
   await page.mouse.down()
   await expect(block.locator('[data-dragging]')).toHaveCount(0)
   await page.mouse.up()
