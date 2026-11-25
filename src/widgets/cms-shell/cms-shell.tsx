@@ -11,13 +11,14 @@ import type { ReactNode } from 'react'
 
 import { SignOutButton } from '../../features/owner-auth/sign-out-button'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
+import { CMS_PATHNAME } from '../../shared/router/is-cms-pathname'
 
-const { navigation } = CMS_MESSAGES
+const NAVIGATION_COPY = CMS_MESSAGES.navigation
 
 /** CMS screens in the Contenuti group, in menu order. */
 const CONTENT_SCREENS = [
-  { href: '/cms', label: navigation.overview },
-  { href: '/cms/profilo', label: navigation.profile },
+  { href: CMS_PATHNAME, label: NAVIGATION_COPY.overview },
+  { href: `${CMS_PATHNAME}/profilo`, label: NAVIGATION_COPY.profile },
 ] as const
 
 /**
@@ -35,7 +36,7 @@ export function CmsShell({ children }: { children: ReactNode }) {
           header={<SideNavHeading heading={CMS_MESSAGES.brand} />}
           footer={<SignOutButton />}
         >
-          <SideNavSection title={navigation.content}>
+          <SideNavSection title={NAVIGATION_COPY.content}>
             {CONTENT_SCREENS.map((screen) => (
               <SideNavItem
                 key={screen.href}
@@ -45,12 +46,12 @@ export function CmsShell({ children }: { children: ReactNode }) {
               />
             ))}
           </SideNavSection>
-          <SideNavSection title={navigation.site}>
-            <SideNavItem label={navigation.viewSite} href="/" />
+          <SideNavSection title={NAVIGATION_COPY.site}>
+            <SideNavItem label={NAVIGATION_COPY.viewSite} href="/" />
           </SideNavSection>
-          <SideNavSection title={navigation.quality}>
+          <SideNavSection title={NAVIGATION_COPY.quality}>
             <Text type="supporting" color="secondary">
-              {navigation.comingSoon}
+              {NAVIGATION_COPY.comingSoon}
             </Text>
           </SideNavSection>
         </SideNav>

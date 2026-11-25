@@ -5,7 +5,7 @@ import { Text } from '@astryxdesign/core/Text'
 
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 
-const { overview } = CMS_MESSAGES
+const OVERVIEW_COPY = CMS_MESSAGES.overview
 
 /**
  * Panoramica, empty for now: last release, drafts, AI proposals, violations,
@@ -16,14 +16,14 @@ export function CmsOverviewPage() {
   return (
     <VStack gap={6}>
       <VStack gap={2}>
-        <Heading level={1}>{overview.title}</Heading>
+        <Heading level={1}>{OVERVIEW_COPY.title}</Heading>
         <Text type="body" as="p">
-          {overview.description}
+          {OVERVIEW_COPY.description}
         </Text>
       </VStack>
       <EmptyState
-        title={overview.emptyTitle}
-        description={overview.emptyDescription}
+        title={OVERVIEW_COPY.emptyTitle}
+        description={OVERVIEW_COPY.emptyDescription}
         headingLevel={2}
       />
     </VStack>

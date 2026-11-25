@@ -3,11 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { api } from '../../../convex/_generated/api'
 import {
-  type DraftLocale,
   mergeProfileEdits,
   type ProfileEdit,
   toDraftEditFromProfileEdit,
 } from '../../entities/profile/profile-draft'
+import type { Locale } from '../../shared/i18n/locale'
 
 /** Typing pauses this long before an edit is saved. */
 export const AUTOSAVE_DELAY_MS = 800
@@ -27,10 +27,7 @@ export type SaveState =
  * save at a time; edits made during a save wait for the next one. A failed
  * save keeps its edit and is retried by `retry` or by the next edit.
  */
-export function useProfileAutosave(
-  locale: DraftLocale,
-  lastSavedAt: number | null,
-) {
+export function useProfileAutosave(locale: Locale, lastSavedAt: number | null) {
   const saveDraft = useMutation(api.content.saveDraft)
   const [saveState, setSaveState] = useState<SaveState>({
     kind: 'saved',

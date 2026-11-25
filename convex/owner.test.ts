@@ -166,15 +166,20 @@ describe('viewer', () => {
     })
   })
 
-  test('the owner sees their login; a removed owner is not the owner', async () => {
+  test('the owner sees their login', async () => {
     const owner = await signInAsOwner(createAuthBackend())
+
     expect(await owner.query(api.users.getViewer, {})).toEqual({
       status: 'owner',
       login: 'e2e-owner',
       name: 'e2e-owner',
     })
+  })
 
+  test('an owner removed from the allowlist is not the owner', async () => {
+    const owner = await signInAsOwner(createAuthBackend())
     vi.stubEnv('OWNER_GITHUB_IDS', OTHER_GITHUB_ID)
+
     expect(await owner.query(api.users.getViewer, {})).toEqual({
       status: 'not-owner',
     })

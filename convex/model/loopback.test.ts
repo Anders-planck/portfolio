@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { isLoopbackDeploymentUrl } from './e2e'
+import { isLoopbackDeploymentUrl } from './loopback'
 
 describe('isLoopbackDeploymentUrl', () => {
   test.each([

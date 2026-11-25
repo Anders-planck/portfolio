@@ -10,7 +10,7 @@ type Viewer = FunctionReturnType<typeof api.users.getViewer>
 /** Who is using the CMS, or why that is not known yet. */
 export type ViewerState = { status: 'loading' } | { status: 'error' } | Viewer
 
-const viewerQueryOptions = convexQueryOptions(api.users.getViewer, {})
+const VIEWER_QUERY_OPTIONS = convexQueryOptions(api.users.getViewer, {})
 
 /**
  * The viewer, read once the auth client has settled: before that the query
@@ -18,7 +18,7 @@ const viewerQueryOptions = convexQueryOptions(api.users.getViewer, {})
  */
 export function useViewer(): ViewerState {
   const { isLoading: isAuthLoading } = useConvexAuth()
-  const viewer = useQuery({ ...viewerQueryOptions, enabled: !isAuthLoading })
+  const viewer = useQuery({ ...VIEWER_QUERY_OPTIONS, enabled: !isAuthLoading })
   if (viewer.isError) {
     return { status: 'error' }
   }

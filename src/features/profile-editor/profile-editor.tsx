@@ -15,7 +15,7 @@ import type {
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 import { ProfileLinksEditor } from './profile-links-editor'
 
-const { profile: copy } = CMS_MESSAGES
+const PROFILE_COPY = CMS_MESSAGES.profile
 type Skill = keyof ProfileFields['skills']
 
 const HERO_LINE_FIELDS = [
@@ -56,9 +56,9 @@ export function ProfileEditor({
     <VStack gap={8}>
       <Section>
         <FormLayout>
-          <Heading level={2}>{copy.heroSection}</Heading>
+          <Heading level={2}>{PROFILE_COPY.heroSection}</Heading>
           <Switch
-            label={copy.fields.isAvailable}
+            label={PROFILE_COPY.fields.isAvailable}
             value={fields.isAvailable}
             onChange={(isAvailable) => {
               editFields({ isAvailable })
@@ -67,7 +67,7 @@ export function ProfileEditor({
           {HERO_LINE_FIELDS.map((field) => (
             <TextInput
               key={field}
-              label={copy.fields[field]}
+              label={PROFILE_COPY.fields[field]}
               value={content[field]}
               onChange={(value) => {
                 editContent({ [field]: value })
@@ -75,7 +75,7 @@ export function ProfileEditor({
             />
           ))}
           <TextArea
-            label={copy.fields.subtitle}
+            label={PROFILE_COPY.fields.subtitle}
             value={content.subtitle}
             onChange={(subtitle) => {
               editContent({ subtitle })
@@ -85,9 +85,9 @@ export function ProfileEditor({
       </Section>
       <Section>
         <FormLayout>
-          <Heading level={2}>{copy.contactSection}</Heading>
+          <Heading level={2}>{PROFILE_COPY.contactSection}</Heading>
           <TextInput
-            label={copy.fields.name}
+            label={PROFILE_COPY.fields.name}
             value={fields.name}
             onChange={(name) => {
               editFields({ name })
@@ -95,14 +95,14 @@ export function ProfileEditor({
           />
           <TextInput
             type="email"
-            label={copy.fields.email}
+            label={PROFILE_COPY.fields.email}
             value={fields.email}
             onChange={(email) => {
               editFields({ email })
             }}
           />
           <TextInput
-            label={copy.fields.contactLabel}
+            label={PROFILE_COPY.fields.contactLabel}
             value={content.contactLabel}
             onChange={(contactLabel) => {
               editContent({ contactLabel })
@@ -144,11 +144,11 @@ function ProfileSkillsSection({
   return (
     <Section>
       <FormLayout>
-        <Heading level={2}>{copy.skillsSection}</Heading>
+        <Heading level={2}>{PROFILE_COPY.skillsSection}</Heading>
         {SKILLS.map((skill) => (
           <TextInput
             key={skill}
-            label={copy.fields[skill]}
+            label={PROFILE_COPY.fields[skill]}
             value={skills[skill]}
             onChange={(value) => {
               onSkillsChange({ ...skills, [skill]: value })
@@ -156,7 +156,7 @@ function ProfileSkillsSection({
           />
         ))}
         <TextInput
-          label={copy.fields.languages}
+          label={PROFILE_COPY.fields.languages}
           value={languages}
           onChange={onLanguagesChange}
         />

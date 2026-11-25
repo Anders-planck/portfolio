@@ -95,6 +95,12 @@ test('an unsaved edit holds back publish and the locale switch', () => {
 
   expect(screen.getByText('Modifiche da salvare…')).toBeDefined()
   expect(
+    screen.getByRole('radio', { name: 'EN' }).hasAttribute('disabled') ||
+      screen
+        .getByRole('radio', { name: 'EN' })
+        .getAttribute('aria-disabled') === 'true',
+  ).toBe(true)
+  expect(
     screen
       .getByRole('button', { name: 'Pubblica' })
       .getAttribute('aria-disabled'),

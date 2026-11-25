@@ -18,7 +18,7 @@ type PublishState =
   | { kind: 'answered'; outcome: PublishOutcome }
   | { kind: 'unconfirmed' }
 
-const { publish: copy } = CMS_MESSAGES
+const PUBLISH_COPY = CMS_MESSAGES.publish
 
 /**
  * Publishes the Profile draft now, at `revision` (null: nothing saved yet).
@@ -60,7 +60,7 @@ export function PublishProfileButton({
     <VStack gap={3}>
       <Button
         variant="primary"
-        label={copy.action}
+        label={PUBLISH_COPY.action}
         isDisabled={isDisabled || revision === null}
         clickAction={async () => {
           if (revision !== null) {
@@ -78,22 +78,26 @@ function PublishStateBanner({ publishState }: { publishState: PublishState }) {
     return null
   }
   if (publishState.kind === 'unconfirmed') {
-    return <Banner status="error" title={copy.networkError} />
+    return <Banner status="error" title={PUBLISH_COPY.networkError} />
   }
   const { outcome } = publishState
   switch (outcome.status) {
     case 'published':
-      return <Banner status="success" title={copy.published} />
+      return <Banner status="success" title={PUBLISH_COPY.published} />
     case 'scheduled':
-      return <Banner status="info" title={copy.scheduled} />
+      return <Banner status="info" title={PUBLISH_COPY.scheduled} />
     case 'stale':
-      return <Banner status="warning" title={copy.stale} />
+      return <Banner status="warning" title={PUBLISH_COPY.stale} />
     case 'blocked':
     case 'failed':
       return (
         <Banner
           status="error"
-          title={outcome.status === 'blocked' ? copy.blocked : copy.failed}
+          title={
+            outcome.status === 'blocked'
+              ? PUBLISH_COPY.blocked
+              : PUBLISH_COPY.failed
+          }
           description={outcome.findings
             .map((finding) => finding.message)
             .join(' · ')}

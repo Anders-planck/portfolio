@@ -4,7 +4,7 @@
 // (`AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` are not read here: convex.config.ts
 // binds them to the GitHub OAuth component, which reads them itself.)
 
-import { isLoopbackDeploymentUrl } from './e2e'
+import { isLoopbackDeploymentUrl } from './loopback'
 
 declare const process: { env: Record<string, string | undefined> }
 

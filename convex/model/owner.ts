@@ -17,28 +17,29 @@ import {
  * `OWNER_GITHUB_IDS` allowlist never gets a user row nor a session.
  */
 
+/** Whether the caller is the owner: the one decision both readers share. */
+type OwnerAccess =
+  | { status: 'signed-out' }
+  | { status: 'not-owner' }
+  | { status: 'owner'; user: Doc<'users'> }
+
 /** The owner's user, or throws: signed out, or no longer on the allowlist. */
 export async function requireOwner(ctx: QueryCtx): Promise<Doc<'users'>> {
-  const user = await readSignedInUser(ctx)
-  if (user === null) {
-    throw new ConvexError<AccessRefusal>({ kind: 'signed-out' })
+  const access = await readOwnerAccess(ctx)
+  if (access.status !== 'owner') {
+    throw new ConvexError<AccessRefusal>({ kind: access.status })
   }
-  if (!isAllowlistedGithubId(user.githubId, readOwnerGithubIds())) {
-    throw new ConvexError<AccessRefusal>({ kind: 'not-owner' })
-  }
-  return user
+  return access.user
 }
 
 /** Who is calling, without throwing: what the CMS shell switches on. */
 export async function readViewer(ctx: QueryCtx): Promise<Viewer> {
-  const user = await readSignedInUser(ctx)
-  if (user === null) {
-    return { status: 'signed-out' }
+  const access = await readOwnerAccess(ctx)
+  if (access.status !== 'owner') {
+    return access
   }
-  if (!isAllowlistedGithubId(user.githubId, readOwnerGithubIds())) {
-    return { status: 'not-owner' }
-  }
-  return { status: 'owner', login: user.login, name: user.name }
+  const { login, name } = access.user
+  return { status: 'owner', login, name }
 }
 
 /**
@@ -67,7 +68,14 @@ export async function admitOwner(
   return ctx.db.insert('users', { ...profile, role: 'owner', createdAt: now })
 }
 
-async function readSignedInUser(ctx: QueryCtx) {
+async function readOwnerAccess(ctx: QueryCtx): Promise<OwnerAccess> {
   const userId = await getAuthUserId(ctx)
-  return userId === null ? null : ctx.db.get(userId)
+  const user = userId === null ? null : await ctx.db.get(userId)
+  if (user === null) {
+    return { status: 'signed-out' }
+  }
+  if (!isAllowlistedGithubId(user.githubId, readOwnerGithubIds())) {
+    return { status: 'not-owner' }
+  }
+  return { status: 'owner', user }
 }

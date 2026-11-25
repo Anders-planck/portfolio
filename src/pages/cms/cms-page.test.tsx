@@ -57,11 +57,14 @@ test('an account off the allowlist sees Accesso for another account', () => {
   expect(screen.getByText('Accesso: altro account')).toBeDefined()
 })
 
-test('loading and errors have their own screen', () => {
+test('while the viewer loads the CMS says so', () => {
   renderAs({ status: 'loading' })
-  expect(screen.getByRole('status').textContent).toBe('Caricamento del CMS…')
-  cleanup()
 
+  expect(screen.getByRole('status').textContent).toBe('Caricamento del CMS…')
+})
+
+test('a backend that does not answer has its own screen', () => {
   renderAs({ status: 'error' })
+
   expect(screen.getByText('Il CMS non risponde')).toBeDefined()
 })

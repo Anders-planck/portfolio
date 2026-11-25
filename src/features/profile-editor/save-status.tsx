@@ -5,7 +5,7 @@ import { Text } from '@astryxdesign/core/Text'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
 import type { SaveState } from './use-profile-autosave'
 
-const { save } = CMS_MESSAGES
+const SAVE_COPY = CMS_MESSAGES.save
 
 const TIME_FORMAT = new Intl.DateTimeFormat('it-IT', {
   hour: '2-digit',
@@ -26,7 +26,7 @@ export function SaveStatus({
         {toSaveStatusText(saveState)}
       </Text>
       {saveState.kind === 'failed' && (
-        <Button size="sm" label={save.retry} onClick={onRetry} />
+        <Button size="sm" label={SAVE_COPY.retry} onClick={onRetry} />
       )}
     </HStack>
   )
@@ -36,13 +36,13 @@ function toSaveStatusText(saveState: SaveState) {
   switch (saveState.kind) {
     case 'saved':
       return saveState.savedAt === null
-        ? save.neverSaved
-        : save.saved(TIME_FORMAT.format(saveState.savedAt))
+        ? SAVE_COPY.neverSaved
+        : SAVE_COPY.saved(TIME_FORMAT.format(saveState.savedAt))
     case 'unsaved':
-      return save.unsaved
+      return SAVE_COPY.unsaved
     case 'saving':
-      return save.saving
+      return SAVE_COPY.saving
     case 'failed':
-      return save.failed
+      return SAVE_COPY.failed
   }
 }

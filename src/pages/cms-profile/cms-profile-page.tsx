@@ -10,7 +10,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 import {
-  type DraftLocale,
   type EditableProfileDraft,
   profileDraftQueryOptions,
 } from '../../entities/profile/profile-draft'
@@ -19,31 +18,36 @@ import { SaveStatus } from '../../features/profile-editor/save-status'
 import { useProfileAutosave } from '../../features/profile-editor/use-profile-autosave'
 import { PublishProfileButton } from '../../features/publish-profile/publish-profile-button'
 import { CMS_MESSAGES } from '../../shared/i18n/cms-messages'
+import {
+  DEFAULT_LOCALE,
+  isLocale,
+  type Locale,
+  LOCALES,
+} from '../../shared/i18n/locale'
 
-const { profile: copy } = CMS_MESSAGES
-
-/** The locales the Profile is written in, as the switch lists them. */
-const DRAFT_LOCALES: readonly DraftLocale[] = ['it', 'en', 'fr', 'de']
+const PROFILE_COPY = CMS_MESSAGES.profile
 
 /** `/cms/profilo`: edit the Profile draft, saved as you type, and publish it. */
 export function CmsProfilePage() {
-  const [locale, setLocale] = useState<DraftLocale>('it')
+  const [locale, setLocale] = useState<Locale>(DEFAULT_LOCALE)
   const draft = useQuery(profileDraftQueryOptions(locale))
 
   return (
     <VStack gap={6}>
       <VStack gap={2}>
-        <Heading level={1}>{copy.title}</Heading>
+        <Heading level={1}>{PROFILE_COPY.title}</Heading>
         <Text type="body" as="p">
-          {copy.description}
+          {PROFILE_COPY.description}
         </Text>
       </VStack>
       {draft.isPending && (
         <Text type="body" role="status">
-          {copy.loading}
+          {PROFILE_COPY.loading}
         </Text>
       )}
-      {draft.isError && <Banner status="error" title={copy.errorTitle} />}
+      {draft.isError && (
+        <Banner status="error" title={PROFILE_COPY.errorTitle} />
+      )}
       {draft.isSuccess && (
         // Keyed by locale: each locale opens with its own saved values.
         <ProfileDraftWorkspace
@@ -67,8 +71,8 @@ function ProfileDraftWorkspace({
   onLocaleChange,
 }: {
   draft: EditableProfileDraft
-  locale: DraftLocale
-  onLocaleChange: (locale: DraftLocale) => void
+  locale: Locale
+  onLocaleChange: (locale: Locale) => void
 }) {
   const { saveState, queueEdit, retry } = useProfileAutosave(
     locale,
@@ -80,21 +84,20 @@ function ProfileDraftWorkspace({
     <VStack gap={6}>
       <HStack gap={4} align="center" justify="between">
         <SegmentedControl
-          label={copy.localeLabel}
+          label={PROFILE_COPY.localeLabel}
           value={locale}
           isDisabled={!isEverythingSaved}
           onChange={(value) => {
-            const next = DRAFT_LOCALES.find((entry) => entry === value)
-            if (next !== undefined) {
-              onLocaleChange(next)
+            if (isLocale(value)) {
+              onLocaleChange(value)
             }
           }}
         >
-          {DRAFT_LOCALES.map((entry) => (
+          {LOCALES.map((entry) => (
             <SegmentedControlItem
               key={entry}
               value={entry}
-              label={copy.locales[entry]}
+              label={PROFILE_COPY.locales[entry]}
             />
           ))}
         </SegmentedControl>

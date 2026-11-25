@@ -15,7 +15,7 @@ Who may use the CMS, and how every CMS function checks it.
 - `auth.config.ts`: accepts Convex Auth's access tokens.
 - `auth.ts`: session functions and the GitHub sign-in.
 - `users.ts`, `model/users.ts`, `model/owner.ts`: users (role), the allowlist rule, `requireOwner`, `admitOwner`.
-- `e2e.ts`, `model/e2e.ts`: the test-only sign-in.
+- `e2e.ts`, `model/loopback.ts`: the test-only sign-in and its loopback guard.
 - `model/env.ts`: `OWNER_GITHUB_IDS`, `AUTH_REDIRECT_ORIGINS`, `E2E_SIGN_IN_SECRET`.
 
 ## Invariants
