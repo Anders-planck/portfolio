@@ -31,7 +31,8 @@ function renderField(
   render(
     <MediaUploadField
       isDisabled={false}
-      acceptedMimes={['application/pdf']}
+      acceptedMimes={['image/png', 'application/pdf']}
+      maxBytes={10 * 1024 * 1024}
       onCreateUploadUrl={onCreateUploadUrl}
       onCompleteUpload={onCompleteUpload}
     />,
@@ -71,4 +72,51 @@ test('a retry repeats the same upload request', async () => {
     (call: unknown[]) => call[0],
   )
   expect(second).toEqual(first)
+})
+
+test('a refusal a retry cannot fix offers no retry, and names the limit', async () => {
+  const onCreateUploadUrl = vi.fn(() =>
+    Promise.resolve({ kind: 'refused' as const, reason: 'too-large' as const }),
+  )
+  render(
+    <MediaUploadField
+      isDisabled={false}
+      acceptedMimes={['image/png', 'application/pdf']}
+      maxBytes={10 * 1024 * 1024}
+      onCreateUploadUrl={onCreateUploadUrl}
+      onCompleteUpload={vi.fn()}
+    />,
+  )
+
+  pickPdf()
+
+  expect(
+    await screen.findByText('File troppo grande: il limite è 10 MB.'),
+  ).toBeDefined()
+  expect(screen.queryByRole('button', { name: 'Riprova' })).toBeNull()
+})
+
+test('an image the browser cannot read is never uploaded', async () => {
+  vi.stubGlobal(
+    'createImageBitmap',
+    vi.fn(() => Promise.reject(new Error('undecodable'))),
+  )
+  const onCreateUploadUrl = renderField(() =>
+    Promise.resolve({ kind: 'recorded', mediaId: MEDIA_ID }),
+  )
+  const input = document.querySelector('input[type="file"]')
+  if (!(input instanceof HTMLInputElement)) {
+    throw new Error('No file input')
+  }
+  const png = new File(['not a png'], 'shot.png', { type: 'image/png' })
+
+  fireEvent.change(input, { target: { files: [png] } })
+
+  expect(
+    await screen.findByText(
+      'Il browser non riesce a leggere questa immagine: esportala di nuovo e riprova.',
+    ),
+  ).toBeDefined()
+  expect(onCreateUploadUrl).not.toHaveBeenCalled()
+  expect(screen.queryByRole('button', { name: 'Riprova' })).toBeNull()
 })

@@ -124,38 +124,38 @@ const R2_BUCKET_PATTERN = /^[a-z0-9][a-z0-9-]{1,61}[a-z0-9]$/
  * loopback address, and only on a local backend (Playwright).
  */
 export function readMediaStorageSettings(): MediaStorageSettings | null {
-  const raw = {
+  const mediaEnv = {
     accountId: process.env.R2_ACCOUNT_ID ?? '',
     bucket: process.env.R2_BUCKET ?? '',
     accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
     publicOrigin: process.env.MEDIA_PUBLIC_ORIGIN ?? '',
   }
-  const values = Object.values(raw)
-  if (values.every((value) => value === '')) {
+  const mediaEnvEntries = Object.values(mediaEnv)
+  if (mediaEnvEntries.every((entry) => entry === '')) {
     return null
   }
-  if (values.some((value) => value === '')) {
+  if (mediaEnvEntries.some((entry) => entry === '')) {
     throw new Error(
       'Set all of R2_ACCOUNT_ID, R2_BUCKET, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY and MEDIA_PUBLIC_ORIGIN, or none',
     )
   }
-  if (!R2_ACCOUNT_ID_PATTERN.test(raw.accountId)) {
+  if (!R2_ACCOUNT_ID_PATTERN.test(mediaEnv.accountId)) {
     throw new Error('R2_ACCOUNT_ID must be the 32-character account id')
   }
-  if (!R2_BUCKET_PATTERN.test(raw.bucket)) {
+  if (!R2_BUCKET_PATTERN.test(mediaEnv.bucket)) {
     throw new Error('R2_BUCKET must be an R2 bucket name')
   }
-  if (!isServingOrigin(raw.publicOrigin)) {
+  if (!isServingOrigin(mediaEnv.publicOrigin)) {
     throw new Error('MEDIA_PUBLIC_ORIGIN must be a bare https origin')
   }
-  const { accessKeyId, secretAccessKey, bucket } = raw
+  const { accessKeyId, secretAccessKey, bucket } = mediaEnv
   return {
-    endpoint: readR2Endpoint(raw.accountId),
+    endpoint: readR2Endpoint(mediaEnv.accountId),
     bucket,
     accessKeyId,
     secretAccessKey,
-    publicOrigin: new URL(raw.publicOrigin).origin,
+    publicOrigin: new URL(mediaEnv.publicOrigin).origin,
   }
 }
 

@@ -67,6 +67,7 @@ export function MediaPage({
             <MediaUploadField
               isDisabled={!library.isStorageConfigured}
               acceptedMimes={library.limits.acceptedMimes}
+              maxBytes={library.limits.maxBytes}
               onCreateUploadUrl={onCreateUploadUrl}
               onCompleteUpload={onCompleteUpload}
             />

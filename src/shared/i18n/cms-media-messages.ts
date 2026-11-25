@@ -15,15 +15,17 @@ export const CMS_MEDIA_MESSAGES = {
     'Le varianti AVIF/WebP si attivano con Image transformations sul dominio del sito; fino ad allora le immagini sono servite come caricate.',
   upload: {
     label: 'Carica un’immagine o un PDF',
-    description:
-      'JPEG, PNG, WebP o PDF fino a 10 MB. Le immagini perdono i metadati (EXIF, posizione) prima di partire.',
+    /** `types` and `maxSize` come from the server's limits. */
+    description: (types: string, maxSize: string) =>
+      `${types} fino a ${maxSize}. Le immagini perdono i metadati (EXIF, posizione) prima di partire.`,
+    typeNotAllowed: (types: string) =>
+      `Tipo di file non ammesso: usa ${types}.`,
+    tooLarge: (maxSize: string) =>
+      `File troppo grande: il limite è ${maxSize}.`,
     uploading: (fileName: string) => `Caricamento di ${fileName}…`,
     recorded: (fileName: string) => `${fileName} caricato.`,
     retry: 'Riprova',
     problems: {
-      'type-not-allowed':
-        'Tipo di file non ammesso: usa JPEG, PNG, WebP o PDF.',
-      'too-large': 'File troppo grande: il limite è 10 MB.',
       empty: 'Il file è vuoto.',
       'bad-name': 'Il nome del file non è valido.',
       'bad-size': 'Non riesco a leggere le dimensioni dell’immagine.',

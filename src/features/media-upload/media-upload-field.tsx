@@ -7,16 +7,39 @@ import { CMS_MEDIA_MESSAGES } from '../../shared/i18n/cms-media-messages'
 import type { UploadCommands } from './upload-media-file'
 import {
   canRetryUpload,
+  type UploadFailure,
   type UploadState,
   useMediaUpload,
 } from './use-media-upload'
 
 const UPLOAD_COPY = CMS_MEDIA_MESSAGES.upload
 
+const MEGABYTES = new Intl.NumberFormat('it', {
+  style: 'unit',
+  unit: 'megabyte',
+  maximumFractionDigits: 0,
+})
+
+/** How the server's limits read in the copy: `JPEG, PNG, PDF` and `10 MB`. */
+interface LimitsCopy {
+  types: string
+  maxSize: string
+}
+
+function toLimitsCopy(acceptedMimes: readonly string[], maxBytes: number) {
+  return {
+    types: acceptedMimes
+      .map((mime) => (mime.split('/')[1] ?? mime).toUpperCase())
+      .join(', '),
+    maxSize: MEGABYTES.format(maxBytes / (1024 * 1024)),
+  }
+}
+
 export interface MediaUploadFieldProps {
   isDisabled: boolean
   /** The server's allowlist (`media.listMedia` limits); it decides again. */
   acceptedMimes: readonly string[]
+  maxBytes: number
   onCreateUploadUrl: UploadCommands['createUploadUrl']
   onCompleteUpload: UploadCommands['completeUpload']
 }
@@ -28,6 +51,7 @@ export interface MediaUploadFieldProps {
 export function MediaUploadField({
   isDisabled,
   acceptedMimes,
+  maxBytes,
   onCreateUploadUrl,
   onCompleteUpload,
 }: MediaUploadFieldProps) {
@@ -35,12 +59,16 @@ export function MediaUploadField({
     { createUploadUrl: onCreateUploadUrl, completeUpload: onCompleteUpload },
     acceptedMimes,
   )
+  const limitsCopy = toLimitsCopy(acceptedMimes, maxBytes)
 
   return (
     <VStack gap={2}>
       <FileInput
         label={UPLOAD_COPY.label}
-        description={UPLOAD_COPY.description}
+        description={UPLOAD_COPY.description(
+          limitsCopy.types,
+          limitsCopy.maxSize,
+        )}
         accept={acceptedMimes.join(',')}
         value={null}
         isDisabled={isDisabled || uploadState.kind === 'uploading'}
@@ -54,7 +82,7 @@ export function MediaUploadField({
       />
       <HStack gap={2} align="center">
         <Text type="supporting" role="status">
-          {toUploadStatusText(uploadState)}
+          {toUploadStatusText(uploadState, limitsCopy)}
         </Text>
         {uploadState.kind === 'failed' &&
           canRetryUpload(uploadState.problem) && (
@@ -69,7 +97,7 @@ export function MediaUploadField({
   )
 }
 
-function toUploadStatusText(uploadState: UploadState) {
+function toUploadStatusText(uploadState: UploadState, limits: LimitsCopy) {
   switch (uploadState.kind) {
     case 'idle':
       return ''
@@ -78,6 +106,17 @@ function toUploadStatusText(uploadState: UploadState) {
     case 'recorded':
       return UPLOAD_COPY.recorded(uploadState.fileName)
     case 'failed':
-      return UPLOAD_COPY.problems[uploadState.problem]
+      return toFailureText(uploadState.problem, limits)
+  }
+}
+
+function toFailureText(failure: UploadFailure, limits: LimitsCopy) {
+  switch (failure) {
+    case 'type-not-allowed':
+      return UPLOAD_COPY.typeNotAllowed(limits.types)
+    case 'too-large':
+      return UPLOAD_COPY.tooLarge(limits.maxSize)
+    default:
+      return UPLOAD_COPY.problems[failure]
   }
 }
