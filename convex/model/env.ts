@@ -4,11 +4,19 @@
 
 declare const process: { env: Record<string, string | undefined> }
 
+/** HMAC-SHA256 wants a key at least as long as its 32-byte output. */
+const MIN_PREVIEW_SECRET_BYTES = 32
+
 /** HMAC key for preview tokens (`model/content/preview.ts`). */
 export function readPreviewTokenSecret(): string {
   const secret = process.env.PREVIEW_TOKEN_SECRET
   if (secret === undefined || secret === '') {
     throw new Error('PREVIEW_TOKEN_SECRET is not set in the Convex env')
+  }
+  if (new TextEncoder().encode(secret).length < MIN_PREVIEW_SECRET_BYTES) {
+    throw new Error(
+      `PREVIEW_TOKEN_SECRET must be at least ${String(MIN_PREVIEW_SECRET_BYTES)} bytes`,
+    )
   }
   return secret
 }

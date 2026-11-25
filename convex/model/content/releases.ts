@@ -4,8 +4,15 @@ import { internal } from '../../_generated/api'
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import { readDraftRevision, readDraftSnapshot } from './drafts'
-import { movePublishedPointers } from './pointers'
 import {
+  expectedPointerValidator,
+  findPublishedPointer,
+  movePublishedPointers,
+  readLiveVersionIdsAfter,
+} from './pointers'
+import { findRepeatedRequest, requestKindValidator } from './requests'
+import {
+  type DocumentFinding,
   documentFindingValidator,
   hasBlockingFinding,
   PUBLISH_RULES,
@@ -22,30 +29,47 @@ import { readVersions, writeVersions } from './versions'
 /**
  * Releases (ADR 0003): publish freezes the selected drafts into immutable
  * versions, groups them in a release and moves the published pointers, all
- * in one mutation. Blocked publishes are a result the owner sees (DATA-03).
- * Every command carries a `requestId` chosen by the caller: repeating it
- * (double click, retry after a lost response) returns the first release.
+ * in one mutation. Blocked, stale and failed publishes are results the owner
+ * sees (DATA-03).
  */
+const MAX_SELECTION = 100
+const MAX_NOTE_LENGTH = 500
+
 const RELEASE_BASE_FIELDS = {
   versionIds: v.array(v.id('versions')),
   note: v.string(),
   requestId: v.string(),
+  requestKind: requestKindValidator,
   /** Rule findings at publish: warnings, or the blocks that failed it. */
   findings: v.array(documentFindingValidator),
 }
+
+/** Why a scheduled release did not go live when it came due. */
+export const releaseFailureValidator = v.union(
+  v.object({ kind: v.literal('rules') }),
+  /** These documents were published or rolled back after it was scheduled. */
+  v.object({
+    kind: v.literal('conflict'),
+    documents: v.array(documentRefValidator),
+  }),
+)
 
 export const releaseValidator = v.union(
   v.object({
     ...RELEASE_BASE_FIELDS,
     status: v.literal('scheduled'),
     scheduledAt: v.number(),
+    /** Each document's pointer when it was scheduled, to detect newer content. */
+    expectedPointers: v.array(expectedPointerValidator),
   }),
   v.object({
     ...RELEASE_BASE_FIELDS,
     status: v.literal('published'),
     publishedAt: v.number(),
     scheduledAt: v.optional(v.number()),
-    /** Set on a rollback: the release whose versions it made live again. */
+    /** Every live version right after this release: what a rollback restores. */
+    liveVersionIds: v.array(v.id('versions')),
+    /** Set on a rollback: the release whose site it restored. */
     rolledBackFrom: v.optional(v.id('releases')),
   }),
   v.object({
@@ -53,6 +77,7 @@ export const releaseValidator = v.union(
     status: v.literal('failed'),
     scheduledAt: v.number(),
     failedAt: v.number(),
+    failure: releaseFailureValidator,
   }),
 )
 
@@ -67,16 +92,19 @@ export const publishOutcomeValidator = v.union(
     documents: v.array(documentRefValidator),
   }),
   v.object({
-    status: v.union(
-      v.literal('published'),
-      v.literal('scheduled'),
-      v.literal('failed'),
-    ),
+    status: v.union(v.literal('published'), v.literal('scheduled')),
     releaseId: v.id('releases'),
     findings: v.array(documentFindingValidator),
   }),
+  v.object({
+    status: v.literal('failed'),
+    releaseId: v.id('releases'),
+    findings: v.array(documentFindingValidator),
+    failure: releaseFailureValidator,
+  }),
 )
 type PublishOutcome = Infer<typeof publishOutcomeValidator>
+type ReleaseFailure = Infer<typeof releaseFailureValidator>
 
 interface PublishRequest {
   selection: ReviewedDraft[]
@@ -88,13 +116,18 @@ interface PublishRequest {
 
 export async function publishSelection(
   ctx: MutationCtx,
-  { selection, note, requestId, scheduledAt }: PublishRequest,
+  request: PublishRequest,
   now: number,
 ): Promise<PublishOutcome> {
-  const repeated = await findReleaseByRequestId(ctx, requestId)
+  const { selection, note, requestId, scheduledAt } = request
+  const repeated = await findRepeatedRequest(ctx, {
+    requestId,
+    kind: 'publish',
+  })
   if (repeated !== null) {
     return toPublishOutcomeFromRelease(repeated)
   }
+  checkPublishRequest(request)
   const staleDocuments = await findStaleDrafts(ctx, selection)
   if (staleDocuments.length > 0) {
     return { status: 'stale', documents: staleDocuments }
@@ -105,30 +138,43 @@ export async function publishSelection(
     return { status: 'blocked', findings }
   }
   const versionIds = await writeVersions(ctx, snapshots, now)
-  const releaseFields = { versionIds, note, requestId, findings }
+  const releaseFields = {
+    versionIds,
+    note,
+    requestId,
+    requestKind: 'publish' as const,
+    findings,
+  }
   if (scheduledAt !== undefined && scheduledAt > now) {
     // Versions are frozen now; edits made after scheduling wait for the next
-    // publish. The rules run again when the release comes due.
+    // publish. Rules and newer content are checked again when it comes due.
     const releaseId = await ctx.db.insert('releases', {
       ...releaseFields,
       status: 'scheduled',
       scheduledAt,
+      expectedPointers: await readCurrentPointers(ctx, selection),
     })
     await ctx.scheduler.runAt(scheduledAt, internal.content.publishScheduled, {
       releaseId,
     })
     return { status: 'scheduled', releaseId, findings }
   }
+  const versions = await readVersions(ctx, versionIds)
   const releaseId = await ctx.db.insert('releases', {
     ...releaseFields,
     status: 'published',
     publishedAt: now,
+    liveVersionIds: await readLiveVersionIdsAfter(ctx, versions),
   })
-  await movePublishedPointers(ctx, releaseId, versionIds)
+  await movePublishedPointers(ctx, releaseId, versions)
   return { status: 'published', releaseId, findings }
 }
 
-/** Makes a due scheduled release live, unless a rule now blocks it. */
+/**
+ * Makes a due scheduled release live, unless a document was published or
+ * rolled back since it was scheduled (newer content wins) or a rule now
+ * blocks it. Either way it applies all of its documents or none.
+ */
 export async function publishScheduledRelease(
   ctx: MutationCtx,
   releaseId: Id<'releases'>,
@@ -138,77 +184,79 @@ export async function publishScheduledRelease(
   if (release?.status !== 'scheduled') {
     return
   }
-  const { versionIds, note, requestId, scheduledAt } = release
+  const { versionIds, note, requestId, requestKind, scheduledAt } = release
   const versions = await readVersions(ctx, versionIds)
   const findings = runPublishRules(
     versions.map(({ snapshot }) => snapshot),
     PUBLISH_RULES,
   )
-  const releaseFields = { versionIds, note, requestId, findings, scheduledAt }
-  if (hasBlockingFinding(findings)) {
+  const releaseFields = { versionIds, note, requestId, requestKind, findings }
+  const conflicts = await findMovedPointers(ctx, release.expectedPointers)
+  const failure = toReleaseFailure({ conflicts, findings })
+  if (failure !== null) {
     await ctx.db.replace(releaseId, {
       ...releaseFields,
       status: 'failed',
+      scheduledAt,
       failedAt: now,
+      failure,
     })
     return
   }
   await ctx.db.replace(releaseId, {
     ...releaseFields,
     status: 'published',
+    scheduledAt,
     publishedAt: now,
+    liveVersionIds: await readLiveVersionIdsAfter(ctx, versions),
   })
-  await movePublishedPointers(ctx, releaseId, versionIds)
-}
-
-/**
- * Makes a published release live again: its documents point back at its
- * versions (other documents keep theirs). Recorded as a new release, so a
- * rollback can be rolled back too. Drafts are untouched and rules are not
- * re-run: rollback is the way out when something went wrong.
- */
-export async function rollBackToRelease(
-  ctx: MutationCtx,
-  { targetId, requestId }: { targetId: Id<'releases'>; requestId: string },
-  now: number,
-) {
-  const repeated = await findReleaseByRequestId(ctx, requestId)
-  if (repeated !== null) {
-    return repeated._id
-  }
-  const target = await ctx.db.get(targetId)
-  if (target?.status !== 'published') {
-    throw new ConvexError({
-      code: 'NOT_ROLLBACKABLE',
-      message: 'Only a published release can be rolled back to',
-    })
-  }
-  const releaseId = await ctx.db.insert('releases', {
-    versionIds: target.versionIds,
-    note: target.note,
-    requestId,
-    findings: [],
-    status: 'published',
-    publishedAt: now,
-    rolledBackFrom: targetId,
-  })
-  await movePublishedPointers(ctx, releaseId, target.versionIds)
-  return releaseId
-}
-
-function findReleaseByRequestId(ctx: QueryCtx, requestId: string) {
-  return ctx.db
-    .query('releases')
-    .withIndex('by_request_id', (query) => query.eq('requestId', requestId))
-    .unique()
+  await movePublishedPointers(ctx, releaseId, versions)
 }
 
 function toPublishOutcomeFromRelease(release: Doc<'releases'>): PublishOutcome {
-  return {
-    status: release.status,
-    releaseId: release._id,
-    findings: release.findings,
+  const { _id: releaseId, findings } = release
+  if (release.status === 'failed') {
+    return { status: 'failed', releaseId, findings, failure: release.failure }
   }
+  return { status: release.status, releaseId, findings }
+}
+
+/** Newer content wins over rules: a conflict is reported first. */
+function toReleaseFailure({
+  conflicts,
+  findings,
+}: {
+  conflicts: DocumentRef[]
+  findings: DocumentFinding[]
+}): ReleaseFailure | null {
+  if (conflicts.length > 0) {
+    return { kind: 'conflict', documents: conflicts }
+  }
+  return hasBlockingFinding(findings) ? { kind: 'rules' } : null
+}
+
+function checkPublishRequest({ selection, note }: PublishRequest) {
+  if (selection.length === 0 || selection.length > MAX_SELECTION) {
+    throwInvalidPublishRequest(
+      `A release holds at least one and at most ${String(MAX_SELECTION)} documents`,
+    )
+  }
+  const paths = selection.map(({ collection, key }) => `${collection}/${key}`)
+  const repeatedPath = paths.find(
+    (path, index) => paths.indexOf(path) !== index,
+  )
+  if (repeatedPath !== undefined) {
+    throwInvalidPublishRequest(`${repeatedPath} is selected more than once`)
+  }
+  if (note.length > MAX_NOTE_LENGTH) {
+    throwInvalidPublishRequest(
+      `A release note holds at most ${String(MAX_NOTE_LENGTH)} characters`,
+    )
+  }
+}
+
+function throwInvalidPublishRequest(message: string): never {
+  throw new ConvexError({ code: 'INVALID_PUBLISH_REQUEST', message })
 }
 
 async function findStaleDrafts(
@@ -224,6 +272,28 @@ async function findStaleDrafts(
       // A missing draft is not stale: readSelectedDrafts reports it.
       return revision !== null && revision !== draft.revision
     })
+    .map(({ collection, key }) => ({ collection, key }))
+}
+
+async function readCurrentPointers(ctx: QueryCtx, selection: DocumentRef[]) {
+  return Promise.all(
+    selection.map(async ({ collection, key }) => {
+      const pointer = await findPublishedPointer(ctx, { collection, key })
+      return { collection, key, releaseId: pointer?.releaseId ?? null }
+    }),
+  )
+}
+
+async function findMovedPointers(
+  ctx: QueryCtx,
+  expectedPointers: Infer<typeof expectedPointerValidator>[],
+): Promise<DocumentRef[]> {
+  const current = await readCurrentPointers(ctx, expectedPointers)
+  return current
+    .filter(
+      (pointer, index) =>
+        pointer.releaseId !== expectedPointers[index]?.releaseId,
+    )
     .map(({ collection, key }) => ({ collection, key }))
 }
 

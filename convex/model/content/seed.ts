@@ -59,7 +59,7 @@ export async function publishSeedProfileOnce(ctx: MutationCtx, now: number) {
     {
       selection: [{ ...ref, revision }],
       note: 'Profilo iniziale',
-      requestId: 'seed-profile',
+      requestId: 'seed:profile:initial',
     },
     now,
   )

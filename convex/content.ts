@@ -1,21 +1,28 @@
 import { v } from 'convex/values'
 
-import { internalMutation, query } from './_generated/server'
+import { internal } from './_generated/api'
+import {
+  action,
+  internalMutation,
+  internalQuery,
+  query,
+} from './_generated/server'
 import {
   draftEditValidator,
+  type PreviewOutcome,
   previewOutcomeValidator,
-  readDraftForPreview,
+  readDraftPreview,
   saveDraftEdit,
 } from './model/content/drafts'
 import { localeValidator } from './model/content/locales'
 import { readPublishedDocument } from './model/content/pointers'
-import { issuePreviewToken } from './model/content/preview'
+import { issuePreviewToken, openPreviewToken } from './model/content/preview'
 import {
   publishOutcomeValidator,
   publishScheduledRelease,
   publishSelection,
-  rollBackToRelease,
 } from './model/content/releases'
+import { rollBackToRelease } from './model/content/rollback'
 import {
   collectionValidator,
   localizedDocumentValidator,
@@ -72,7 +79,8 @@ export const publishScheduled = internalMutation({
 })
 
 /**
- * Makes an earlier published release live again, as a new release.
+ * Restores the site as it was right after an earlier published release
+ * (documents first published later are unpublished), as a new release.
  * `requestId` makes it idempotent: repeating it returns the first rollback.
  */
 export const rollback = internalMutation({
@@ -119,15 +127,37 @@ export const createPreviewToken = internalMutation({
 
 /**
  * What preview reads: the draft a token was issued for, or `expired` /
- * `no-draft`; a token this backend did not sign throws. Expiry is checked
- * when the query runs.
+ * `no-draft`; a token this backend did not sign throws. An action, so the
+ * expiry is checked against the clock on every call (a query result could be
+ * served from cache after the link expired).
  */
-export const getDraft = query({
+export const getDraft = action({
   args: { token: v.string() },
   returns: previewOutcomeValidator,
-  handler: (ctx, { token }) =>
-    readDraftForPreview(ctx, token, {
+  handler: async (ctx, { token }): Promise<PreviewOutcome> => {
+    const opened = await openPreviewToken(token, {
       secret: readPreviewTokenSecret(),
       now: Date.now(),
-    }),
+    })
+    if (opened.status === 'expired') {
+      return opened
+    }
+    const { collection, key, locale } = opened.claims
+    return ctx.runQuery(internal.content.readDraftForPreview, {
+      collection,
+      key,
+      locale,
+    })
+  },
+})
+
+/** Reads the draft for a preview token `getDraft` has already checked. */
+export const readDraftForPreview = internalQuery({
+  args: {
+    collection: collectionValidator,
+    key: v.string(),
+    locale: localeValidator,
+  },
+  returns: previewOutcomeValidator,
+  handler: (ctx, target) => readDraftPreview(ctx, target),
 })

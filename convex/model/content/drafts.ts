@@ -1,9 +1,8 @@
-import { ConvexError, type Infer, v } from 'convex/values'
+import { type Infer, v } from 'convex/values'
 
 import type { Doc, Id } from '../../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../../_generated/server'
 import { type Locale, LOCALES, localeValidator } from './locales'
-import { verifyPreviewToken } from './preview'
 import {
   EMPTY_PROFILE_CONTENT_FIELDS,
   EMPTY_PROFILE_FIELDS,
@@ -106,9 +105,8 @@ function toSnapshotContentFromProfileContent(
 }
 
 /**
- * What preview shows for a token: the draft it was issued for, `expired`
- * (the owner opens a new link) or `no-draft`. A token this backend did not
- * sign is an authorization failure and throws.
+ * What preview shows: the draft a token was issued for, `expired` (the owner
+ * opens a new link) or `no-draft`. Tokens are checked in `preview.ts`.
  */
 export const previewOutcomeValidator = v.union(
   v.object({
@@ -118,30 +116,20 @@ export const previewOutcomeValidator = v.union(
   v.object({ status: v.literal('expired') }),
   v.object({ status: v.literal('no-draft') }),
 )
-type PreviewOutcome = Infer<typeof previewOutcomeValidator>
+export type PreviewOutcome = Infer<typeof previewOutcomeValidator>
 
-export async function readDraftForPreview(
+/** The draft of one document in one locale, as preview shows it. */
+export async function readDraftPreview(
   ctx: QueryCtx,
-  token: string,
-  verification: { secret: string; now: number },
+  target: DocumentRef & { locale: Locale },
 ): Promise<PreviewOutcome> {
-  const check = await verifyPreviewToken(token, verification)
-  if (check.status === 'invalid') {
-    throw new ConvexError({
-      code: 'PREVIEW_TOKEN_INVALID',
-      message: 'This preview link was not issued by this site',
-    })
-  }
-  if (check.status === 'expired') {
-    return { status: 'expired' }
-  }
-  const snapshot = await readDraftSnapshot(ctx, check.claims)
+  const snapshot = await readDraftSnapshot(ctx, target)
   if (snapshot === null) {
     return { status: 'no-draft' }
   }
   return {
     status: 'ready',
-    document: toLocalizedDocumentFromSnapshot(snapshot, check.claims.locale),
+    document: toLocalizedDocumentFromSnapshot(snapshot, target.locale),
   }
 }
 

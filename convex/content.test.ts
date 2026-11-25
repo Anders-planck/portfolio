@@ -22,7 +22,10 @@ vi.mock('./model/content/rules', async (importOriginal) => ({
 }))
 
 const PROFILE = { collection: 'profile', key: 'main' } as const
+// A second profile document, for releases that span more than one document.
+const OTHER_KEY = 'other'
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
+const PREVIEW_SECRET = 'test-preview-secret-of-at-least-32-bytes'
 
 type Backend = ReturnType<typeof createBackend>
 
@@ -34,20 +37,26 @@ function saveSubtitleDraft(
   backend: Backend,
   subtitle: string,
   locale: Locale = 'it',
+  key: string = PROFILE.key,
 ) {
   return backend.mutation(internal.content.saveDraft, {
-    ...PROFILE,
+    collection: 'profile',
+    key,
     localeEdit: { locale, content: { subtitle } },
   })
 }
 
-/** Publishes the profile draft at `revision`, the one the owner reviewed. */
-function publishProfile(
+/** Publishes the drafts at the revisions the owner reviewed. */
+function publishDrafts(
   backend: Backend,
-  options: { revision: number; scheduledAt?: number; requestId?: string },
+  drafts: { key: string; revision: number }[],
+  options: { scheduledAt?: number; requestId?: string } = {},
 ) {
   return backend.mutation(internal.content.publish, {
-    selection: [{ ...PROFILE, revision: options.revision }],
+    selection: drafts.map((draft) => ({
+      collection: 'profile' as const,
+      ...draft,
+    })),
     note: 'Nota di rilascio',
     requestId: options.requestId ?? crypto.randomUUID(),
     ...(options.scheduledAt === undefined
@@ -56,10 +65,23 @@ function publishProfile(
   })
 }
 
+/** Publishes the main profile draft at `revision`, the one the owner reviewed. */
+function publishProfile(
+  backend: Backend,
+  options: { revision: number; scheduledAt?: number; requestId?: string },
+) {
+  const { revision, ...rest } = options
+  return publishDrafts(backend, [{ key: PROFILE.key, revision }], rest)
+}
+
 /** Saves the subtitle and publishes it now; returns the release. */
-async function publishSubtitle(backend: Backend, subtitle: string) {
-  const { revision } = await saveSubtitleDraft(backend, subtitle)
-  const outcome = await publishProfile(backend, { revision })
+async function publishSubtitle(
+  backend: Backend,
+  subtitle: string,
+  key: string = PROFILE.key,
+) {
+  const { revision } = await saveSubtitleDraft(backend, subtitle, 'it', key)
+  const outcome = await publishDrafts(backend, [{ key, revision }])
   if (outcome.status !== 'published') {
     throw new Error(`Expected a published release, got ${outcome.status}`)
   }
@@ -76,12 +98,23 @@ function rollBack(
   })
 }
 
-function readPublishedProfile(backend: Backend, locale: Locale = 'it') {
-  return backend.query(api.content.getPublished, { ...PROFILE, locale })
+function readPublishedProfile(
+  backend: Backend,
+  locale: Locale = 'it',
+  key: string = PROFILE.key,
+) {
+  return backend.query(api.content.getPublished, {
+    collection: 'profile',
+    key,
+    locale,
+  })
 }
 
-async function readPublishedSubtitle(backend: Backend) {
-  return (await readPublishedProfile(backend))?.content?.subtitle
+async function readPublishedSubtitle(
+  backend: Backend,
+  key: string = PROFILE.key,
+) {
+  return (await readPublishedProfile(backend, 'it', key))?.content?.subtitle
 }
 
 function countReleases(backend: Backend) {
@@ -191,7 +224,75 @@ describe('publish', () => {
   })
 })
 
+describe('publish request checks', () => {
+  test('a selection that names a document twice is refused', async () => {
+    const backend = createBackend()
+    const { revision } = await saveSubtitleDraft(backend, 'Doppia')
+
+    await expect(
+      publishDrafts(backend, [
+        { key: PROFILE.key, revision },
+        { key: PROFILE.key, revision },
+      ]),
+    ).rejects.toThrow(/more than once/)
+  })
+
+  test('a selection over the limit is refused', async () => {
+    const backend = createBackend()
+    const tooMany = Array.from({ length: 101 }, (_, index) => ({
+      key: `doc-${String(index)}`,
+      revision: 1,
+    }))
+
+    await expect(publishDrafts(backend, tooMany)).rejects.toThrow(/at most/)
+  })
+
+  test('a release note over the limit is refused', async () => {
+    const backend = createBackend()
+    const { revision } = await saveSubtitleDraft(backend, 'Nota lunga')
+
+    await expect(
+      backend.mutation(internal.content.publish, {
+        selection: [{ ...PROFILE, revision }],
+        note: 'x'.repeat(501),
+        requestId: crypto.randomUUID(),
+      }),
+    ).rejects.toThrow(/note/)
+  })
+
+  test('a publish request id cannot be reused for a rollback', async () => {
+    const backend = createBackend()
+    const { revision } = await saveSubtitleDraft(backend, 'Uno')
+    const outcome = await publishProfile(backend, {
+      revision,
+      requestId: 'shared-id',
+    })
+    if (outcome.status !== 'published') {
+      throw new Error('Expected a published release')
+    }
+
+    await expect(
+      backend.mutation(internal.content.rollback, {
+        releaseId: outcome.releaseId,
+        requestId: 'shared-id',
+      }),
+    ).rejects.toThrow(/already used/)
+  })
+})
+
 describe('rollback', () => {
+  test('restores the whole site as it was: later documents become unpublished', async () => {
+    const backend = createBackend()
+    const first = await publishSubtitle(backend, 'Uno')
+    const second = await publishSubtitle(backend, 'Altro', OTHER_KEY)
+
+    await rollBack(backend, first)
+    expect(await readPublishedSubtitle(backend)).toBe('Uno')
+    expect(await readPublishedProfile(backend, 'it', OTHER_KEY)).toBeNull()
+
+    await rollBack(backend, second)
+    expect(await readPublishedSubtitle(backend, OTHER_KEY)).toBe('Altro')
+  })
   test('restores any earlier release and leaves the draft alone', async () => {
     const backend = createBackend()
     const first = await publishSubtitle(backend, 'Uno')
@@ -274,6 +375,67 @@ describe('scheduled publish', () => {
 
     expect(outcome.status).toBe('published')
     expect(await readPublishedSubtitle(backend)).toBe('Subito')
+  })
+
+  test('a later publish wins: the scheduled release fails with a conflict and applies nothing', async () => {
+    const backend = createBackend()
+    await publishSubtitle(backend, 'Adesso')
+    const main = await saveSubtitleDraft(backend, 'Domani')
+    const other = await saveSubtitleDraft(
+      backend,
+      'Altro domani',
+      'it',
+      OTHER_KEY,
+    )
+    const scheduled = {
+      scheduledAt: Date.now() + ONE_DAY_MS,
+      requestId: 'scheduled-both',
+    }
+    await publishDrafts(
+      backend,
+      [
+        { key: PROFILE.key, revision: main.revision },
+        { key: OTHER_KEY, revision: other.revision },
+      ],
+      scheduled,
+    )
+
+    await publishSubtitle(backend, 'Più nuova')
+    vi.advanceTimersByTime(ONE_DAY_MS)
+    await backend.finishInProgressScheduledFunctions()
+
+    expect(await readPublishedSubtitle(backend)).toBe('Più nuova')
+    expect(await readPublishedProfile(backend, 'it', OTHER_KEY)).toBeNull()
+    const outcome = await publishDrafts(backend, [], scheduled)
+    expect(outcome).toMatchObject({
+      status: 'failed',
+      failure: {
+        kind: 'conflict',
+        documents: [{ collection: 'profile', key: PROFILE.key }],
+      },
+    })
+  })
+
+  test('a later rollback wins: the scheduled release fails with a conflict', async () => {
+    const backend = createBackend()
+    const first = await publishSubtitle(backend, 'Uno')
+    await publishSubtitle(backend, 'Due')
+    const { revision } = await saveSubtitleDraft(backend, 'Tre')
+    const scheduled = {
+      scheduledAt: Date.now() + ONE_DAY_MS,
+      requestId: 'scheduled-after-two',
+    }
+    await publishProfile(backend, { revision, ...scheduled })
+
+    await rollBack(backend, first)
+    vi.advanceTimersByTime(ONE_DAY_MS)
+    await backend.finishInProgressScheduledFunctions()
+
+    expect(await readPublishedSubtitle(backend)).toBe('Uno')
+    expect(await publishDrafts(backend, [], scheduled)).toMatchObject({
+      status: 'failed',
+      failure: { kind: 'conflict' },
+    })
   })
 })
 
@@ -376,6 +538,7 @@ describe('rules at publish', () => {
     expect(release).toMatchObject({
       status: 'failed',
       failedAt: Date.now(),
+      failure: { kind: 'rules' },
       findings: [{ rule: 'placeholder', severity: 'block', locale: 'it' }],
     })
   })
@@ -383,7 +546,7 @@ describe('rules at publish', () => {
 
 describe('preview', () => {
   beforeEach(() => {
-    vi.stubEnv('PREVIEW_TOKEN_SECRET', 'test-preview-secret')
+    vi.stubEnv('PREVIEW_TOKEN_SECRET', PREVIEW_SECRET)
   })
   afterEach(() => {
     vi.unstubAllEnvs()
@@ -408,7 +571,7 @@ describe('preview', () => {
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
 
-    const preview = await backend.query(api.content.getDraft, { token })
+    const preview = await backend.action(api.content.getDraft, { token })
 
     expect(preview).toMatchObject({
       status: 'ready',
@@ -417,14 +580,19 @@ describe('preview', () => {
     expect(await readPublishedSubtitle(backend)).toBe('Pubblicata')
   })
 
-  test('a preview token expires', async () => {
+  test('a link read again after it expired is expired, not an earlier answer', async () => {
     vi.useFakeTimers()
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
+    expect(await backend.action(api.content.getDraft, { token })).toMatchObject(
+      {
+        status: 'ready',
+      },
+    )
 
     vi.advanceTimersByTime(PREVIEW_TOKEN_TTL_MS + 1)
 
-    expect(await backend.query(api.content.getDraft, { token })).toEqual({
+    expect(await backend.action(api.content.getDraft, { token })).toEqual({
       status: 'expired',
     })
   })
@@ -433,10 +601,23 @@ describe('preview', () => {
     const backend = createBackend()
     const token = await createPreviewOfDraft(backend)
 
-    vi.stubEnv('PREVIEW_TOKEN_SECRET', 'another-secret')
+    vi.stubEnv('PREVIEW_TOKEN_SECRET', `another-${PREVIEW_SECRET}`)
 
     await expect(
-      backend.query(api.content.getDraft, { token }),
+      backend.action(api.content.getDraft, { token }),
     ).rejects.toThrow(/not issued by this site/)
+  })
+
+  test('a preview secret shorter than 32 bytes is refused', async () => {
+    const backend = createBackend()
+    await saveSubtitleDraft(backend, 'In bozza')
+    vi.stubEnv('PREVIEW_TOKEN_SECRET', 'too-short')
+
+    await expect(
+      backend.mutation(internal.content.createPreviewToken, {
+        ...PROFILE,
+        locale: 'it',
+      }),
+    ).rejects.toThrow(/at least 32 bytes/)
   })
 })

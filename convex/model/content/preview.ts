@@ -1,3 +1,5 @@
+import { ConvexError } from 'convex/values'
+
 import { isLocale, type Locale } from './locales'
 import { type Collection, isCollection } from './snapshot'
 
@@ -73,6 +75,24 @@ export async function verifyPreviewToken(
   return claims.expiresAt > now
     ? { status: 'valid', claims }
     : { status: 'expired' }
+}
+
+/**
+ * Opens a token for preview: its claims, or `expired`. A token this backend
+ * did not sign is an authorization failure and throws.
+ */
+export async function openPreviewToken(
+  token: string,
+  verification: { secret: string; now: number },
+): Promise<{ status: 'valid'; claims: PreviewClaims } | { status: 'expired' }> {
+  const check = await verifyPreviewToken(token, verification)
+  if (check.status === 'invalid') {
+    throw new ConvexError({
+      code: 'PREVIEW_TOKEN_INVALID',
+      message: 'This preview link was not issued by this site',
+    })
+  }
+  return check
 }
 
 function importSigningKey(secret: string) {
