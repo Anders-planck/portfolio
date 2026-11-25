@@ -120,3 +120,22 @@ test('an image the browser cannot read is never uploaded', async () => {
   expect(onCreateUploadUrl).not.toHaveBeenCalled()
   expect(screen.queryByRole('button', { name: 'Riprova' })).toBeNull()
 })
+
+test('a lost connection says the upload was interrupted and offers a retry', async () => {
+  render(
+    <MediaUploadField
+      isDisabled={false}
+      acceptedMimes={['image/png', 'application/pdf']}
+      maxBytes={10 * 1024 * 1024}
+      onCreateUploadUrl={() => Promise.reject(new Error('Connection lost'))}
+      onCompleteUpload={vi.fn()}
+    />,
+  )
+
+  pickPdf()
+
+  expect(
+    await screen.findByText('Caricamento interrotto. Riprova.'),
+  ).toBeDefined()
+  expect(screen.getByRole('button', { name: 'Riprova' })).toBeDefined()
+})

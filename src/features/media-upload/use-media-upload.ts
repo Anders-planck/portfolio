@@ -1,3 +1,4 @@
+import { ConvexError } from 'convex/values'
 import { useRef, useState } from 'react'
 
 import { toUploadableFile, type UploadableFile } from './to-uploadable-file'
@@ -56,10 +57,14 @@ export function useMediaUpload(
     const outcome = await uploadMediaFile(pending.file, pending.requestId, {
       ...commands,
       putObject: putObjectToStorage,
-    }).catch(() => ({
-      kind: 'failed' as const,
-      problem: 'interrupted' as const,
-    }))
+    }).catch((error: unknown) => {
+      // A refusal from the backend (signed out, not the owner) is not a
+      // lost connection: it throws, and the CMS gate takes over (ADR 0005).
+      if (error instanceof ConvexError) {
+        throw error
+      }
+      return { kind: 'failed' as const, problem: 'interrupted' as const }
+    })
     if (outcome.kind === 'recorded') {
       pendingRef.current = null
       setUploadState({ kind: 'recorded', fileName })
